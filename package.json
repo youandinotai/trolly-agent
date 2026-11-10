@@ -1,0 +1,39 @@
+{
+  "name": "trolly-agent",
+  "productName": "Trolly Agent",
+  "version": "0.1.0",
+  "description": "Trolly Agent - a desktop AI companion with MCP tools, ComfyUI artistry, and local LLM providers",
+  "author": "Joshua Coleman",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "main": "dist/electron/main/index.js",
+  "scripts": {
+    "dev": "vite",
+    "build:electron": "tsc -p tsconfig.electron.json && node scripts/copy-assets.mjs",
+    "build:renderer": "vite build",
+    "build": "npm run build:electron && npm run build:renderer && npm run build:assets",
+    "typecheck": "tsc -p electron/tsconfig.json --noEmit && tsc -p tsconfig.json --noEmit",
+    "test": "node --test tests/",
+    "build:assets": "python scripts/make-icons.py",
+    "start": "npm run build && electron .",
+    "verify:leak": "node scripts/verify-no-leak.mjs"
+  },
+  "dependencies": {
+    "pinia": "^3.0.3",
+    "vue": "^3.5.18",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "electron": "^38.2.0",
+    "typescript": "^5.7.2",
+    "vite": "^7.1.5",
+    "vue-tsc": "^2.2.10"
+  },
+  "allowScripts": {
+    "electron@38.8.6": true,
+    "esbuild@0.28.2": true
+  }
+}
