@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 
+import AfterDarkPanel from '../components/AfterDarkPanel.vue';
+import { appMode } from '../lib/mode';
+
 const status = ref<{ online: boolean; comfyuiVersion?: string; device?: string; vramTotal?: number; vramFree?: number; error?: string }>(
   { online: false },
 );
 
-const mode = ref<'video' | 'image'>('video');
+const mode = ref<'video' | 'image' | 'after-dark'>('video');
 
 /* What the local machine actually has installed. */
 const inventory = ref<{
@@ -33,8 +36,9 @@ const duration = ref(2);
  * Each backend wants its own shape: Z-Image Turbo is a distilled model that
  * wants 8 steps at square resolution, the LTX video model wants 4 steps.
  */
-function setMode(next: 'video' | 'image') {
+function setMode(next: 'video' | 'image' | 'after-dark') {
   mode.value = next;
+  if (next === 'after-dark') return;
   if (next === 'image') {
     steps.value = 8;
     width.value = 1024;
@@ -123,7 +127,7 @@ async function generate() {
       sampler: sampler.value,
       checkpoint: model.value || undefined,
       duration: duration.value,
-      mode: mode.value,
+      mode: mode.value === 'video' ? 'video' : 'image',
       filenamePrefix: mode.value === 'video' ? 'trolly_video' : 'trolly',
     });
     result.value = out.url;
@@ -171,8 +175,8 @@ onMounted(refresh);
     </div>
 
     <div class="panel">
-      <h2>Generate</h2>
-      <p class="hint">A standard txt2img graph: checkpoint → text encode → sampler → decode → save.</p>
+      <h2>{{ mode === 'after-dark' ? 'Studio mode' : 'Generate' }}</h2>
+      <p v-if="mode !== 'after-dark'" class="hint">A standard txt2img graph: checkpoint → text encode → sampler → decode → save.</p>
 
       <div class="field">
         <label>Mode</label>
@@ -183,9 +187,19 @@ onMounted(refresh);
           <button class="btn sm" :class="{ primary: mode === 'image' }" @click="setMode('image')">
             Image (SD)
           </button>
+          <button
+            class="btn sm after-dark-tab"
+            :class="{ primary: mode === 'after-dark' }"
+            :disabled="!appMode.adult"
+            :title="appMode.adult ? 'Local adult img2img' : 'Enable adult mode in Mind first'"
+            @click="setMode('after-dark')"
+          >
+            After Dark
+          </button>
         </div>
       </div>
 
+      <template v-if="mode !== 'after-dark'">
       <div class="field">
         <label>Model</label>
         <select :value="model" @change="applyModel(($event.target as HTMLSelectElement).value)">
@@ -274,11 +288,20 @@ onMounted(refresh);
           </button>
         </div>
       </div>
+      </template>
     </div>
+
+    <AfterDarkPanel
+      v-if="mode === 'after-dark'"
+      :online="status.online"
+      :checkpoints="inventory.checkpoints"
+    />
   </div>
 </template>
 
 <style scoped>
+.after-dark-tab:not(:disabled) { color: #fda4af; border-color: #6b3547; }
+.after-dark-tab.primary { background: #e11d48; border-color: #e11d48; color: white; }
 .lib-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));

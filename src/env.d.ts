@@ -100,6 +100,8 @@ export interface TrollyBridge {
       file: string;
       bytes: number;
       voice: string;
+      /** WAV samples used both for playback and real-time VRM lip sync. */
+      audioBase64: string;
     }>;
   },
   comfy: {
@@ -125,6 +127,20 @@ export interface TrollyBridge {
       mode?: 'image' | 'video';
       duration?: number;
     }): Promise<{ promptId: string; file: string; url: string; kind?: string }>;
+    generateAfterDark(payload: {
+      positive?: string;
+      negative?: string;
+      reference: { name: string; dataBase64: string };
+      seed?: number;
+      width?: number;
+      height?: number;
+      steps?: number;
+      cfg?: number;
+      sampler?: string;
+      scheduler?: string;
+      checkpoint?: string;
+      denoise?: number;
+    }): Promise<{ promptId: string; file: string; url: string; kind: 'image'; outputDir: string }>;
   };
   mcp: {
     list(): Promise<McpServerState[]>;

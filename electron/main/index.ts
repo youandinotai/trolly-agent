@@ -6,8 +6,11 @@ import { fileURLToPath } from 'node:url';
 import { McpSupervisor } from './mcp-supervisor.js';
 import { OllamaClient } from './ollama.js';
 import { ComfyClient } from './comfy.js';
+import { AfterDarkClient } from './after-dark.js';
+import { AfterDarkSafetyInspector } from './after-dark-safety.js';
 import { SpeechClient } from './speech.js';
 import { MindStore } from './mind.js';
+import { assertAfterDarkAllowed, resolveAfterDarkOutputDir } from '../../src/lib/after-dark.js';
 
 const __dirname_ = path.dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = path.resolve(__dirname_, '..', '..', '..');
@@ -21,6 +24,11 @@ let supervisor: McpSupervisor | null = null;
 
 const ollama = new OllamaClient('http://127.0.0.1:11434');
 const comfy = new ComfyClient('http://127.0.0.1:8188');
+const afterDark = new AfterDarkClient(
+  'http://127.0.0.1:8188',
+  resolveAfterDarkOutputDir(process.env, APP_ROOT),
+  new AfterDarkSafetyInspector('http://127.0.0.1:11434', process.env.TROLLY_SAFETY_VISION_MODEL || 'qwen2.5vl:7b'),
+);
 const speech = new SpeechClient(DATA_DIR);
 const mind = new MindStore(DATA_DIR);
 
@@ -104,6 +112,10 @@ function registerIpc() {
   ipcMain.handle('trolly:comfy:generate', async (_e, payload) => comfy.generate(payload));
   ipcMain.handle('trolly:comfy:inventory', async () => comfy.inventory());
   ipcMain.handle('trolly:comfy:outputs', async (_e, limit) => comfy.outputs(limit));
+  ipcMain.handle('trolly:comfy:after-dark', async (_e, payload) => {
+    assertAfterDarkAllowed(mind.readPreferences());
+    return afterDark.generate(payload);
+  });
 
   ipcMain.handle('trolly:mcp:list', async () => supervisor?.listServers() ?? []);
   ipcMain.handle('trolly:mcp:connect', async (_e, id: string) => supervisor?.connect(id));

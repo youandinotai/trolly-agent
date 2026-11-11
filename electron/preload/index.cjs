@@ -30,6 +30,7 @@ contextBridge.exposeInMainWorld('trolly', {
     generate: (payload) => ipcRenderer.invoke('trolly:comfy:generate', payload),
     inventory: () => ipcRenderer.invoke('trolly:comfy:inventory'),
     outputs: (limit) => ipcRenderer.invoke('trolly:comfy:outputs', limit),
+    generateAfterDark: (payload) => ipcRenderer.invoke('trolly:comfy:after-dark', payload),
   },
   mcp: {
     list: () => ipcRenderer.invoke('trolly:mcp:list'),
