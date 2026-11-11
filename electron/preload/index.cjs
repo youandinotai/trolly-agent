@@ -28,6 +28,8 @@ contextBridge.exposeInMainWorld('trolly', {
   comfy: {
     status: () => ipcRenderer.invoke('trolly:comfy:status'),
     generate: (payload) => ipcRenderer.invoke('trolly:comfy:generate', payload),
+    inventory: () => ipcRenderer.invoke('trolly:comfy:inventory'),
+    outputs: (limit) => ipcRenderer.invoke('trolly:comfy:outputs', limit),
   },
   mcp: {
     list: () => ipcRenderer.invoke('trolly:mcp:list'),

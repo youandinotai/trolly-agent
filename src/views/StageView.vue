@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, ref } from 'vue';
 
 import type { OllamaModel } from '../env';
+import { appMode, loadMode, systemPrompt } from '../lib/mode';
 
 const emit = defineEmits<{ (e: 'navigate', view: 'mcp' | 'providers' | 'artistry'): void }>();
 
@@ -48,28 +49,13 @@ const DEFAULT_PERSONA = [
 /** The persona saved under Mind > Consciousness wins over the built-in default. */
 const persona = ref(DEFAULT_PERSONA);
 
-/**
- * Adult content preference. Honoured only when the user has passed the age
- * check; the hard limits (adults only, consensual, no gore) always apply and
- * are restated to the model here so a preference cannot widen them.
- */
-const adultContent = ref(false);
-
-const ADULT_PREFERENCE = [
-  'The user has enabled adult content in their preferences.',
-  'You may engage with legal adult content when asked directly.',
-  'Hard limits that do not change: legal adults only, never minors,',
-  'consensual adults only, no gore or extreme violence.',
-].join(' ');
-
-async function loadPrefs() {
-  try {
-    const prefs = await window.trolly.mind.readPrefs();
-    adultContent.value = prefs.adultContent === true && prefs.ageVerified === true;
-  } catch {
-    adultContent.value = false;
-  }
+/** Mirror the shared persona into this view so the composer shows it. */
+async function syncPersona() {
+  await loadMode();
+  if (appMode.persona?.trim()) persona.value = appMode.persona;
 }
+
+
 
 async function loadPersona() {
   try {
@@ -223,13 +209,7 @@ async function send() {
     if (attached) last.images = [attached.base64];
     const reply = await window.trolly.ollama.chat({
       model: selectedModel.value,
-      messages: [
-        {
-          role: 'system',
-          content: adultContent.value ? `${persona.value} ${ADULT_PREFERENCE}` : persona.value,
-        },
-        ...history,
-      ],
+      messages: [{ role: 'system', content: systemPrompt() }, ...history],
       temperature: 0.85,
       maxTokens: 1024,
     });
@@ -283,8 +263,7 @@ async function loadToolButtons() {
 
 onMounted(async () => {
   await loadModels();
-  await loadPersona();
-  await loadPrefs();
+  await syncPersona();
   await loadVoices();
   await loadToolButtons();
   window.trolly.mcp.onChanged(() => loadToolButtons());

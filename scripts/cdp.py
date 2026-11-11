@@ -88,7 +88,7 @@ def cdp(ws_url, method, params=None, timeout=90):
         msg_id += 1
 
 
-def evaluate(ws_url, expression, await_promise=False, timeout=90):
+def evaluate(ws_url, expression, await_promise=False, timeout=600):
     res = cdp(ws_url, 'Runtime.evaluate', {
         'expression': expression,
         'returnByValue': True,

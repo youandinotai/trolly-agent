@@ -10,6 +10,7 @@ import path from 'node:path';
 import {
   buildLtxvVideoWorkflow,
   buildTxt2ImgWorkflow,
+  buildZImageWorkflow,
   comfyViewUrl,
   parseComfyHistoryImage,
 } from '../../src/lib/comfyui.js';
@@ -52,6 +53,54 @@ export class ComfyClient {
     }
   }
 
+  /**
+   * Every model the running ComfyUI actually has, grouped by kind. The app
+   * must offer what is installed, not a hardcoded list.
+   */
+  async inventory(): Promise<{ checkpoints: string[]; diffusionModels: string[]; textEncoders: string[]; vaes: string[] }> {
+    const get = async (folder: string): Promise<string[]> => {
+      try {
+        const res = await fetch(this.url(`/models/${folder}`));
+        if (!res.ok) return [];
+        const data = await res.json();
+        return Array.isArray(data) ? data.map(String) : [];
+      } catch {
+        return [];
+      }
+    };
+    const [checkpoints, diffusionModels, textEncoders, vaes] = await Promise.all([
+      get('checkpoints'),
+      get('diffusion_models'),
+      get('text_encoders'),
+      get('vae'),
+    ]);
+    return { checkpoints, diffusionModels, textEncoders, vaes };
+  }
+
+  /** Files the backend has already written, newest first. */
+  async outputs(limit = 40): Promise<{ filename: string; url: string }[]> {
+    try {
+      const res = await fetch(this.url('/history?max_items=' + limit));
+      if (!res.ok) return [];
+      const data = await res.json();
+      const out: { filename: string; url: string }[] = [];
+      for (const entry of Object.values(data as Record<string, any>)) {
+        for (const outputs of Object.values(entry?.outputs ?? {})) {
+          const anyOut = outputs as any;
+          for (const img of anyOut.images ?? []) {
+            out.push({ filename: img.filename, url: this.url(`/view?filename=${encodeURIComponent(img.filename)}&subfolder=${encodeURIComponent(img.subfolder ?? '')}&type=${img.type ?? 'output'}`) });
+          }
+          for (const vid of anyOut.videos ?? []) {
+            out.push({ filename: vid.filename, url: this.url(`/view?filename=${encodeURIComponent(vid.filename)}&subfolder=${encodeURIComponent(vid.subfolder ?? '')}&type=${vid.type ?? 'output'}`) });
+          }
+        }
+      }
+      return out.slice(0, limit);
+    } catch {
+      return [];
+    }
+  }
+
   async status() {
     try {
       const res = await fetch(this.url('/system_stats'), { signal: AbortSignal.timeout(6000) });
@@ -77,11 +126,20 @@ export class ComfyClient {
       const [first] = await this.listCheckpoints();
       if (first) opts.checkpoint = first;
     }
-    // The local checkpoint is an LTX video model, so video is the default path.
+    // The builder has to match the model the user picked:
+    //  - a full checkpoint (SDXL, so Pony and Illustrious) uses the classic
+    //    checkpoint -> KSampler chain;
+    //  - a standalone diffusion model (Z-Image Turbo, LTX) has its own
+    //    loader and sampler config.
+    const chosen = (opts.checkpoint ?? '').toLowerCase();
+    const isStandaloneDiffusion = chosen.includes('z_image') || chosen.includes('z-image');
+
     const graph =
-      opts.mode === 'image'
-        ? buildTxt2ImgWorkflow(opts as any)
-        : buildLtxvVideoWorkflow(opts as any);
+      opts.mode === 'video'
+        ? buildLtxvVideoWorkflow(opts as any)
+        : isStandaloneDiffusion
+          ? buildZImageWorkflow(opts as any)
+          : buildTxt2ImgWorkflow(opts as any);
 
     const submit = await fetch(this.url('/prompt'), {
       method: 'POST',

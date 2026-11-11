@@ -102,6 +102,8 @@ function registerIpc() {
   ipcMain.handle('trolly:ollama:chat', async (_e, payload) => ollama.chat(payload));
   ipcMain.handle('trolly:comfy:status', async () => comfy.status());
   ipcMain.handle('trolly:comfy:generate', async (_e, payload) => comfy.generate(payload));
+  ipcMain.handle('trolly:comfy:inventory', async () => comfy.inventory());
+  ipcMain.handle('trolly:comfy:outputs', async (_e, limit) => comfy.outputs(limit));
 
   ipcMain.handle('trolly:mcp:list', async () => supervisor?.listServers() ?? []);
   ipcMain.handle('trolly:mcp:connect', async (_e, id: string) => supervisor?.connect(id));

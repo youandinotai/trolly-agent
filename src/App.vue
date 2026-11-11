@@ -6,6 +6,7 @@ import McpView from './views/McpView.vue';
 import ProvidersView from './views/ProvidersView.vue';
 import ArtistryView from './views/ArtistryView.vue';
 import MindView from './views/MindView.vue';
+import { appMode, loadMode, setAdultMode } from './lib/mode';
 
 type ViewId = 'stage' | 'mcp' | 'providers' | 'artistry' | 'mind';
 
@@ -25,6 +26,18 @@ const comfyOnline = ref(false);
 const mcpConnected = ref(0);
 const mcpTotal = ref(0);
 const dataDir = ref('');
+const modeBusy = ref(false);
+
+/** Toggle the global content mode. The age gate lives in the Mind store. */
+async function toggleAdult() {
+  if (modeBusy.value) return;
+  modeBusy.value = true;
+  try {
+    await setAdultMode(!appMode.adult);
+  } finally {
+    modeBusy.value = false;
+  }
+}
 
 async function refreshHealth() {
   try {
@@ -53,6 +66,7 @@ async function refreshHealth() {
 onMounted(async () => {
   const paths = await window.trolly.paths();
   dataDir.value = paths.dataDir;
+  await loadMode();
   await refreshHealth();
   window.trolly.mcp.onChanged(() => refreshHealth());
   setInterval(refreshHealth, 8000);
@@ -105,6 +119,39 @@ onMounted(async () => {
           <span class="led" />
           MCP {{ mcpConnected }}/{{ mcpTotal }}
         </span>
+
+        <div class="mode-switch" :title="appMode.gateError || 'How the agent answers'">
+          <button
+            class="mode-btn"
+            :class="{ active: !appMode.adult }"
+            @click="appMode.adult && toggleAdult()"
+          >
+            Clean
+          </button>
+          <button
+            class="mode-btn"
+            :class="{ active: appMode.adult }"
+            :disabled="!appMode.ageVerified || modeBusy"
+            :title="
+              appMode.ageVerified
+                ? 'Adult content mode'
+                : 'Complete the age check in Mind to enable adult mode'
+            "
+            @click="toggleAdult()"
+          >
+            Adult
+          </button>
+        </div>
+
+        <button
+          class="chip"
+          :class="appMode.brainstorming ? 'online' : ''"
+          title="Always offer options, push back, and end with a next step"
+          @click="appMode.brainstorming = !appMode.brainstorming"
+        >
+          <span class="led" />
+          Brainstorm
+        </button>
       </header>
 
       <StageView v-show="view === 'stage'" @navigate="view = $event" />

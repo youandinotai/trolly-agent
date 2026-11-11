@@ -93,6 +93,118 @@ function requirePositive(value: number, name: string): number {
  * Build a standard txt2img ComfyUI prompt graph.
  * Node ids are stable so the graph is reproducible across runs.
  */
+/**
+ * Z-Image Turbo text-to-image graph.
+ *
+ * This machine has no Stable Diffusion checkpoint, so the classic
+ * checkpoint -> KSampler chain cannot run. Z-Image Turbo is a standalone
+ * diffusion model (diffusion_models/) with its own Qwen3-VL text encoder and
+ * a separate VAE, so it needs UNETLoader + ModelSamplingAuraFlow rather than
+ * CheckpointLoaderSimple.
+ *
+ * Chain mirrors ComfyUI's shipped `image_z_image_turbo.json` template.
+ */
+export interface ZImageOptions {
+  positive: string;
+  negative?: string;
+  seed?: number;
+  width?: number;
+  height?: number;
+  steps?: number;
+  cfg?: number;
+  sampler?: string;
+  scheduler?: string;
+  filenamePrefix?: string;
+  /** diffusion_models/ entry. */
+  unetName?: string;
+  /** text_encoders/ entry loaded with type 'lumina2'. */
+  textEncoder?: string;
+  /** vae/ entry. */
+  vaeName?: string;
+}
+
+const ZIMAGE_DEFAULTS = {
+  seed: 42,
+  width: 1024,
+  height: 1024,
+  steps: 8,
+  cfg: 1,
+  sampler: 'res_multistep',
+  scheduler: 'simple',
+  filenamePrefix: 'trolly_image',
+  negative: '',
+  unetName: 'z_image_turbo_bf16.safetensors',
+  textEncoder: 'qwen_3_4b.safetensors',
+  vaeName: 'ae.safetensors',
+};
+
+export function buildZImageWorkflow(options: ZImageOptions): ComfyPromptGraph {
+  if (!options?.positive || !options.positive.trim()) {
+    throw new Error('positive prompt is required');
+  }
+  const opt = { ...ZIMAGE_DEFAULTS, ...options };
+  requirePositive(opt.width, 'width');
+  requirePositive(opt.height, 'height');
+  requirePositive(opt.steps, 'steps');
+
+  const prompt: ComfyPromptGraph['prompt'] = {
+    '1': {
+      class_type: 'UNETLoader',
+      inputs: { unet_name: opt.unetName, weight_dtype: 'default' },
+    },
+    '2': {
+      class_type: 'CLIPLoader',
+      inputs: { clip_name: opt.textEncoder, type: 'lumina2', device: 'default' },
+    },
+    '3': {
+      class_type: 'VAELoader',
+      inputs: { vae_name: opt.vaeName },
+    },
+    '4': {
+      class_type: 'CLIPTextEncode',
+      inputs: { text: opt.positive, clip: ['2', 0] },
+    },
+    '5': {
+      // Z-Image Turbo is a distilled model: the negative prompt is zeroed out.
+      class_type: 'ConditioningZeroOut',
+      inputs: { conditioning: ['4', 0] },
+    },
+    '6': {
+      class_type: 'ModelSamplingAuraFlow',
+      inputs: { model: ['1', 0], shift: 3 },
+    },
+    '7': {
+      class_type: 'EmptySD3LatentImage',
+      inputs: { width: opt.width, height: opt.height, batch_size: 1 },
+    },
+    '8': {
+      class_type: 'KSampler',
+      inputs: {
+        model: ['6', 0],
+        positive: ['4', 0],
+        negative: ['5', 0],
+        latent_image: ['7', 0],
+        seed: opt.seed,
+        steps: opt.steps,
+        cfg: opt.cfg,
+        sampler_name: opt.sampler,
+        scheduler: opt.scheduler,
+        denoise: 1,
+      },
+    },
+    '9': {
+      class_type: 'VAEDecode',
+      inputs: { samples: ['8', 0], vae: ['3', 0] },
+    },
+    '10': {
+      class_type: 'SaveImage',
+      inputs: { images: ['9', 0], filename_prefix: opt.filenamePrefix },
+    },
+  };
+
+  return { prompt };
+}
+
 export function buildTxt2ImgWorkflow(options: Txt2ImgOptions): ComfyPromptGraph {
   if (!options?.positive || !options.positive.trim()) {
     throw new Error('positive prompt is required');

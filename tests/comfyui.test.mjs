@@ -100,3 +100,43 @@ test('parseComfyHistoryImage returns null when nothing was saved', () => {
   assert.equal(parseComfyHistoryImage({}, 'missing'), null);
   assert.equal(parseComfyHistoryImage({ 'x': { outputs: {} } }, 'x'), null);
 });
+
+test('buildZImageWorkflow produces a valid Z-Image Turbo graph', async () => {
+  const { buildZImageWorkflow } = await import('../src/lib/comfyui.ts');
+  const graph = buildZImageWorkflow({
+    positive: 'a lone lighthouse on a storm-battered cliff',
+    seed: 7,
+    width: 1024,
+    height: 1024,
+  });
+
+  assert.ok(graph?.prompt, 'must return a prompt graph');
+  const p = graph.prompt;
+  assert.equal(p['1'].class_type, 'UNETLoader');
+  assert.equal(p['1'].inputs.unet_name, 'z_image_turbo_bf16.safetensors');
+  assert.equal(p['2'].class_type, 'CLIPLoader');
+  assert.equal(p['2'].inputs.type, 'lumina2');
+  assert.equal(p['3'].class_type, 'VAELoader');
+  assert.equal(p['5'].class_type, 'ConditioningZeroOut');
+  assert.equal(p['6'].class_type, 'ModelSamplingAuraFlow');
+  assert.equal(p['6'].inputs.shift, 3);
+  assert.equal(p['7'].class_type, 'EmptySD3LatentImage');
+  assert.equal(p['8'].class_type, 'KSampler');
+  assert.equal(p['8'].inputs.sampler_name, 'res_multistep');
+  assert.equal(p['8'].inputs.steps, 8, 'distilled model wants few steps');
+  assert.equal(p['10'].class_type, 'SaveImage');
+
+  // Every node reference must point at a node that exists.
+  for (const [id, node] of Object.entries(p)) {
+    for (const [key, value] of Object.entries(node.inputs)) {
+      if (Array.isArray(value) && typeof value[0] === 'string') {
+        assert.ok(p[value[0]], `node ${id}.${key} references missing node ${value[0]}`);
+      }
+    }
+  }
+});
+
+test('buildZImageWorkflow rejects an empty prompt', async () => {
+  const { buildZImageWorkflow } = await import('../src/lib/comfyui.ts');
+  assert.throws(() => buildZImageWorkflow({ positive: '   ' }), /positive prompt/i);
+});

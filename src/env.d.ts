@@ -104,6 +104,13 @@ export interface TrollyBridge {
   },
   comfy: {
     status(): Promise<{ online: boolean; comfyuiVersion?: string; device?: string; vramTotal?: number; vramFree?: number; error?: string }>;
+    inventory(): Promise<{
+      checkpoints: string[];
+      diffusionModels: string[];
+      textEncoders: string[];
+      vaes: string[];
+    }>;
+    outputs(limit?: number): Promise<{ filename: string; url: string }[]>;
     generate(payload: {
       positive: string;
       negative?: string;
@@ -112,6 +119,7 @@ export interface TrollyBridge {
       height?: number;
       steps?: number;
       cfg?: number;
+      sampler?: string;
       checkpoint?: string;
       filenamePrefix?: string;
       mode?: 'image' | 'video';
