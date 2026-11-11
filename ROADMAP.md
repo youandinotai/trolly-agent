@@ -41,8 +41,13 @@ The skeleton everything else sits on.
 *The character needs a body.*
 
 - **3D VTuber** — VRM models via `three-vrm`, running in the renderer.
-  Open format, no licence lock-in.
-- **Live2D** — Cubism runtime, for the models that exist only as Live2D.
+  Open format, no licence lock-in, and the engine renders an exported VRM
+  faithfully rather than approximating it.
+- **Characters come from VRoid Studio**, designed there and exported as VRM.
+  We do not embed VRoid Studio in the app and do not reverse-engineer it;
+  we consume the exported file. That keeps the character pipeline clean.
+- **Live2D** — Cubism runtime, for models that exist only as Live2D. Second
+  priority; VRM is the primary path.
 - **Lip sync** — the TTS audio drives mouth shapes and head motion; the
   speech engine already produces WAV, so this is analysis of what exists.
 - **Expression triggers** — emotion in the reply maps to a face shape.
@@ -111,6 +116,12 @@ Not a mode you enter. A standing capability.
 - Import/export of everything: personas, memories, recipes, media, plugins.
 
 ---
+
+## Working practice
+
+Every visual change ends the same way: a render, a screenshot, a side-by-side
+against a reference, and a vision judge that scores named qualities with
+written reasons. Below the bar, it goes back.
 
 ## Ground rules
 

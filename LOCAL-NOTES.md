@@ -5,6 +5,42 @@ Paths, ports, and which backend actually serves what.
 
 ---
 
+## Ports
+
+**Never use a common port.** This machine hosts the game stack; the reserved
+list comes from the DREAM-Engine README and `api.workflow.json`.
+
+| Reserved | What |
+|---|---|
+| 3130 | Mission Control (T5500) |
+| 8082 | Free Claude Code admin |
+| 8188 | ComfyUI |
+| 8390 | OPSis Cut & Reach Studio |
+| 8391 | YouTube Shorts worker (Sabretooth) |
+| 8392 | Hermes Leadgen |
+| 9119 | Hermes (Sabretooth) |
+| 9127 | Live NPC Lab |
+| 9133 | DreamOps Bridge |
+| 9150 | — |
+| 9180 | DREAM Engine / 3D Studio viewport |
+| 11434 | Ollama |
+| 20128 | OmniRoute (T5500) |
+| 27123 | — |
+| 42000 | Pinokio API |
+| 42013 | Uncensored Local Studio |
+| 49374 | Shared ai-memory (T5500) |
+
+**The 48xxx band belongs to Trolly Agent.**
+
+| Port | What |
+|---|---|
+| 48701 | Trolly vite dev server |
+| 48702 | Electron remote-debugging (CDP) |
+| 48703 | Remake local serve |
+| 48777 | Chrome remote-debugging (throwaway profile) |
+
+---
+
 ## Services
 
 | Service | Where | Notes |
