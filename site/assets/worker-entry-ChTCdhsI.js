@@ -1,0 +1,2 @@
+(function(){try{var e=typeof globalThis<`u`?globalThis:typeof window<`u`?window:typeof global<`u`?global:typeof self<`u`?self:{},t=new e.Error().stack;t&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[t]=`23dbc59e-75ec-4067-bfb1-b06438922f79`,e._sentryDebugIdIdentifier=`sentry-dbid-23dbc59e-75ec-4067-bfb1-b06438922f79`)}catch{}})();function e(e){return new Worker(`/assets/worker-entry-Cv39KZD5.js`,{type:`module`,name:e?.name})}export{e as default};
+//# sourceMappingURL=worker-entry-ChTCdhsI.js.map

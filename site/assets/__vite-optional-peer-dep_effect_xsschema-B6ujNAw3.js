@@ -1,0 +1,2 @@
+(function(){try{var e=typeof globalThis<`u`?globalThis:typeof window<`u`?window:typeof global<`u`?global:typeof self<`u`?self:{},t=new e.Error().stack;t&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[t]=`6ea98be3-36e6-4b0f-a0f5-b396b34e1210`,e._sentryDebugIdIdentifier=`sentry-dbid-6ea98be3-36e6-4b0f-a0f5-b396b34e1210`)}catch{}})();var e={};throw Error(`Could not resolve "effect" imported by "xsschema". Is it installed?`);export{e as default};
+//# sourceMappingURL=__vite-optional-peer-dep_effect_xsschema-B6ujNAw3.js.map

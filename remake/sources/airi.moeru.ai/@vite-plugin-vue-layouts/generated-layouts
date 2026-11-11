@@ -1,0 +1,63 @@
+
+
+import __layout_0 from '/home/runner/work/airi/airi/packages/stage-layouts/src/layouts/default.vue'
+export const layouts = {
+'default': __layout_0,
+'home': () => import('/home/runner/work/airi/airi/packages/stage-layouts/src/layouts/home.vue'),
+'plain': () => import('/home/runner/work/airi/airi/packages/stage-layouts/src/layouts/plain.vue'),
+'settings': () => import('/home/runner/work/airi/airi/packages/stage-layouts/src/layouts/settings.vue'),
+'stage': () => import('/home/runner/work/airi/airi/packages/stage-layouts/src/layouts/stage.vue'),
+}
+export const createGetRoutes = (router, withLayout = false) => {
+  const routes = router.getRoutes()
+  if (withLayout) {
+      return routes
+  }
+  return () => routes.filter(route => !route.meta.isLayout)
+}
+
+export function setupLayouts(routes) {
+  function deepSetupLayout(routes, top = true) {
+    return routes.map(route => {
+      if (route.children?.length > 0) {
+        route.children = deepSetupLayout(route.children, false)
+      }
+      
+      if (top) {
+        // unplugin-vue-router adds a top-level route to the routing group, which we should skip.
+        const skipLayout = !route.component && route.children?.find(r => (r.path === '' || r.path === '/') && r.meta?.isLayout)  
+
+        if (skipLayout) {
+          return route
+        }
+
+        if (route.meta?.layout !== false) {
+          return { 
+            path: route.path,
+            component: layouts[route.meta?.layout || 'default'],
+            children: route.path === '/' ? [route] : [{...route, path: ''}],
+            meta: {
+              isLayout: true
+            }
+          }
+        }
+      }
+
+      if (route.meta?.layout) {
+        return { 
+          path: route.path,
+          component: layouts[route.meta?.layout],
+          children: [ {...route, path: ''} ],
+          meta: {
+            isLayout: true
+          }
+        }
+      }
+
+      return route
+    })
+  }
+
+    return deepSetupLayout(routes)
+
+}

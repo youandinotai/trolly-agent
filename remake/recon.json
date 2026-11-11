@@ -1,0 +1,95 @@
+{
+  "url": "https://airi.moeru.ai/",
+  "at": "2026-11-11T00:36:39.699Z",
+  "pages": {
+    "/": {
+      "desktop": {
+        "title": "AIRI",
+        "frameworks": [
+          "Vue"
+        ],
+        "canvases": 1,
+        "videos": 0,
+        "iframes": [],
+        "fonts": [
+          "Comfortaa Variable 300 700",
+          "DM Sans 100 1000",
+          "Nunito 200 1000",
+          "Quicksand 300 700"
+        ],
+        "links": [
+          {
+            "href": "https://airi.moeru.ai/",
+            "nav": true,
+            "text": "AIRI"
+          },
+          {
+            "href": "https://airi.moeru.ai/settings/flux",
+            "nav": true,
+            "text": "Pricing"
+          },
+          {
+            "href": "https://airi.moeru.ai/docs/en/about/terms",
+            "nav": true,
+            "text": "Terms of Service"
+          }
+        ],
+        "height": 900
+      },
+      "phone": {
+        "title": "AIRI",
+        "frameworks": [
+          "Vue"
+        ],
+        "canvases": 1,
+        "videos": 0,
+        "iframes": [],
+        "fonts": [
+          "Comfortaa Variable 300 700",
+          "DM Sans 100 1000",
+          "Nunito 200 1000"
+        ],
+        "links": [
+          {
+            "href": "https://airi.moeru.ai/",
+            "nav": true,
+            "text": "AIRI"
+          },
+          {
+            "href": "https://airi.moeru.ai/settings/flux",
+            "nav": true,
+            "text": "Pricing"
+          },
+          {
+            "href": "https://airi.moeru.ai/docs/en/about/terms",
+            "nav": true,
+            "text": "Terms of Service"
+          }
+        ],
+        "height": 844
+      }
+    }
+  },
+  "archive": false,
+  "stats": {
+    "files": 886,
+    "bytes": 104182673,
+    "counts": {
+      "pages": 1,
+      "scripts": 743,
+      "styles": 8,
+      "images": 7,
+      "fonts": 115,
+      "api": 10,
+      "other": 2
+    },
+    "archived": 0,
+    "sourceMaps": {
+      "maps": 298,
+      "files": 1435
+    }
+  },
+  "trackersRemoved": [],
+  "streaming": [],
+  "blockedHosts": []
+}

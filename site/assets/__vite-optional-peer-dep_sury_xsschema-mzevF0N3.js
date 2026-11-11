@@ -1,0 +1,2 @@
+(function(){try{var e=typeof globalThis<`u`?globalThis:typeof window<`u`?window:typeof global<`u`?global:typeof self<`u`?self:{},t=new e.Error().stack;t&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[t]=`513da635-92ad-4bdd-a528-2ed37fd21554`,e._sentryDebugIdIdentifier=`sentry-dbid-513da635-92ad-4bdd-a528-2ed37fd21554`)}catch{}})();var e={};throw Error(`Could not resolve "sury" imported by "xsschema". Is it installed?`);export{e as default};
+//# sourceMappingURL=__vite-optional-peer-dep_sury_xsschema-mzevF0N3.js.map
