@@ -201,6 +201,23 @@ async function send() {
   busy.value = true;
 
   try {
+    const route = await window.trolly.router.classify(text);
+    if (route.task !== 'chat') {
+      const routerName = route.source === 'jev' ? `JEV · ${route.routerModel ?? 'local'}` : 'Router · deterministic fallback';
+      messages.value.push({
+        role: 'tool',
+        name: routerName,
+        text: route.task === 'avatar'
+          ? `Avatar → Stage VRM · ${route.model}. Choose a VRM or GLB on the stage to continue.`
+          : `${route.task} → ${route.backend} · ${route.model}. Opening Artistry with your prompt.`,
+      });
+      if (route.task !== 'avatar') {
+        window.dispatchEvent(new CustomEvent('trolly:task-route', { detail: route }));
+        emit('navigate', 'artistry');
+      }
+      return;
+    }
+
     const history: { role: 'user' | 'assistant'; content: string; images?: string[] }[] =
       messages.value
         .filter((m): m is Msg & { role: 'user' | 'assistant' } => m.role !== 'tool')

@@ -76,6 +76,17 @@ export interface TrollyBridge {
       maxTokens?: number;
     }): Promise<string>;
   };
+  router: {
+    classify(prompt: string): Promise<{
+      task: 'avatar' | 'image' | 'video' | 'edit' | 'chat';
+      backend: 'stage-vrm' | 'comfyui-image' | 'comfyui-ltxv' | 'comfyui-img2img' | 'ollama-chat';
+      model: string;
+      reason: string;
+      prompt: string;
+      source: 'jev' | 'fallback';
+      routerModel?: string;
+    }>;
+  };
   mind: {
     read(): Promise<MindDoc>;
     persona(): Promise<Persona | null>;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
 import AfterDarkPanel from '../components/AfterDarkPanel.vue';
 import { appMode } from '../lib/mode';
@@ -52,6 +52,24 @@ function setMode(next: 'video' | 'image' | 'after-dark') {
 const busy = ref(false);
 const result = ref('');
 const resultFile = ref('');
+const routeNotice = ref('');
+
+function onTaskRoute(event: Event) {
+  const route = (event as CustomEvent).detail;
+  if (!route?.prompt) return;
+  positive.value = route.prompt;
+  if (route.task === 'video') setMode('video');
+  else if (route.task === 'edit' && appMode.adult) setMode('after-dark');
+  else setMode('image');
+  if (route.model && modelOptions.value.includes(route.model)) applyModel(route.model);
+  routeNotice.value = `${route.source === 'jev' ? `JEV · ${route.routerModel ?? 'local'}` : 'Deterministic fallback'}: ${route.task} → ${route.backend}`;
+}
+
+onMounted(() => {
+  window.addEventListener('trolly:task-route', onTaskRoute);
+  refresh();
+});
+onBeforeUnmount(() => window.removeEventListener('trolly:task-route', onTaskRoute));
 
 /**
  * Per-model presets. Each backend wants different numbers: SDXL checkpoints
@@ -139,7 +157,6 @@ async function generate() {
   }
 }
 
-onMounted(refresh);
 </script>
 
 <template>
@@ -198,6 +215,8 @@ onMounted(refresh);
           </button>
         </div>
       </div>
+
+      <p v-if="routeNotice" class="route-notice">{{ routeNotice }}</p>
 
       <template v-if="mode !== 'after-dark'">
       <div class="field">
@@ -295,11 +314,13 @@ onMounted(refresh);
       v-if="mode === 'after-dark'"
       :online="status.online"
       :checkpoints="inventory.checkpoints"
+      :prompt="positive"
     />
   </div>
 </template>
 
 <style scoped>
+.route-notice { padding: 8px 10px; border-left: 2px solid var(--accent); background: var(--bg-panel); color: var(--text-dim); font: 11px var(--mono); }
 .after-dark-tab:not(:disabled) { color: #fda4af; border-color: #6b3547; }
 .after-dark-tab.primary { background: #e11d48; border-color: #e11d48; color: white; }
 .lib-grid {

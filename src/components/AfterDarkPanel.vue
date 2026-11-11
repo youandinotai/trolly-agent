@@ -4,9 +4,9 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { AFTER_DARK_DEFAULT_NEGATIVE, AFTER_DARK_DEFAULT_POSITIVE } from '../lib/after-dark-shared';
 import { appMode } from '../lib/mode';
 
-const props = defineProps<{ online: boolean; checkpoints: string[] }>();
+const props = defineProps<{ online: boolean; checkpoints: string[]; prompt?: string }>();
 
-const positive = ref(AFTER_DARK_DEFAULT_POSITIVE);
+const positive = ref(props.prompt?.trim() || AFTER_DARK_DEFAULT_POSITIVE);
 const negative = ref(AFTER_DARK_DEFAULT_NEGATIVE);
 const model = ref('');
 const seed = ref(12345);
@@ -84,6 +84,9 @@ async function generate() {
 }
 
 watch(() => props.checkpoints, chooseDefaultModel);
+watch(() => props.prompt, (value) => {
+  if (value?.trim()) positive.value = value;
+});
 onMounted(chooseDefaultModel);
 </script>
 

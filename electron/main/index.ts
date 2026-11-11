@@ -8,6 +8,7 @@ import { OllamaClient } from './ollama.js';
 import { ComfyClient } from './comfy.js';
 import { AfterDarkClient } from './after-dark.js';
 import { AfterDarkSafetyInspector } from './after-dark-safety.js';
+import { JevTaskRouter } from './task-router.js';
 import { SpeechClient } from './speech.js';
 import { MindStore } from './mind.js';
 import { assertAfterDarkAllowed, resolveAfterDarkOutputDir } from '../../src/lib/after-dark.js';
@@ -23,6 +24,7 @@ let tray: Tray | null = null;
 let supervisor: McpSupervisor | null = null;
 
 const ollama = new OllamaClient('http://127.0.0.1:11434');
+const router = new JevTaskRouter('http://127.0.0.1:11434', process.env.TROLLY_ROUTER_MODEL || 'eve-cpu:latest');
 const comfy = new ComfyClient('http://127.0.0.1:8188');
 const afterDark = new AfterDarkClient(
   'http://127.0.0.1:8188',
@@ -108,6 +110,7 @@ function createTray() {
 function registerIpc() {
   ipcMain.handle('trolly:ollama:models', async () => ollama.listModels());
   ipcMain.handle('trolly:ollama:chat', async (_e, payload) => ollama.chat(payload));
+  ipcMain.handle('trolly:router:classify', async (_e, prompt: string) => router.classify(prompt));
   ipcMain.handle('trolly:comfy:status', async () => comfy.status());
   ipcMain.handle('trolly:comfy:generate', async (_e, payload) => comfy.generate(payload));
   ipcMain.handle('trolly:comfy:inventory', async () => comfy.inventory());

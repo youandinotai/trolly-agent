@@ -8,6 +8,9 @@ contextBridge.exposeInMainWorld('trolly', {
     models: () => ipcRenderer.invoke('trolly:ollama:models'),
     chat: (payload) => ipcRenderer.invoke('trolly:ollama:chat', payload),
   },
+  router: {
+    classify: (prompt) => ipcRenderer.invoke('trolly:router:classify', prompt),
+  },
   mind: {
     read: () => ipcRenderer.invoke('trolly:mind:read'),
     persona: () => ipcRenderer.invoke('trolly:mind:persona'),
