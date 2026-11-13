@@ -158,6 +158,17 @@ NOT yet run** — run it before treating the branch as fully reviewed:
    `hermes fallback add` chain: Kimi/Nous → opencode-zen (already keyed) →
    omni-best → local eve-cpu.
 
+## 2B. One repo for the lane
+
+`youandinotai/trolly-agent` is the single repo for the whole Trolly lane.
+`remake-airi` was merged in as `airi-remake/` (history preserved, commit
+`50a7e2a`) and then **archived** (read-only, 2026-11-13). The other
+youandinotai repos stay separate by design:
+
+- `youandinotai/Hermes` — mission-lane config (D:\Grin Droid pushes here).
+  Nothing adult ever touches this repo.
+- `youandinotai/youandinotai` — the DATE APP. Untouched.
+
 ## 3. Moving the lane to Sabretooth
 
 **One folder now:** `D:\Trolly` is the entire lane on Alienware (created
