@@ -1,0 +1,2 @@
+(function(){try{var e=typeof globalThis<`u`?globalThis:typeof window<`u`?window:typeof global<`u`?global:typeof self<`u`?self:{};e.SENTRY_RELEASE={id:`822243de34e8d1151202ac2f688f83d68d04289c`};var t=new e.Error().stack;t&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[t]=`7f16def5-634b-4313-8dfc-14946eaa7914`,e._sentryDebugIdIdentifier=`sentry-dbid-7f16def5-634b-4313-8dfc-14946eaa7914`)}catch{}})();var e=`/settings/flux`,t=`/docs/en/about/terms`,n=`/docs/en/about/privacy`;export{n,t as r,e as t};
+//# sourceMappingURL=public-links-DF-GkbzV.js.map

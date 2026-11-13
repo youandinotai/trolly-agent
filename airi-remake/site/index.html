@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head><script src="/_remake/runtime.js"></script><meta name="robots" content="noindex, nofollow">
+    <meta charset="UTF-8" />
+    <title>AIRI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="description" content="Open source attempt to create cyber companion.">
+    <meta name="apple-mobile-web-app-title" content="AIRI" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="rgb(18,18,18)" id="themeColor" />
+
+    <!-- Open Graph Protocol -->
+    <meta property="og:title" content="AIRI">
+    <meta property="og:site_name" content="AIRI">
+    <meta property="og:image" content="/open-graph.png">
+    <meta property="og:description" content="Top 1 open source attempt to create cyber companion, capable of playing Minecraft, Factorio, Balatro, etc. .">
+    <meta property="og:url" content="/docs/en/">
+
+    <!-- Open Graph Protocol extension, Twitter cards -->
+    <meta name="twitter:title" content="AIRI">
+    <meta name="twitter:description" content="Top 1 open source attempt to create cyber companion, capable of playing Minecraft, Factorio, Balatro, etc. .">
+    <meta name="twitter:image" content="/open-graph.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:creator" content="Moeru AI">
+    <script>
+      ;(function () {
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        const setting = localStorage.getItem('vueuse-color-scheme') || 'auto'
+        if (setting === 'light' || (prefersDark && setting !== 'dark'))
+          document.querySelector('#themeColor')?.setAttribute('content', 'rgb(255,255,255)')
+      })()
+    </script>
+    <script>
+      ;(function () {
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        const setting = localStorage.getItem('vueuse-color-scheme') || 'auto'
+        if (setting === 'dark' || (prefersDark && setting !== 'light'))
+          document.documentElement.classList.toggle('dark', true)
+
+        const savedHue = localStorage.getItem('settings/theme/colors/hue')
+        const hue = Number(savedHue)
+        if (savedHue !== null && Number.isFinite(hue))
+          document.documentElement.style.setProperty('--chromatic-hue', hue.toString())
+      })()
+    </script>
+    <style>#boot-splash{z-index:9999;box-sizing:border-box;padding:max(calc(env(safe-area-inset-top) + 48px), calc(40vh - 82px)) 24px calc(env(safe-area-inset-bottom) + clamp(48px, 8vh, 96px));color:#262626;background:#fff;flex-direction:column;justify-content:space-between;align-items:center;gap:24px;font-family:Comfortaa Variable,Comfortaa,ui-sans-serif,system-ui,sans-serif;display:flex;position:fixed;inset:0}#boot-splash .brand{flex-direction:column;flex-shrink:0;align-items:center;gap:20px;display:flex}#boot-splash img{width:96px;height:96px;filter:hue-rotate(calc(var(--chromatic-hue,220.44) * 1deg))}#boot-splash strong{letter-spacing:.07em;-webkit-text-stroke:.5px currentColor;padding-left:.07em;font-size:32px;font-weight:700}#boot-splash .status{flex-direction:column;flex-shrink:0;align-items:center;width:min(220px,60vw);height:44px;display:flex}#boot-splash .track-space{width:48px;height:3px;margin-top:28px}#boot-splash .boot-error{bottom:max(calc(env(safe-area-inset-bottom) + 48px), 8vh);text-align:center;flex-direction:column;align-items:center;gap:12px;max-width:80vw;font-size:13px;display:none;position:absolute}#boot-splash .boot-error button{background:oklch(65% .16 var(--chromatic-hue,220.44));color:#fff;font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 20px}#boot-splash.failed .boot-error{display:flex}#app:not(:empty)+#boot-splash{display:none}html.dark #boot-splash{color:#f5f5f5;background:#171717}</style>
+    <noscript><style>#boot-splash{display:none}</style></noscript>
+    <script type="module" crossorigin src="/assets/index-DfNk3FsW.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-DZyG74sE.js">
+    <link rel="modulepreload" crossorigin href="/assets/runtime-core.esm-bundler-BlcJvvAw.js">
+    <link rel="modulepreload" crossorigin href="/assets/runtime-dom.esm-bundler-DDbnBfZf.js">
+    <link rel="modulepreload" crossorigin href="/assets/dist-CSh2t7Yf.js">
+    <link rel="modulepreload" crossorigin href="/assets/error-CL6mOV0P.js">
+    <link rel="modulepreload" crossorigin href="/assets/defu-BYMa4JgW.js">
+    <link rel="modulepreload" crossorigin href="/assets/_plugin-vue_export-helper-BHVMyNZe.js">
+    <link rel="modulepreload" crossorigin href="/assets/src-D-wQQdy7.js">
+    <link rel="modulepreload" crossorigin href="/assets/three.core-UIoc4VXQ.js">
+    <link rel="modulepreload" crossorigin href="/assets/three.module-BcrqnLdX.js">
+    <link rel="modulepreload" crossorigin href="/assets/tres-D4Tgy8-S.js">
+    <link rel="modulepreload" crossorigin href="/assets/pinia-Bb5A80_0.js">
+    <link rel="modulepreload" crossorigin href="/assets/dist-CAP-A7C4.js">
+    <link rel="modulepreload" crossorigin href="/assets/preload-helper-DJ6ezFwP.js">
+    <link rel="modulepreload" crossorigin href="/assets/picomatch-DktuuUMY.js">
+    <link rel="modulepreload" crossorigin href="/assets/url-alphabet-DgZw3Zwf.js">
+    <link rel="modulepreload" crossorigin href="/assets/non-secure-CeyChw-L.js">
+    <link rel="modulepreload" crossorigin href="/assets/context-Do0TNnqd-DP2VEWS-.js">
+    <link rel="modulepreload" crossorigin href="/assets/src-fuvwCQxi.js">
+    <link rel="modulepreload" crossorigin href="/assets/invoke-BPvOIpeR-BA_Z14cu.js">
+    <link rel="modulepreload" crossorigin href="/assets/environment-m-22PzUh.js">
+    <link rel="modulepreload" crossorigin href="/assets/core-B_LgYr2f.js">
+    <link rel="modulepreload" crossorigin href="/assets/schemas-Bb9fUnhz.js">
+    <link rel="modulepreload" crossorigin href="/assets/renderer-B3aQ0lN9.js">
+    <link rel="modulepreload" crossorigin href="/assets/provider-Btv7T2_L.js">
+    <link rel="modulepreload" crossorigin href="/assets/dist-BqpJV752.js">
+    <link rel="modulepreload" crossorigin href="/assets/ofetch.CWycOUEr-Bv9Y6geW.js">
+    <link rel="modulepreload" crossorigin href="/assets/index.browser-B5Et_6JW.js">
+    <link rel="modulepreload" crossorigin href="/assets/rng-Pui8XOXy.js">
+    <link rel="modulepreload" crossorigin href="/assets/stream-transcription-lNvtEt0Q.js">
+    <link rel="modulepreload" crossorigin href="/assets/dist-DsqMHUbQ.js">
+    <link rel="modulepreload" crossorigin href="/assets/output-Vvdwlfl2.js">
+    <link rel="modulepreload" crossorigin href="/assets/encoding-D3KE2b-i.js">
+    <link rel="modulepreload" crossorigin href="/assets/dist-dk2Pcn1c.js">
+    <link rel="modulepreload" crossorigin href="/assets/dist-C4fkJrR2.js">
+    <link rel="modulepreload" crossorigin href="/assets/vue-i18n.runtime-BxHdbFyV.js">
+    <link rel="modulepreload" crossorigin href="/assets/model-assets-CKJweXZa.js">
+    <link rel="modulepreload" crossorigin href="/assets/clamp-B1evkRnV.js">
+    <link rel="modulepreload" crossorigin href="/assets/use-trace-DvpN5_91.js">
+    <link rel="modulepreload" crossorigin href="/assets/use-local-storage-manual-reset-jYHLlbM2.js">
+    <link rel="modulepreload" crossorigin href="/assets/jszip.min-BA03txmU.js">
+    <link rel="modulepreload" crossorigin href="/assets/decode-zip-filename-B48lAiyg.js">
+    <link rel="modulepreload" crossorigin href="/assets/manifest-1hIs0_hM.js">
+    <link rel="modulepreload" crossorigin href="/assets/storage-DWQSX29o.js">
+    <link rel="modulepreload" crossorigin href="/assets/sync-preferences-xhrlfBth.js">
+    <link rel="modulepreload" crossorigin href="/assets/error-message-C7RNqwql.js">
+    <link rel="modulepreload" crossorigin href="/assets/coordinator-DZ1Lh0uC.js">
+    <link rel="modulepreload" crossorigin href="/assets/dist-DiKcyVwS.js">
+    <link rel="modulepreload" crossorigin href="/assets/artistry-BVJobIk6.js">
+    <link rel="modulepreload" crossorigin href="/assets/index-DoHiaFQM-DYinI7HF.js">
+    <link rel="modulepreload" crossorigin href="/assets/websocket-inspector-BKvYjFvA.js">
+    <link rel="modulepreload" crossorigin href="/assets/auxiliary-BxPSY3q6.js">
+    <link rel="modulepreload" crossorigin href="/assets/audio-DW7VNFwX.js">
+    <link rel="modulepreload" crossorigin href="/assets/transcript-DbcXedu4-DTSWLdY4.js">
+    <link rel="modulepreload" crossorigin href="/assets/composables-Chxtvm93.js">
+    <link rel="modulepreload" crossorigin href="/assets/useApi-CROJJdhE-CJoiC3xM.js">
+    <link rel="modulepreload" crossorigin href="/assets/devtools-Bpr7ZAVB-BhheTajs.js">
+    <link rel="modulepreload" crossorigin href="/assets/vue-router-BTC6RkJR.js">
+    <link rel="modulepreload" crossorigin href="/assets/TooltipTrigger-5Ax8Mv4e.js">
+    <link rel="modulepreload" crossorigin href="/assets/DialogDescription-Df032qVI.js">
+    <link rel="modulepreload" crossorigin href="/assets/select-CDJMcT2n.js">
+    <link rel="modulepreload" crossorigin href="/assets/avatar-D6y1Bl_c.js">
+    <link rel="modulepreload" crossorigin href="/assets/src-BFOinq4j.js">
+    <link rel="modulepreload" crossorigin href="/assets/vue-Cctp6_5x.js">
+    <link rel="modulepreload" crossorigin href="/assets/animation-Ct96h9tm.js">
+    <link rel="modulepreload" crossorigin href="/assets/screen-oZpNNP9A.js">
+    <link rel="modulepreload" crossorigin href="/assets/audio-device-DPfCTWUt.js">
+    <link rel="modulepreload" crossorigin href="/assets/display-DRPBSORs.js">
+    <link rel="modulepreload" crossorigin href="/assets/app-Bk7FkyS4.js">
+    <link rel="modulepreload" crossorigin href="/assets/broadcast-channel-wvSdMMpM.js">
+    <link rel="modulepreload" crossorigin href="/assets/beat-sync-1yEUhO0x.js">
+    <link rel="modulepreload" crossorigin href="/assets/tachie-preview-C9QS-ojE.js">
+    <link rel="modulepreload" crossorigin href="/assets/settings-BtpdvEyf.js">
+    <link rel="modulepreload" crossorigin href="/assets/widgets-B1Ihyu0w.js">
+    <link rel="modulepreload" crossorigin href="/assets/checkbox-hEFYBGJ2.js">
+    <link rel="modulepreload" crossorigin href="/assets/alert-JgVmcKz9.js">
+    <link rel="modulepreload" crossorigin href="/assets/field-checkbox-fPd5mthj.js">
+    <link rel="modulepreload" crossorigin href="/assets/combobox-select-DnDurfyG.js">
+    <link rel="modulepreload" crossorigin href="/assets/field-combobox-select-DDnKDSe0.js">
+    <link rel="modulepreload" crossorigin href="/assets/basic-input-file-4weGj61z.js">
+    <link rel="modulepreload" crossorigin href="/assets/input-file-Dr37bjOP.js">
+    <link rel="modulepreload" crossorigin href="/assets/input-BxVNOmnt.js">
+    <link rel="modulepreload" crossorigin href="/assets/field-input-CFc9oYiU.js">
+    <link rel="modulepreload" crossorigin href="/assets/field-select-Ch6HmwBg.js">
+    <link rel="modulepreload" crossorigin href="/assets/settings-card-DblmFBJB.js">
+    <link rel="modulepreload" crossorigin href="/assets/public-links-DF-GkbzV.js">
+    <link rel="modulepreload" crossorigin href="/assets/purify.es-4PeUsHnt.js">
+    <link rel="modulepreload" crossorigin href="/assets/onboarding-EsevAu1P.js">
+    <link rel="modulepreload" crossorigin href="/assets/memory-jHo68jLk.js">
+    <link rel="modulepreload" crossorigin href="/assets/settings-search-DrDvElLp.js">
+    <link rel="modulepreload" crossorigin href="/assets/stickers-BFoRFmh9.js">
+    <link rel="modulepreload" crossorigin href="/assets/tool-cards-DlIOi8Rh.js">
+    <link rel="modulepreload" crossorigin href="/assets/use-recipe-B250KczC.js">
+    <link rel="modulepreload" crossorigin href="/assets/bus-DT8ZRf6-.js">
+    <link rel="modulepreload" crossorigin href="/assets/background-CkAky4mP.js">
+    <link rel="modulepreload" crossorigin href="/assets/recipes-DpFz13UF.js">
+    <link rel="modulepreload" crossorigin href="/assets/chat-bm-ixv3f.js">
+    <link rel="modulepreload" crossorigin href="/assets/vue-OLwcU2vt.js">
+    <link rel="modulepreload" crossorigin href="/assets/icons-DD9gxX5t.js">
+    <link rel="modulepreload" crossorigin href="/assets/capture-lease-BCuHE22h.js">
+    <link rel="modulepreload" crossorigin href="/assets/voiceprint-BuCbCIne.js">
+    <link rel="modulepreload" crossorigin href="/assets/browser-DSaDC1Z9.js">
+    <link rel="modulepreload" crossorigin href="/assets/libs-DFmO9pwX.js">
+    <link rel="modulepreload" crossorigin href="/assets/auxiliary-uUg5pqg5.js">
+    <link rel="modulepreload" crossorigin href="/assets/settings-search-rCvt8-I2.js">
+    <link rel="modulepreload" crossorigin href="/assets/dist-t1sPLkD3.js">
+    <link rel="modulepreload" crossorigin href="/assets/HeaderLink-CogPYTE5.js">
+    <link rel="modulepreload" crossorigin href="/assets/context-channel-Bbn66uAT.js">
+    <link rel="modulepreload" crossorigin href="/assets/context-bridge-DM_E1YkG.js">
+    <link rel="modulepreload" crossorigin href="/assets/export-csv-BIpde1mu.js">
+    <link rel="modulepreload" crossorigin href="/assets/devtools-lag-C0gvkq4a.js">
+    <link rel="stylesheet" crossorigin href="/assets/src-swZHHGtM.css">
+    <link rel="stylesheet" crossorigin href="/assets/widgets-e909eBjO.css">
+    <link rel="stylesheet" crossorigin href="/assets/components-r0uZLuAN.css">
+    <link rel="stylesheet" crossorigin href="/assets/HeaderLink-CgR8yqLo.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-CeY-JOUM.css">
+  <link rel="manifest" href="/manifest.webmanifest.bin"></head>
+  <body class="font-sans">
+    <div id="app"></div>
+    <div id="boot-splash" role="status" aria-busy="true">
+      <div class="brand">
+        <img src="/favicon.svg" alt="" />
+        <strong>AIRI</strong>
+      </div>
+      <div class="status"><span class="track-space" aria-hidden="true"></span></div>
+      <div class="boot-error" role="alert"><span>AIRI could not start.</span><button type="button" onclick="location.reload()">Retry</button></div>
+    </div>
+    <script src="/assets/js/CubismSdkForWeb-5-r.3/Core/live2dcubismcore.min.js"></script>
+    <script id="boot-splash-locales" type="application/json">{"labels":{"en":{"failed":"Startup failed","retry":"Retry"},"es":{"failed":"Error al iniciar","retry":"Reintentar"},"fr":{"failed":"Échec du démarrage","retry":"Réessayer"},"ko":{"failed":"시작 실패","retry":"다시 시도"},"ja":{"failed":"起動に失敗しました","retry":"再試行"},"ru":{"failed":"Ошибка запуска","retry":"Повторить"},"th":{"failed":"การเริ่มต้นล้มเหลว","retry":"ลองอีกครั้ง"},"vi":{"failed":"Khởi động thất bại","retry":"Thử lại"},"zh-Hans":{"failed":"启动失败","retry":"重新启动 AIRI"},"zh-Hant":{"failed":"啟動失敗","retry":"重試"}},"localeRemap":{"zh-CN":"zh-Hans","zh-TW":"zh-Hant","zh-HK":"zh-Hant","zh-Hant":"zh-Hant","zh-Hans":"zh-Hans","en":"en","en-US":"en","en-GB":"en","en-AU":"en","es":"es","es-ES":"es","es-MX":"es","es-AR":"es","fr":"fr","fr-FR":"fr","ja":"ja","ja-JP":"ja","ko":"ko","ko-KR":"ko","ru":"ru","ru-RU":"ru","th":"th","th-TH":"th","vi":"vi","vi-VN":"vi"}}</script>
+    <script>
+      ;(function () {
+        const data = JSON.parse(document.querySelector('#boot-splash-locales').textContent)
+        const preferred = localStorage.getItem('settings/language') || navigator.language
+        const locale = data.localeRemap[preferred] || preferred
+        const labels = data.labels[locale] || data.labels.en
+        document.querySelector('#boot-splash .boot-error span').textContent = labels.failed
+        document.querySelector('#boot-splash .boot-error button').textContent = labels.retry
+
+        setTimeout(() => {
+          if (document.querySelector('#app:empty')) {
+            const splash = document.querySelector('#boot-splash')
+            splash?.classList.add('failed')
+            splash?.setAttribute('aria-busy', 'false')
+          }
+        }, 15000)
+      })()
+    </script>
+    <noscript> This website requires JavaScript to function properly. Please enable JavaScript to continue. </noscript>
+  <script type="module" src="/_ext/static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092.js" data-cf-beacon='{"version":"2024.11.0","token":"ed701fca44b74adc91d97699098e3142","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

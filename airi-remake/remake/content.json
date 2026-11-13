@@ -1,0 +1,923 @@
+{
+  "site": "https://airi.moeru.ai/",
+  "generatedAt": "2026-11-11T01:12:58.453Z",
+  "howToSwap": "Set a slot's `swap`, then run `remake apply`. Text and attributes: the new words. Images: a path to your file. Videos: a path to an MP4, or to a photo (it becomes a slow-zoom clip). Fonts: a Google Fonts family name (e.g. \"Inter\"). Links: the new URL. Forms: the address that should receive submissions. Colours: any CSS colour. Inline SVG logos: a path to your .svg. Leave `swap` null to keep the original.",
+  "summary": {
+    "total": 43,
+    "swapped": 0,
+    "yours": 0,
+    "groups": {
+      "Copy": {
+        "slots": 8,
+        "swapped": 0,
+        "words": 31
+      },
+      "Headlines": {
+        "slots": 1,
+        "swapped": 0,
+        "words": 1
+      },
+      "Buttons & menus": {
+        "slots": 1,
+        "swapped": 0,
+        "words": 1
+      },
+      "Logos": {
+        "slots": 1,
+        "swapped": 0,
+        "words": 0
+      },
+      "Fonts": {
+        "slots": 14,
+        "swapped": 0,
+        "words": 0
+      },
+      "Colours": {
+        "slots": 10,
+        "swapped": 0,
+        "words": 0
+      },
+      "Search & sharing": {
+        "slots": 6,
+        "swapped": 0,
+        "words": 0
+      },
+      "Icons": {
+        "slots": 2,
+        "swapped": 0,
+        "words": 0
+      }
+    }
+  },
+  "slots": [
+    {
+      "id": "t-0fb28ffd",
+      "kind": "text",
+      "group": "Copy",
+      "value": "Sign in to use the official AIRI provider, or set up your own provider in Settings.",
+      "section": "drawn by script",
+      "tag": "script",
+      "where": [
+        {
+          "file": "site\\assets\\auxiliary-BxPSY3q6.js",
+          "mode": "literal",
+          "needle": "`Sign in to use the official AIRI provider, or set up your own provider in Settings.`"
+        }
+      ],
+      "flags": [
+        "their words"
+      ],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "t-dbde4a56",
+      "kind": "text",
+      "group": "Copy",
+      "value": "Sign in to start chatting",
+      "section": "drawn by script",
+      "tag": "script",
+      "where": [
+        {
+          "file": "site\\assets\\auxiliary-BxPSY3q6.js",
+          "mode": "literal",
+          "needle": "`Sign in to start chatting`"
+        }
+      ],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "t-6973971b",
+      "kind": "text",
+      "group": "Copy",
+      "value": "Open provider settings",
+      "section": "drawn by script",
+      "tag": "script",
+      "where": [
+        {
+          "file": "site\\assets\\auxiliary-BxPSY3q6.js",
+          "mode": "literal",
+          "needle": "`Open provider settings`"
+        }
+      ],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "t-ca5e631d",
+      "kind": "text",
+      "group": "Copy",
+      "value": "New chat",
+      "section": "drawn by script",
+      "tag": "script",
+      "where": [
+        {
+          "file": "site\\assets\\auxiliary-BxPSY3q6.js",
+          "mode": "literal",
+          "needle": "`New chat`"
+        }
+      ],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "t-744be623",
+      "kind": "text",
+      "group": "Copy",
+      "value": "Sign in",
+      "section": "drawn by script",
+      "tag": "script",
+      "where": [
+        {
+          "file": "site\\assets\\auxiliary-BxPSY3q6.js",
+          "mode": "literal",
+          "needle": "`Sign in`"
+        }
+      ],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "t-ae0ed984",
+      "kind": "text",
+      "group": "Copy",
+      "value": "Message",
+      "section": "drawn by script",
+      "tag": "script",
+      "where": [
+        {
+          "file": "site\\assets\\auxiliary-BxPSY3q6.js",
+          "mode": "literal",
+          "needle": "`Message`"
+        },
+        {
+          "file": "site\\assets\\context-flow-C_-8rIDs.js",
+          "mode": "literal",
+          "needle": "`Message`"
+        }
+      ],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "t-53af8357",
+      "kind": "text",
+      "group": "Copy",
+      "value": "Loading",
+      "section": "drawn by script",
+      "tag": "script",
+      "where": [
+        {
+          "file": "site\\assets\\auxiliary-BxPSY3q6.js",
+          "mode": "literal",
+          "needle": "`Loading`"
+        }
+      ],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "t-e9921375",
+      "kind": "text",
+      "group": "Copy",
+      "value": "Iru",
+      "section": "drawn by script",
+      "tag": "script",
+      "where": [
+        {
+          "file": "site\\assets\\auxiliary-BxPSY3q6.js",
+          "mode": "literal",
+          "needle": "`Iru`"
+        }
+      ],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "t-1892a89a",
+      "kind": "text",
+      "group": "Headlines",
+      "value": "AIRI",
+      "section": "page",
+      "tag": "title",
+      "where": [
+        {
+          "file": "site\\index.html",
+          "mode": "inner"
+        },
+        {
+          "file": "site\\index.html",
+          "mode": "inner"
+        }
+      ],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "t-8036af59",
+      "kind": "text",
+      "group": "Buttons & menus",
+      "value": "Retry",
+      "section": "div#boot-splash",
+      "tag": "button",
+      "where": [
+        {
+          "file": "site\\index.html",
+          "mode": "inner"
+        }
+      ],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "i-b7846202",
+      "kind": "image",
+      "group": "Logos",
+      "value": "/assets/logo-B2aCU-bH.svg",
+      "files": [
+        "/assets/logo-B2aCU-bH.svg"
+      ],
+      "width": 1500,
+      "height": 1500,
+      "alt": "",
+      "shown": true,
+      "section": "header",
+      "source": "live",
+      "where": [],
+      "flags": [
+        "their trademark"
+      ],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "i-17b34ad5",
+      "kind": "image",
+      "group": "Photos",
+      "value": "/assets/cute-streaming-room-with-pastel-decor-CcSMxsGp.avif",
+      "files": [
+        "/assets/cute-streaming-room-with-pastel-decor-CcSMxsGp.avif"
+      ],
+      "width": null,
+      "height": null,
+      "alt": "",
+      "shown": false,
+      "section": "",
+      "source": "live",
+      "where": [],
+      "flags": [
+        "their photo"
+      ],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "i-c2537b49",
+      "kind": "image",
+      "group": "Photos",
+      "value": "/assets/cozy-tea-corner-in-pastel-hues-Dj7AXgjz.avif",
+      "files": [
+        "/assets/cozy-tea-corner-in-pastel-hues-Dj7AXgjz.avif"
+      ],
+      "width": null,
+      "height": null,
+      "alt": "",
+      "shown": false,
+      "section": "",
+      "source": "live",
+      "where": [],
+      "flags": [
+        "their photo"
+      ],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "i-b8544556",
+      "kind": "image",
+      "group": "Photos",
+      "value": "/assets/onboarding-S2C4LIWw.avif",
+      "files": [
+        "/assets/onboarding-S2C4LIWw.avif"
+      ],
+      "width": null,
+      "height": null,
+      "alt": "",
+      "shown": false,
+      "section": "",
+      "source": "live",
+      "where": [],
+      "flags": [
+        "their photo"
+      ],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "i-575b714e",
+      "kind": "image",
+      "group": "Photos",
+      "value": "/open-graph.png",
+      "files": [
+        "/open-graph.png"
+      ],
+      "width": 1280,
+      "height": 640,
+      "alt": "",
+      "shown": false,
+      "section": "",
+      "source": "live",
+      "where": [],
+      "flags": [
+        "their photo"
+      ],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "ff-40a3c1a3",
+      "kind": "font",
+      "group": "Fonts",
+      "value": "Comfortaa Variable",
+      "weights": [
+        "300 700"
+      ],
+      "files": [
+        "/assets/comfortaa-cyrillic-ext-wght-normal-Bbyo-ZHz.woff2",
+        "/assets/comfortaa-cyrillic-wght-normal-D14l-6cu.woff2",
+        "/assets/comfortaa-greek-wght-normal-C_9s1t5x.woff2",
+        "/assets/comfortaa-vietnamese-wght-normal-BegpjMof.woff2",
+        "/assets/comfortaa-latin-ext-wght-normal-CYL25BRH.woff2",
+        "/assets/comfortaa-latin-wght-normal-CLB3k12Y.woff2"
+      ],
+      "license": "check: likely a paid license",
+      "where": [],
+      "flags": [
+        "paid font"
+      ],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "ff-f9da73cf",
+      "kind": "font",
+      "group": "Fonts",
+      "value": "M PLUS Rounded 1c",
+      "weights": [
+        "100",
+        "300",
+        "400",
+        "500",
+        "700",
+        "800",
+        "900"
+      ],
+      "files": [
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/cyrillic-100-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/cyrillic-300-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/cyrillic-400-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/cyrillic-500-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/cyrillic-700-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/cyrillic-800-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/cyrillic-900-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/cyrillic-ext-100-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/cyrillic-ext-300-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/cyrillic-ext-400-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/cyrillic-ext-500-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/cyrillic-ext-700-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/cyrillic-ext-800-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/cyrillic-ext-900-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/greek-100-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/greek-300-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/greek-400-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/greek-500-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/greek-700-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@5.3.0/greek-800-normal.woff2"
+      ],
+      "license": "check: likely a paid license",
+      "where": [],
+      "flags": [
+        "paid font"
+      ],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "ff-d1cc1fef",
+      "kind": "font",
+      "group": "Fonts",
+      "value": "cjkfonts AllSeto",
+      "weights": [
+        "400"
+      ],
+      "files": [
+        "/_ext/static.airi.build/proj-airi/stage-web/main/assets/cjkFonts_allseto_v1.11-ByBdljxl.ttf"
+      ],
+      "license": "check: likely a paid license",
+      "where": [],
+      "flags": [
+        "paid font"
+      ],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "ff-ef6c4c29",
+      "kind": "font",
+      "group": "Fonts",
+      "value": "DM Serif Display",
+      "weights": [
+        "400"
+      ],
+      "files": [
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/dm-serif-display@5.3.0/latin-400-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/dm-serif-display@5.3.0/latin-ext-400-normal.woff2"
+      ],
+      "license": "free (open font license)",
+      "where": [],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "ff-b5124cce",
+      "kind": "font",
+      "group": "Fonts",
+      "value": "Xiaolai SC",
+      "weights": [
+        "400"
+      ],
+      "files": [
+        "/_ext/static.airi.build/proj-airi/stage-web/main/assets/XiaolaiSC-Regular-SNWuh554.ttf"
+      ],
+      "license": "check: likely a paid license",
+      "where": [],
+      "flags": [
+        "paid font"
+      ],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "ff-155c48f5",
+      "kind": "font",
+      "group": "Fonts",
+      "value": "Maple Mono",
+      "weights": [
+        "100",
+        "200",
+        "300",
+        "400",
+        "500",
+        "600",
+        "700",
+        "800"
+      ],
+      "files": [
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-100-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-200-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-300-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-400-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-500-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-600-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-700-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-800-normal.woff2"
+      ],
+      "license": "check: likely a paid license",
+      "where": [],
+      "flags": [
+        "paid font"
+      ],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "ff-043af3ec",
+      "kind": "font",
+      "group": "Fonts",
+      "value": "Kiwi Maru",
+      "weights": [
+        "300",
+        "400",
+        "500"
+      ],
+      "files": [
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/kiwi-maru@5.3.1/japanese-300-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/kiwi-maru@5.3.1/japanese-400-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/kiwi-maru@5.3.1/japanese-500-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/kiwi-maru@5.3.1/latin-300-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/kiwi-maru@5.3.1/latin-400-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/kiwi-maru@5.3.1/latin-500-normal.woff2"
+      ],
+      "license": "check: likely a paid license",
+      "where": [],
+      "flags": [
+        "paid font"
+      ],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "ff-1cfd2ebe",
+      "kind": "font",
+      "group": "Fonts",
+      "value": "Quicksand",
+      "weights": [
+        "300 700"
+      ],
+      "files": [
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/quicksand_vf@latest/latin-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/quicksand_vf@latest/latin-ext-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/quicksand_vf@latest/vietnamese-wght-normal.woff2"
+      ],
+      "license": "check: likely a paid license",
+      "where": [],
+      "flags": [
+        "paid font"
+      ],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "ff-b3fa6055",
+      "kind": "font",
+      "group": "Fonts",
+      "value": "Comfortaa",
+      "weights": [
+        "300 700"
+      ],
+      "files": [
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/comfortaa_vf@latest/cyrillic-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/comfortaa_vf@latest/cyrillic-ext-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/comfortaa_vf@latest/greek-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/comfortaa_vf@latest/latin-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/comfortaa_vf@latest/latin-ext-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/comfortaa_vf@latest/vietnamese-wght-normal.woff2"
+      ],
+      "license": "check: likely a paid license",
+      "where": [],
+      "flags": [
+        "paid font"
+      ],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "ff-5990b1b1",
+      "kind": "font",
+      "group": "Fonts",
+      "value": "Urbanist",
+      "weights": [
+        "100 900"
+      ],
+      "files": [
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/urbanist_vf@latest/latin-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/urbanist_vf@latest/latin-ext-wght-normal.woff2"
+      ],
+      "license": "free (open font license)",
+      "where": [],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "ff-9c0caae5",
+      "kind": "font",
+      "group": "Fonts",
+      "value": "DM Sans",
+      "weights": [
+        "100 1000"
+      ],
+      "files": [
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/dm-sans_vf@latest/latin-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/dm-sans_vf@latest/latin-ext-wght-normal.woff2"
+      ],
+      "license": "free (open font license)",
+      "where": [],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "ff-452a6f8c",
+      "kind": "font",
+      "group": "Fonts",
+      "value": "Nunito",
+      "weights": [
+        "200 1000"
+      ],
+      "files": [
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/nunito_vf@latest/cyrillic-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/nunito_vf@latest/cyrillic-ext-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/nunito_vf@latest/latin-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/nunito_vf@latest/latin-ext-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/nunito_vf@latest/vietnamese-wght-normal.woff2"
+      ],
+      "license": "free (open font license)",
+      "where": [],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "ff-b6239d2d",
+      "kind": "font",
+      "group": "Fonts",
+      "value": "Jura",
+      "weights": [
+        "300 700"
+      ],
+      "files": [
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/jura_vf@latest/cyrillic-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/jura_vf@latest/cyrillic-ext-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/jura_vf@latest/greek-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/jura_vf@latest/greek-ext-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/jura_vf@latest/kayah-li-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/jura_vf@latest/latin-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/jura_vf@latest/latin-ext-wght-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/jura_vf@latest/vietnamese-wght-normal.woff2"
+      ],
+      "license": "check: likely a paid license",
+      "where": [],
+      "flags": [
+        "paid font"
+      ],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "ff-35be1f79",
+      "kind": "font",
+      "group": "Fonts",
+      "value": "Gugi",
+      "weights": [
+        "400"
+      ],
+      "files": [
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/gugi@5.3.0/korean-400-normal.woff2",
+        "/_ext/cdn.jsdelivr.net/fontsource/fonts/gugi@5.3.0/latin-400-normal.woff2"
+      ],
+      "license": "check: likely a paid license",
+      "where": [],
+      "flags": [
+        "paid font"
+      ],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "c-7e6529f6",
+      "kind": "color",
+      "group": "Colours",
+      "value": "#ffffff",
+      "uses": 44,
+      "where": [],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "c-167b94e2",
+      "kind": "color",
+      "group": "Colours",
+      "value": "#000000",
+      "uses": 12,
+      "where": [],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "c-613f011a",
+      "kind": "color",
+      "group": "Colours",
+      "value": "#171717",
+      "uses": 8,
+      "where": [],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "c-e6c6c395",
+      "kind": "color",
+      "group": "Colours",
+      "value": "#121212",
+      "uses": 7,
+      "where": [],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "c-6dcb6302",
+      "kind": "color",
+      "group": "Colours",
+      "value": "#111827",
+      "uses": 7,
+      "where": [],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "c-03e67a1f",
+      "kind": "color",
+      "group": "Colours",
+      "value": "#e5e7eb",
+      "uses": 5,
+      "where": [],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "c-c378e886",
+      "kind": "color",
+      "group": "Colours",
+      "value": "#1890ff",
+      "uses": 4,
+      "where": [],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "c-e3e4cd82",
+      "kind": "color",
+      "group": "Colours",
+      "value": "#262626",
+      "uses": 4,
+      "where": [],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "c-eb4bdb0f",
+      "kind": "color",
+      "group": "Colours",
+      "value": "#f5f5f5",
+      "uses": 4,
+      "where": [],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "c-2027bfbd",
+      "kind": "color",
+      "group": "Colours",
+      "value": "#9ca3af",
+      "uses": 4,
+      "where": [],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "a-513799c8",
+      "kind": "attr",
+      "group": "Search & sharing",
+      "attr": "meta og:description",
+      "value": "Top 1 open source attempt to create cyber companion, capable of playing Minecraft, Factorio, Balatro, etc. .",
+      "section": "head",
+      "where": [
+        {
+          "file": "site\\index.html"
+        }
+      ],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "a-111fbc3d",
+      "kind": "attr",
+      "group": "Search & sharing",
+      "attr": "meta twitter:description",
+      "value": "Top 1 open source attempt to create cyber companion, capable of playing Minecraft, Factorio, Balatro, etc. .",
+      "section": "head",
+      "where": [
+        {
+          "file": "site\\index.html"
+        }
+      ],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "a-b85faecc",
+      "kind": "attr",
+      "group": "Search & sharing",
+      "attr": "meta description",
+      "value": "Open source attempt to create cyber companion.",
+      "section": "head",
+      "where": [
+        {
+          "file": "site\\index.html"
+        }
+      ],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "a-4a44da3d",
+      "kind": "attr",
+      "group": "Search & sharing",
+      "attr": "meta og:title",
+      "value": "AIRI",
+      "section": "head",
+      "where": [
+        {
+          "file": "site\\index.html"
+        }
+      ],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "a-be25564c",
+      "kind": "attr",
+      "group": "Search & sharing",
+      "attr": "meta og:site_name",
+      "value": "AIRI",
+      "section": "head",
+      "where": [
+        {
+          "file": "site\\index.html"
+        }
+      ],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "a-f8a3a830",
+      "kind": "attr",
+      "group": "Search & sharing",
+      "attr": "meta twitter:title",
+      "value": "AIRI",
+      "section": "head",
+      "where": [
+        {
+          "file": "site\\index.html"
+        }
+      ],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "i-b980e72f",
+      "kind": "image",
+      "group": "Icons",
+      "value": "/apple-touch-icon.png",
+      "files": [
+        "/apple-touch-icon.png"
+      ],
+      "width": 180,
+      "height": 180,
+      "alt": "",
+      "shown": false,
+      "section": "",
+      "source": "live",
+      "where": [],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    },
+    {
+      "id": "i-0fa420c6",
+      "kind": "image",
+      "group": "Icons",
+      "value": "/favicon.svg",
+      "files": [
+        "/favicon.svg"
+      ],
+      "width": 1500,
+      "height": 1500,
+      "alt": "",
+      "shown": true,
+      "section": "div#boot-splash",
+      "source": "live",
+      "where": [],
+      "flags": [],
+      "swap": null,
+      "status": "original"
+    }
+  ]
+}

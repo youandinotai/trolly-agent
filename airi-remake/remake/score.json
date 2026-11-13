@@ -1,0 +1,175 @@
+{
+  "at": "2026-11-11T01:10:57.347Z",
+  "thresholds": {
+    "screen": 98,
+    "motion": 95
+  },
+  "local": "http://127.0.0.1:49447",
+  "pages": {
+    "home": {
+      "path": "/",
+      "desktop": {
+        "screens": [
+          {
+            "i": 0,
+            "y": 0,
+            "score": 100,
+            "noise": 0,
+            "diff": "remake\\score\\home-desktop-01.png"
+          }
+        ],
+        "lowest": 100,
+        "average": 100,
+        "height": {
+          "original": 900,
+          "remake": 900
+        },
+        "errors": []
+      },
+      "phone": {
+        "screens": [
+          {
+            "i": 0,
+            "y": 0,
+            "score": 100,
+            "noise": 0,
+            "diff": "remake\\score\\home-phone-01.png"
+          }
+        ],
+        "lowest": 100,
+        "average": 100,
+        "height": {
+          "original": 844,
+          "remake": 844
+        },
+        "errors": []
+      }
+    }
+  },
+  "motion": {
+    "frames": [
+      {
+        "i": 0,
+        "score": 99.73,
+        "noise": 0
+      },
+      {
+        "i": 1,
+        "score": 99.75,
+        "noise": 0
+      },
+      {
+        "i": 2,
+        "score": 99.88,
+        "noise": 0
+      },
+      {
+        "i": 3,
+        "score": 99.86,
+        "noise": 0
+      },
+      {
+        "i": 4,
+        "score": 99.69,
+        "noise": 0
+      },
+      {
+        "i": 5,
+        "score": 99.76,
+        "noise": 0
+      },
+      {
+        "i": 6,
+        "score": 99.84,
+        "noise": 0
+      },
+      {
+        "i": 7,
+        "score": 99.91,
+        "noise": 0
+      },
+      {
+        "i": 8,
+        "score": 99.88,
+        "noise": 0
+      },
+      {
+        "i": 9,
+        "score": 99.88,
+        "noise": 0
+      },
+      {
+        "i": 10,
+        "score": 99.88,
+        "noise": 0
+      },
+      {
+        "i": 11,
+        "score": 99.88,
+        "noise": 0
+      },
+      {
+        "i": 12,
+        "score": 99.88,
+        "noise": 0
+      },
+      {
+        "i": 13,
+        "score": 99.89,
+        "noise": 0
+      },
+      {
+        "i": 14,
+        "score": 99.83,
+        "noise": 0
+      },
+      {
+        "i": 15,
+        "score": 99.83,
+        "noise": 0
+      },
+      {
+        "i": 16,
+        "score": 99.94,
+        "noise": 0
+      },
+      {
+        "i": 17,
+        "score": 100,
+        "noise": 0
+      },
+      {
+        "i": 18,
+        "score": 99.99,
+        "noise": 0
+      },
+      {
+        "i": 19,
+        "score": 99.9,
+        "noise": 0
+      },
+      {
+        "i": 20,
+        "score": 99.83,
+        "noise": 0
+      },
+      {
+        "i": 21,
+        "score": 99.81,
+        "noise": 0
+      },
+      {
+        "i": 22,
+        "score": 99.81,
+        "noise": 0
+      },
+      {
+        "i": 23,
+        "score": 99.81,
+        "noise": 0
+      }
+    ],
+    "lowest": 99.69
+  },
+  "pass": true
+}
