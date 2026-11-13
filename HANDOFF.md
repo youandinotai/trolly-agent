@@ -90,6 +90,29 @@ store, frame race; deduped double-hotkey). **A re-review of the fixed batch has
 NOT yet run** — run it before treating the branch as fully reviewed:
 `git diff HEAD~N` with the requesting-code-review skill.
 
+## 2A. Required installs on Sabretooth (before Trolly runs there)
+
+1. **Comfy Desktop (ComfyUI)** — install fresh; on the RX 6800 use the DirectML
+   build (CPU fallback acceptable for smoke tests). Set
+   `--enable-cors-header "*"` in `%APPDATA%\Comfy Desktop\installations.json`
+   `launchArgs` for every instance (Trolly itself is immune — its Electron main
+   process calls Comfy — but browser-origin apps need it). Port stays 8188.
+2. **Pinokio** — install, then **Maestro** at `<pinokio>\api\maestro`
+   (`app\env-agent` for the MCP entry; 24 tools). Pinokio API 42000.
+3. **Free Claude Code** — admin on 8082 (executor lane; judged by the Claude
+   judge lane per the monorepo rules).
+4. **MCP servers (repo checkouts Trolly spawns):**
+   `comfyui-fl-mcp` (136 tools, stdio), Maestro MCP (24), `cua-driver mcp`
+   (computer-use, 57). Default registry seeds at first launch into
+   `data/mcp-servers.json` — edit paths there for the new node.
+5. **Ollama** with `OLLAMA_MODELS` on D:. Pull: `eve-cpu:latest` (JEV router),
+   `qwen2.5vl:7b` (After Dark visual safety), plus the chat model of choice.
+6. **Node LTS + native git.** MSYS git is permission-denied on these boxes —
+   use `C:\Program Files\Git\cmd\git.exe`.
+7. **Hermes** (same Nous account), `hermes serve --host 0.0.0.0 --port 9119` +
+   firewall rule, then OmniRoute 20128 public + firewall (currently drops all
+   ports from .40).
+
 ## 2. What DEFINITELY still needs fixing (DEF list)
 
 1. **Re-review + push gate.** Rerun the independent fail-closed review on the
@@ -101,10 +124,22 @@ NOT yet run** — run it before treating the branch as fully reviewed:
 3. **Approved-asset Clean library.** Today Clean hides ALL unreviewed media.
    Next: per-asset `safe/unsafe/unknown` approval store so known-safe images can
    show in Clean without unlocking Adult (see research report §"labels").
-4. **Wardrobe quality.** Parametric primitives work and canvas-verified, but they
-   are NOT real cloth: authored SkinnedMesh garments + versioned mesh manifests
-   per VRM version are the real fix (see report §Wardrobe). T-pose is fixed
-   visually on AvatarSample_K (VRM 1.0); regression-test against a VRM 0.x model.
+4. **Wardrobe quality — user-confirmed visual bugs (2026-11-12 screenshot).**
+   In Studio Adult mode the fit is visibly wrong and must NOT ship as-is:
+   bikini cups render beside/armpit-adjacent to the torso instead of centered
+   on the chest; the "Midnight cap" reads as a tall top hat (crown height
+   wrong); the base body stays partially exposed around the primitives; and the
+   flat-shaded parametric pieces clash with the model's toon shading (no
+   material/lighting match). Root causes are known: hardcoded proportional
+   offsets per bone, no authored skinning, and primitives instead of real
+   cloth. Fix = authored SkinnedMesh garments + versioned mesh manifests per
+   VRM version (see report §Wardrobe). T-pose is fixed visually on
+   AvatarSample_K (VRM 1.0); regression-test against a VRM 0.x model.
+4b. **Dangling garment references.** Live `studio.json` showed actor
+   `garmentIds` pointing at deleted garment records (stale UUIDs from earlier
+   upload cycles). Add pruning on `read()`/`loadActor` (drop ids with no
+   matching garment) so the Dressing Room count and `applyLook` never chase
+   ghosts.
 5. **Live voice calls.** Not built: mic → chat → animated TTS with mute,
    interrupt, end-call. Build only after P0/P1 above.
 6. **Comfy Desktop state.** Currently OFFLINE on Alienware; start it for Artistry.
