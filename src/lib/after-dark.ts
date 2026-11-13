@@ -42,9 +42,10 @@ const AFTER_DARK_DEFAULTS = {
 };
 
 /** The renderer cannot unlock this on its own; the Electron main process calls it too. */
-export function assertAfterDarkAllowed(prefs: AfterDarkPreferences): void {
+export function assertAfterDarkAllowed(prefs: AfterDarkPreferences, currentSessionAdult = false): void {
   if (!prefs?.ageVerified) throw new Error('Complete the age check in Mind before using After Dark.');
   if (!prefs.adultContent) throw new Error('Enable adult content in Mind before using After Dark.');
+  if (!currentSessionAdult) throw new Error('Adult content is not unlocked in the current session.');
 }
 
 /** Fixed product boundaries, independent of model or user prompt. */

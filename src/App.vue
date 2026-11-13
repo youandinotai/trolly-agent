@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import StageView from './views/StageView.vue';
 import McpView from './views/McpView.vue';
 import ProvidersView from './views/ProvidersView.vue';
 import ArtistryView from './views/ArtistryView.vue';
 import MindView from './views/MindView.vue';
-import { appMode, loadMode, setAdultMode } from './lib/mode';
+import StudioView from './views/StudioView.vue';
+import { appMode, applyModeState, loadMode, setAdultMode } from './lib/mode';
 
-type ViewId = 'stage' | 'mcp' | 'providers' | 'artistry' | 'mind';
+type ViewId = 'stage' | 'mcp' | 'providers' | 'artistry' | 'studio' | 'mind';
 
 const view = ref<ViewId>('stage');
 
@@ -17,18 +18,26 @@ const NAV: { id: ViewId; label: string }[] = [
   { id: 'mcp', label: 'Tools (MCP)' },
   { id: 'providers', label: 'Providers' },
   { id: 'artistry', label: 'Artistry' },
+  { id: 'studio', label: 'Studio' },
   { id: 'mind', label: 'Mind' },
 ];
 
 const ollamaOnline = ref(false);
 const modelCount = ref(0);
 const comfyOnline = ref(false);
+const hermesOnline = ref(false);
 const mcpConnected = ref(0);
 const mcpTotal = ref(0);
 const dataDir = ref('');
 const modeBusy = ref(false);
 
 /** Toggle the global content mode. The age gate lives in the Mind store. */
+function onCleanHotkey(event: KeyboardEvent) {
+  if (!event.ctrlKey || !event.altKey || event.code !== 'KeyC') return;
+  event.preventDefault();
+  void setAdultMode(false);
+}
+
 async function toggleAdult() {
   if (modeBusy.value) return;
   modeBusy.value = true;
@@ -55,6 +64,12 @@ async function refreshHealth() {
     comfyOnline.value = false;
   }
   try {
+    const status = await window.trolly.hermes.status();
+    hermesOnline.value = !!status.online;
+  } catch {
+    hermesOnline.value = false;
+  }
+  try {
     const servers = await window.trolly.mcp.list();
     mcpTotal.value = servers.length;
     mcpConnected.value = servers.filter((s: any) => s.status === 'connected').length;
@@ -67,6 +82,8 @@ onMounted(async () => {
   const paths = await window.trolly.paths();
   dataDir.value = paths.dataDir;
   await loadMode();
+  window.trolly.mode.onChanged(applyModeState);
+  window.addEventListener('keydown', onCleanHotkey);
   await refreshHealth();
   window.trolly.mcp.onChanged(() => refreshHealth());
   setInterval(refreshHealth, 8000);
@@ -115,6 +132,10 @@ onMounted(async () => {
           <span class="led" />
           ComfyUI {{ comfyOnline ? 'ready' : 'offline' }}
         </span>
+        <span class="chip" :class="hermesOnline ? 'online' : ''" title="Optional Hermes ethics and QA reviewer">
+          <span class="led" />
+          Hermes {{ hermesOnline ? 'review' : 'offline' }}
+        </span>
         <span class="chip" :class="mcpConnected ? 'online' : ''">
           <span class="led" />
           MCP {{ mcpConnected }}/{{ mcpTotal }}
@@ -124,7 +145,7 @@ onMounted(async () => {
           <button
             class="mode-btn"
             :class="{ active: !appMode.adult }"
-            @click="appMode.adult && toggleAdult()"
+            @click="setAdultMode(false)"
           >
             Clean
           </button>
@@ -154,10 +175,15 @@ onMounted(async () => {
         </button>
       </header>
 
+      <section v-if="!appMode.adult" class="clean-status" role="status">
+        <strong>Clean visual protection</strong>
+        <span>Agent, chat, tools, and tasks stay available · instant hotkey Ctrl+Alt+C</span>
+      </section>
       <StageView v-show="view === 'stage'" @navigate="view = $event" />
       <McpView v-show="view === 'mcp'" />
       <ProvidersView v-show="view === 'providers'" />
       <ArtistryView v-show="view === 'artistry'" />
+      <StudioView v-show="view === 'studio'" />
       <MindView v-show="view === 'mind'" />
     </main>
   </div>

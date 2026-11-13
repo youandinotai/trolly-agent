@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import AfterDarkPanel from '../components/AfterDarkPanel.vue';
+import SafeMedia from '../components/SafeMedia.vue';
 import { appMode } from '../lib/mode';
 
 const status = ref<{ online: boolean; comfyuiVersion?: string; device?: string; vramTotal?: number; vramFree?: number; error?: string }>(
@@ -37,6 +38,7 @@ const duration = ref(2);
  * wants 8 steps at square resolution, the LTX video model wants 4 steps.
  */
 function setMode(next: 'video' | 'image' | 'after-dark') {
+  if (next === 'after-dark' && !appMode.adult) return;
   mode.value = next;
   if (next === 'after-dark') return;
   if (next === 'image') {
@@ -70,6 +72,9 @@ onMounted(() => {
   refresh();
 });
 onBeforeUnmount(() => window.removeEventListener('trolly:task-route', onTaskRoute));
+watch(() => appMode.adult, (adult) => {
+  if (!adult && mode.value === 'after-dark') setMode('image');
+});
 
 /**
  * Per-model presets. Each backend wants different numbers: SDXL checkpoints
@@ -267,20 +272,13 @@ async function generate() {
       </button>
 
       <div v-if="result" style="margin-top: 14px">
-        <video
-          v-if="status.online && !result.startsWith('error') && result.endsWith('.mp4')"
+        <SafeMedia
+          v-if="!result.startsWith('error')"
           :src="result"
-          controls
-          autoplay
-          loop
-          muted
-          style="max-width: 100%; border-radius: var(--radius); border: 1px solid var(--line)"
-        />
-        <img
-          v-else-if="status.online && !result.startsWith('error')"
-          :src="result"
+          :kind="result.endsWith('.mp4') ? 'video' : 'image'"
           alt="Generated artwork"
-          style="max-width: 100%; border-radius: var(--radius); border: 1px solid var(--line)"
+          :autoplay="result.endsWith('.mp4')"
+          :loop="result.endsWith('.mp4')"
         />
         <div class="scroll-box">{{ resultFile || result }}</div>
       </div>
@@ -295,14 +293,13 @@ async function generate() {
             :title="item.filename"
             @click="result = item.url"
           >
-            <video
-              v-if="item.filename.endsWith('.mp4')"
+            <SafeMedia
+              class="library-media"
               :src="item.url"
-              muted
-              loop
-              autoplay
+              :kind="item.filename.endsWith('.mp4') ? 'video' : 'image'"
+              :alt="item.filename"
+              :controls="false"
             />
-            <img v-else :src="item.url" :alt="item.filename" />
             <span class="lib-name">{{ item.filename }}</span>
           </button>
         </div>
@@ -345,6 +342,11 @@ async function generate() {
   object-fit: cover;
   display: block;
 }
+.lib-item .library-media { aspect-ratio: 1; min-height: 0; border-radius: 0; }
+.lib-item .library-media :deep(.safe-media-content) { height: 100%; object-fit: cover; border-radius: 0; }
+.lib-item .library-media :deep(.safe-media-cover) { padding: 7px; gap: 3px; }
+.lib-item .library-media :deep(.safe-media-cover small) { display: none; }
+.lib-item .library-media :deep(.safe-media-cover span) { font-size: 8px; }
 .lib-name {
   padding: 4px 6px;
   font-size: 10px;

@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue';
+import { nextTick, onMounted, ref } from 'vue';
 
+import AvatarStage from '../components/AvatarStage.vue';
+import SafeMedia from '../components/SafeMedia.vue';
 import type { OllamaModel } from '../env';
 import { appMode, loadMode, systemPrompt } from '../lib/mode';
+import { DEFAULT_VOICE, type SpeechVoice } from '../lib/voices';
 
 const emit = defineEmits<{ (e: 'navigate', view: 'mcp' | 'providers' | 'artistry'): void }>();
 
@@ -25,9 +28,11 @@ const busy = ref(false);
 
 /* Speech: offline SAPI synthesis for replies. */
 const voiceEnabled = ref(false);
-const voices = ref<{ name: string; culture: string }[]>([]);
-const voiceName = ref('');
+const voices = ref<SpeechVoice[]>([]);
+const voiceName = ref(DEFAULT_VOICE);
+const speechStatus = ref('Natural voices · first use downloads once');
 const speaking = ref(false);
+const avatarStage = ref<InstanceType<typeof AvatarStage> | null>(null);
 
 /* Vision: attach an image to the next message. */
 const attachment = ref<{ name: string; dataUrl: string; base64: string } | null>(null);
@@ -85,7 +90,7 @@ async function loadModels() {
 async function loadVoices() {
   try {
     voices.value = await window.trolly.speech.voices();
-    if (!voiceName.value && voices.value.length) voiceName.value = voices.value[0].name;
+    if (!voices.value.some((voice) => voice.id === voiceName.value)) voiceName.value = DEFAULT_VOICE;
   } catch {
     voices.value = [];
   }
@@ -95,15 +100,33 @@ async function loadVoices() {
 async function speakLatest() {
   const last = [...messages.value].reverse().find((m) => m.role === 'assistant');
   if (!last || speaking.value) return;
+  await speakText(last.text);
+}
+
+async function previewVoice() {
+  if (speaking.value) return;
+  const voice = voices.value.find((item) => item.id === voiceName.value);
+  await speakText(`Hi, I'm ${voice?.name ?? 'Heart'}. This is my natural voice.`);
+}
+
+async function speakText(text: string) {
+  const startedAdult = appMode.adult;
   speaking.value = true;
+  speechStatus.value = 'Preparing natural voice…';
   try {
-    await window.trolly.speech.speak({ text: last.text, voice: voiceName.value || undefined });
+    const result = await window.trolly.speech.speak({ text, voice: voiceName.value || undefined });
+    if (!result.audioBase64) throw new Error('speech engine returned no playable audio');
+    if (startedAdult && !appMode.adult) {
+      speechStatus.value = 'Speech stopped by Clean mode';
+      return;
+    }
+    speechStatus.value = `Playing ${result.voice} · local Kokoro`;
+    if (!avatarStage.value) throw new Error('avatar stage is not ready');
+    await avatarStage.value.playSpeech(result.audioBase64, text);
+    speechStatus.value = 'Natural voices ready';
   } catch (err: any) {
-    messages.value.push({
-      role: 'tool',
-      name: 'speech',
-      text: `voice failed: ${err?.message ?? err}`,
-    });
+    speechStatus.value = 'Voice failed';
+    messages.value.push({ role: 'tool', name: 'speech', text: `voice failed: ${err?.message ?? err}` });
   } finally {
     speaking.value = false;
   }
@@ -282,6 +305,7 @@ onMounted(async () => {
   await loadModels();
   await syncPersona();
   await loadVoices();
+  window.trolly.speech.onStatus((status) => { speechStatus.value = status.message; });
   await loadToolButtons();
   window.trolly.mcp.onChanged(() => loadToolButtons());
 });
@@ -289,21 +313,8 @@ onMounted(async () => {
 
 <template>
   <div class="view" style="padding: 0; overflow: hidden">
-    <div class="stage">
-      <section class="stage-visual">
-        <div class="stage-canvas">
-          <div class="avatar">
-            <span class="avatar-label">TRO</span>
-          </div>
-        </div>
-        <div class="stage-meta">
-          <div class="stage-name">Trolly</div>
-          <div class="stage-persona">
-            Your local companion. Runs on Ollama at <code>127.0.0.1:11434</code>; reaches ComfyUI and
-            the MCP tool servers on this machine.
-          </div>
-        </div>
-      </section>
+  <div class="stage">
+    <AvatarStage ref="avatarStage" :adult="appMode.adult" @speaking-change="speaking = $event" />
 
       <section class="chat">
         <div class="chat-log" ref="logEl">
@@ -321,8 +332,8 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div style="padding: 0 12px 10px" v-if="toolButtons.length">
-          <div style="display: flex; gap: 6px; flex-wrap: wrap">
+        <div class="stage-tool-actions" v-if="toolButtons.length">
+          <div class="stage-tool-actions-inner">
             <button
               v-for="t in toolButtons"
               :key="t.server + t.name"
@@ -335,7 +346,7 @@ onMounted(async () => {
         </div>
 
         <div v-if="attachment" class="attach-chip">
-          <img :src="attachment.dataUrl" alt="" />
+          <SafeMedia class="attach-preview" :src="attachment.dataUrl" kind="image" alt="Attached image" />
           <span>{{ attachment.name }}</span>
           <button class="btn sm" @click="attachment = null">Remove</button>
         </div>
@@ -374,16 +385,15 @@ onMounted(async () => {
           </button>
         </div>
 
-        <div v-if="voices.length" class="row" style="margin-top: 8px; gap: 8px">
+        <div v-if="voices.length" class="row voice-bar">
           <label class="hint">Voice</label>
-          <select
-            v-model="voiceName"
-            style="background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--text); padding: 2px 8px; font-size: 12px"
-          >
-            <option v-for="v in voices" :key="v.name" :value="v.name">
-              {{ v.name }} ({{ v.culture }})
+          <select v-model="voiceName" class="voice-select">
+            <option v-for="v in voices" :key="v.id" :value="v.id">
+              {{ v.name }} · {{ v.culture }} — {{ v.description }}
             </option>
           </select>
+          <button class="voice-preview" :disabled="speaking" @click="previewVoice">{{ speaking ? 'Speaking…' : 'Preview' }}</button>
+          <span class="hint voice-status">{{ speechStatus }}</span>
         </div>
 
         <input ref="fileInput" type="file" accept="image/*" hidden @change="onImagePicked" />
@@ -391,3 +401,14 @@ onMounted(async () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.voice-bar { margin-top: 8px; flex-wrap: wrap; gap: 8px; }
+.voice-select { flex: 1; min-width: 180px; background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--text); padding: 5px 8px; font-size: 12px; }
+.voice-preview { padding: 5px 10px; border: 1px solid var(--accent-dim); border-radius: 6px; color: var(--accent); font-size: 12px; }
+.voice-status { flex-basis: 100%; }
+.attach-preview { width: 44px; min-height: 44px; flex: none; }
+.attach-preview :deep(.safe-media-cover) { padding: 3px; }
+.attach-preview :deep(.safe-media-cover strong) { font-size: 8px; }
+.attach-preview :deep(.safe-media-cover span), .attach-preview :deep(.safe-media-cover small) { display: none; }
+</style>

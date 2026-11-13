@@ -36,9 +36,11 @@ The skeleton everything else sits on.
 
 ---
 
-## Phase 2 — The avatar
+## Phase 2 — The avatar — in progress
 
-*The character needs a body.*
+*The character needs a body.* The VRM renderer, expressions, lip sync, idle
+motion, Studio persistence, and wardrobe primitives are implemented. Visual
+fit, clothing quality, and natural posing remain an active verification lane.
 
 - **3D VTuber** — VRM models via `three-vrm`, running in the renderer.
   Open format, no licence lock-in, and the engine renders an exported VRM
@@ -61,13 +63,14 @@ The skeleton everything else sits on.
 
 *The agent behaves differently depending on what you are doing.*
 
-### Clean / NSFW toggle ✅ built, promoting to first-class
+### Clean / Adult toggle ✅ built as shared presentation states
 
-Already in `Mind → Preferences` and age-gated: the switch refuses to open
-until a year of birth and an explicit adult confirmation. The next step is to
-promote it to a visible, global control in the shell, and to make it drive
-every surface at once — persona, chat, and the media studio — instead of only
-the chat system prompt.
+The global control now protects every visual surface without disabling the
+agent. Clean installs a safe avatar outfit, removes unreviewed media elements,
+stops adult speech playback, and suppresses late adult results through an
+Electron-main session epoch. Clean is restored on launch and renderer reload.
+The next visual-safety step is an approved-asset library, so known-safe media
+can be shown without opening the entire Adult presentation.
 
 Fixed limits that no toggle can switch off: legal adults only, consensual
 adults only, no gore, everything stays local.

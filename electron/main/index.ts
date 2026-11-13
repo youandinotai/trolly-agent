@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell, Tray, Menu, nativeImage } from 'electron';
+import { app, BrowserView, BrowserWindow, globalShortcut, ipcMain, shell, Tray, Menu, nativeImage } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -9,9 +9,12 @@ import { ComfyClient } from './comfy.js';
 import { AfterDarkClient } from './after-dark.js';
 import { AfterDarkSafetyInspector } from './after-dark-safety.js';
 import { JevTaskRouter } from './task-router.js';
+import { StudioStore } from './studio.js';
+import { HermesReviewer } from './hermes-review.js';
 import { SpeechClient } from './speech.js';
 import { MindStore } from './mind.js';
-import { assertAfterDarkAllowed, resolveAfterDarkOutputDir } from '../../src/lib/after-dark.js';
+import { resolveAfterDarkOutputDir } from '../../src/lib/after-dark.js';
+import { SessionMode, type SessionModeSnapshot } from '../../src/lib/session-mode.js';
 
 const __dirname_ = path.dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = path.resolve(__dirname_, '..', '..', '..');
@@ -31,8 +34,78 @@ const afterDark = new AfterDarkClient(
   resolveAfterDarkOutputDir(process.env, APP_ROOT),
   new AfterDarkSafetyInspector('http://127.0.0.1:11434', process.env.TROLLY_SAFETY_VISION_MODEL || 'qwen2.5vl:7b'),
 );
-const speech = new SpeechClient(DATA_DIR);
+const speech = new SpeechClient(DATA_DIR, (status) => {
+  mainWindow?.webContents.send('trolly:speech:status', status);
+});
 const mind = new MindStore(DATA_DIR);
+const contentMode = new SessionMode();
+contentMode.restore(mind.readPreferences());
+const studio = new StudioStore(process.env.TROLLY_STUDIO_DIR || 'D:/Grindroid/trolly-agent/studio');
+const hermes = new HermesReviewer(process.env.TROLLY_HERMES_URL || 'http://127.0.0.1:8645');
+
+function publishMode(state: SessionModeSnapshot = contentMode.snapshot()): void {
+  mainWindow?.webContents.send('trolly:mode:changed', state);
+}
+
+/** Opaque native cover: up before any renderer work, down only after the
+ * renderer acknowledges the safe presentation is on screen. */
+let cleanShield: BrowserView | null = null;
+let lastCleanAt = 0;
+
+function showCleanShield(): void {
+  if (!mainWindow || cleanShield) return;
+  cleanShield = new BrowserView({
+    webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false },
+  });
+  mainWindow.addBrowserView(cleanShield);
+  const [width, height] = mainWindow.getContentSize();
+  cleanShield.setBounds({ x: 0, y: 0, width, height });
+  cleanShield.setAutoResize({ width: true, height: true });
+  cleanShield.setBackgroundColor('#142027');
+  const html = `<!doctype html><html><body style="margin:0;background:#142027;color:#c5f3ec;font:600 16px system-ui;display:flex;align-items:center;justify-content:center;height:100vh;user-select:none"><div style="text-align:center"><div style="font-size:22px;margin-bottom:8px">Clean protection</div><div style="font-weight:400;font-size:13px;color:#8fbab8">Visuals are secured. The workspace returns in a moment.</div></div></body></html>`;
+  void cleanShield.webContents.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`).catch(() => {});
+}
+
+function hideCleanShield(): void {
+  if (!mainWindow || !cleanShield) return;
+  try {
+    mainWindow.removeBrowserView(cleanShield);
+    cleanShield.webContents.close();
+  } catch { /* window may already be gone */ }
+  cleanShield = null;
+}
+
+/** Clean is fail-closed: in-memory protection applies even if preference
+ * persistence fails. Adult is deliberate: persistence must succeed first. */
+function setSessionAdult(enabled: boolean): SessionModeSnapshot {
+  if (enabled) {
+    const prefs = mind.setAdultContent(true);
+    const state = contentMode.unlock(prefs);
+    hideCleanShield();
+    mainWindow?.webContents.setAudioMuted(false);
+    publishMode(state);
+    return state;
+  }
+  return cleanNow();
+}
+
+function cleanNow(): SessionModeSnapshot {
+  // Dedupe the renderer keydown and Electron globalShortcut firing together.
+  const now = Date.now();
+  if (now - lastCleanAt < 400 && cleanShield) return contentMode.snapshot();
+  lastCleanAt = now;
+  mainWindow?.webContents.setAudioMuted(true);
+  showCleanShield();
+  let prefs = mind.readPreferences();
+  try {
+    prefs = mind.setAdultContent(false);
+  } catch (error) {
+    console.warn('Clean mode applied but the preference could not be persisted:', error);
+  }
+  const state = contentMode.clean(prefs);
+  publishMode(state);
+  return state;
+}
 
 function ensureDataDir() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -69,6 +142,10 @@ function createWindow() {
     mainWindow?.focus();
   });
 
+  mainWindow.webContents.on('did-start-navigation', (_event, _url, _isInPlace, isMainFrame) => {
+    if (isMainFrame) cleanNow();
+  });
+
   const devUrl = process.env.TROLLY_DEV_URL;
   if (devUrl) {
     mainWindow.loadURL(devUrl);
@@ -96,6 +173,7 @@ function createTray() {
   tray.setContextMenu(
     Menu.buildFromTemplate([
       { label: 'Show Trolly Agent', click: () => mainWindow?.show() },
+      { label: 'Clean now · Ctrl+Alt+C', click: () => cleanNow() },
       { type: 'separator' },
       { label: 'Quit', click: () => app.quit() },
     ]),
@@ -116,8 +194,9 @@ function registerIpc() {
   ipcMain.handle('trolly:comfy:inventory', async () => comfy.inventory());
   ipcMain.handle('trolly:comfy:outputs', async (_e, limit) => comfy.outputs(limit));
   ipcMain.handle('trolly:comfy:after-dark', async (_e, payload) => {
-    assertAfterDarkAllowed(mind.readPreferences());
-    return afterDark.generate(payload);
+    const ticket = contentMode.beginAdultWork(mind.readPreferences());
+    const rendered = await afterDark.generate(payload);
+    return contentMode.finishAdultWork(ticket, rendered);
   });
 
   ipcMain.handle('trolly:mcp:list', async () => supervisor?.listServers() ?? []);
@@ -136,9 +215,35 @@ function registerIpc() {
   ipcMain.handle('trolly:mind:recipe:delete', async (_e, id: string) => mind.deleteRecipe(id));
   ipcMain.handle('trolly:mind:prefs:read', async () => mind.readPreferences());
   ipcMain.handle('trolly:mind:prefs:verify', async (_e, birthYear: number) => mind.verifyAge(birthYear));
-  ipcMain.handle('trolly:mind:prefs:adult', async (_e, enabled: boolean) => mind.setAdultContent(enabled));
-  ipcMain.handle('trolly:mind:prefs:reset', async () => mind.resetVerification());
+  ipcMain.handle('trolly:mind:prefs:adult', async (_e, enabled: boolean) => {
+    setSessionAdult(enabled);
+    return mind.readPreferences();
+  });
+  ipcMain.handle('trolly:mind:prefs:reset', async () => {
+    const prefs = mind.resetVerification();
+    publishMode(contentMode.clean(prefs));
+    return prefs;
+  });
+  ipcMain.handle('trolly:mode:state', async () => contentMode.snapshot());
+  ipcMain.handle('trolly:mode:adult', async (_e, enabled: boolean) => setSessionAdult(enabled));
+  ipcMain.handle('trolly:mode:clean', async () => cleanNow());
+  ipcMain.handle('trolly:mode:clean-ack', async (_e, epoch: number) => {
+    const state = contentMode.snapshot();
+    if (!state.adult && epoch === state.epoch) {
+      hideCleanShield();
+      mainWindow?.webContents.setAudioMuted(false);
+    }
+    return contentMode.snapshot();
+  });
   ipcMain.handle('trolly:paths', async () => ({ dataDir: DATA_DIR, appRoot: APP_ROOT }));
+  ipcMain.handle('trolly:studio:read', async () => studio.read());
+  ipcMain.handle('trolly:studio:garment:save', async (_e, payload) => studio.saveGarment(payload));
+  ipcMain.handle('trolly:studio:actor:save', async (_e, payload) => studio.saveActor(payload));
+  ipcMain.handle('trolly:studio:scene:save', async (_e, payload) => studio.saveScene(payload));
+  ipcMain.handle('trolly:studio:asset:upload', async (_e, payload) => studio.uploadAsset(payload));
+  ipcMain.handle('trolly:studio:asset:read', async (_e, filePath: string) => studio.readAsset(filePath));
+  ipcMain.handle('trolly:hermes:status', async () => hermes.status());
+  ipcMain.handle('trolly:hermes:review', async (_e, packet) => hermes.review(packet));
 }
 
 app.whenReady().then(async () => {
@@ -161,6 +266,9 @@ app.whenReady().then(async () => {
 
   createWindow();
   createTray();
+  if (!globalShortcut.register('Control+Alt+C', cleanNow)) {
+    console.warn('Clean hotkey Ctrl+Alt+C could not be registered; the top-bar and tray controls remain available.');
+  }
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -172,5 +280,6 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', async () => {
+  globalShortcut.unregisterAll();
   await supervisor?.shutdown();
 });

@@ -61,7 +61,7 @@ async function generate() {
   error.value = '';
   result.value = null;
   try {
-    const out = await window.trolly.comfy.generateAfterDark({
+    const completion = await window.trolly.comfy.generateAfterDark({
       positive: positive.value,
       negative: negative.value,
       reference: { name: reference.value.name, dataBase64: reference.value.dataBase64 },
@@ -75,7 +75,12 @@ async function generate() {
       sampler: 'dpmpp_2m_sde',
       scheduler: 'karras',
     });
-    result.value = out;
+    if (completion.kind === 'suppressed' || !appMode.adult) {
+      result.value = null;
+      error.value = 'Clean mode protected the display. The private render finished without returning pixels to this view.';
+    } else {
+      result.value = completion.result;
+    }
   } catch (err: any) {
     error.value = String(err?.message ?? err).replace(/^Error invoking remote method '[^']+': Error: /, '');
   } finally {
@@ -162,7 +167,7 @@ onMounted(chooseDefaultModel);
     </template>
 
     <p v-if="error" class="after-dark-error" role="alert">{{ error }}</p>
-    <div v-if="result" class="after-dark-result">
+    <div v-if="result && appMode.adult" class="after-dark-result">
       <img :src="result.url" alt="Locally generated After Dark artwork" />
       <div class="result-path">
         <strong>Saved outside every repository</strong>

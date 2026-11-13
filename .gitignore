@@ -4,3 +4,5 @@ data/
 .tmp/
 rea/
 *.log
+scripts/__pycache__/
+research_notes/

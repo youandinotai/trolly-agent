@@ -1,35 +1,32 @@
 import { reactive } from 'vue';
 
-import type { Preferences } from '../env';
+import type { SessionModeState } from '../env';
 
-/**
- * Global app modes.
- *
- * `adult` is a content preference and is only ever true when the age check
- * has been passed. It is read from the Mind store on launch and written back
- * through the same gate, so no surface can enable it on its own.
- *
- * `brainstorming` is a thinking mode, not a content mode: it changes how the
- * agent reasons, not what it will or will not discuss.
- */
+/** Shared agent modes. Visual safety never disables chat, tools, or navigation. */
 export const appMode = reactive({
-  /** Adult content allowed. Requires age verification. */
   adult: false,
-  /** Whether the age check has been passed at all. */
   ageVerified: false,
-  /** Brainstorming always: offer options, challenge the brief, give a next step. */
   brainstorming: true,
-  /** Persona currently in force, so every surface agrees. */
   persona: '',
-  /** Whether the adult gate is currently refusing changes. */
   gateError: '',
 });
 
+export function applyModeState(state: SessionModeState): void {
+  appMode.adult = state.adult === true;
+  appMode.ageVerified = state.ageVerified === true;
+  appMode.gateError = '';
+  window.dispatchEvent(new CustomEvent('trolly:mode-visuals', { detail: state }));
+  // Lift the native shield only after two painted frames of the safe view.
+  if (!state.adult) {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      void window.trolly.mode.acknowledgeClean(state.epoch);
+    }));
+  }
+}
+
 export async function loadMode(): Promise<void> {
   try {
-    const prefs: Preferences = await window.trolly.mind.readPrefs();
-    appMode.adult = prefs.adultContent === true && prefs.ageVerified === true;
-    appMode.ageVerified = prefs.ageVerified === true;
+    applyModeState(await window.trolly.mode.state());
   } catch {
     appMode.adult = false;
     appMode.ageVerified = false;
@@ -42,20 +39,21 @@ export async function loadMode(): Promise<void> {
   }
 }
 
-/**
- * Turn adult content on or off. The store refuses when the age check has not
- * been passed, and the refusal is surfaced rather than silently ignored.
- */
+/** Clean is immediate; Adult is a deliberate unlock validated by Electron main. */
 export async function setAdultMode(on: boolean): Promise<boolean> {
   appMode.gateError = '';
-  try {
-    const prefs = await window.trolly.mind.setAdultContent(on);
-    appMode.adult = prefs.adultContent === true && prefs.ageVerified === true;
-    appMode.ageVerified = prefs.ageVerified === true;
-    return appMode.adult;
-  } catch (err: any) {
-    appMode.gateError = String(err?.message ?? err);
+  if (!on) {
     appMode.adult = false;
+    window.dispatchEvent(new Event('trolly:clean-start'));
+  }
+  try {
+    const state = await window.trolly.mode.setAdult(on);
+    applyModeState(state);
+    return state.adult;
+  } catch (err: any) {
+    appMode.adult = false;
+    appMode.gateError = String(err?.message ?? err);
+    window.dispatchEvent(new Event('trolly:clean-start'));
     return false;
   }
 }

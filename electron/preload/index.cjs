@@ -27,6 +27,11 @@ contextBridge.exposeInMainWorld('trolly', {
   speech: {
     voices: () => ipcRenderer.invoke('trolly:speech:voices'),
     speak: (payload) => ipcRenderer.invoke('trolly:speech:speak', payload),
+    onStatus: (cb) => {
+      const listener = (_e, status) => cb(status);
+      ipcRenderer.on('trolly:speech:status', listener);
+      return () => ipcRenderer.removeListener('trolly:speech:status', listener);
+    },
   },
   comfy: {
     status: () => ipcRenderer.invoke('trolly:comfy:status'),
@@ -45,6 +50,29 @@ contextBridge.exposeInMainWorld('trolly', {
       const listener = (_e, servers) => cb(servers);
       ipcRenderer.on('trolly:mcp:changed', listener);
       return () => ipcRenderer.removeListener('trolly:mcp:changed', listener);
+    },
+  },
+  studio: {
+    read: () => ipcRenderer.invoke('trolly:studio:read'),
+    saveGarment: (payload) => ipcRenderer.invoke('trolly:studio:garment:save', payload),
+    saveActor: (payload) => ipcRenderer.invoke('trolly:studio:actor:save', payload),
+    saveScene: (payload) => ipcRenderer.invoke('trolly:studio:scene:save', payload),
+    uploadAsset: (payload) => ipcRenderer.invoke('trolly:studio:asset:upload', payload),
+    readAsset: (filePath) => ipcRenderer.invoke('trolly:studio:asset:read', filePath),
+  },
+  hermes: {
+    status: () => ipcRenderer.invoke('trolly:hermes:status'),
+    review: (packet) => ipcRenderer.invoke('trolly:hermes:review', packet),
+  },
+  mode: {
+    state: () => ipcRenderer.invoke('trolly:mode:state'),
+    setAdult: (enabled) => ipcRenderer.invoke('trolly:mode:adult', enabled),
+    clean: () => ipcRenderer.invoke('trolly:mode:clean'),
+    acknowledgeClean: (epoch) => ipcRenderer.invoke('trolly:mode:clean-ack', epoch),
+    onChanged: (cb) => {
+      const listener = (_e, state) => cb(state);
+      ipcRenderer.on('trolly:mode:changed', listener);
+      return () => ipcRenderer.removeListener('trolly:mode:changed', listener);
     },
   },
   paths: () => ipcRenderer.invoke('trolly:paths'),

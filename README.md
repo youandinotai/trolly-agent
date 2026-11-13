@@ -111,6 +111,28 @@ These limits are fixed and cannot be toggled off:
 The preference only changes how *directly* the agent answers. It never widens
 those limits.
 
+### Instant Clean visual protection
+
+Clean and Adult share one agent, chat history, task router, and tool runtime.
+They are presentation states, not separate applications.
+
+- Clean is the default at launch and after a full renderer reload. A saved adult
+  preference never restores adult visuals by itself.
+- The avatar's private outfit is hidden and replaced by a modest dress and shoes.
+  An opaque cover remains if that safe presentation cannot be prepared.
+- Unreviewed images, videos, scene artwork, attachments, and After Dark references
+  are not mounted in Clean. Generation and agent tasks can continue behind the
+  cover.
+- Clean stops current avatar speech and invalidates pending adult visual results.
+  Electron main returns only `{ kind: "suppressed" }` for an adult render that
+  finishes after Clean—no pixels, URL, or file path cross back into the view.
+- `Ctrl+Alt+C` activates Clean while the app is focused; Electron also registers it
+  as a global shortcut, and the tray has **Clean now**.
+
+With the app running on CDP `:48702`, `npm run verify:safe-mode` checks the real
+UI end-to-end. The other verification commands cover Clean generation, a late
+adult render, and the normal Adult display path.
+
 ## Speech and Vision
 
 Both run locally, with no cloud service:

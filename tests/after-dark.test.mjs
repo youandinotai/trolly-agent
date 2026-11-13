@@ -16,7 +16,8 @@ test('After Dark requires both age verification and the adult preference', () =>
   assert.throws(() => assertAfterDarkAllowed({ ageVerified: false, adultContent: false }), /age check/i);
   assert.throws(() => assertAfterDarkAllowed({ ageVerified: true, adultContent: false }), /adult content/i);
   assert.throws(() => assertAfterDarkAllowed({ ageVerified: false, adultContent: true }), /age check/i);
-  assert.doesNotThrow(() => assertAfterDarkAllowed({ ageVerified: true, adultContent: true }));
+  assert.throws(() => assertAfterDarkAllowed({ ageVerified: true, adultContent: true }, false), /current session/i);
+  assert.doesNotThrow(() => assertAfterDarkAllowed({ ageVerified: true, adultContent: true }, true));
 });
 
 test('After Dark hard boundaries reject minors, coercion, and gore', () => {

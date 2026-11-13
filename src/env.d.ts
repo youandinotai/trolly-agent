@@ -1,4 +1,6 @@
 /** The typed surface the preload script exposes to the renderer. */
+import type { NewActor, NewGarment, NewScene, StudioDoc } from './lib/studio-types.js';
+
 export interface McpTool {
   name: string;
   description?: string;
@@ -61,6 +63,15 @@ export interface MindDoc {
   preferences: Preferences;
 }
 
+export interface SessionModeState {
+  adult: boolean;
+  ageVerified: boolean;
+  epoch: number;
+  visuals: 'adult' | 'protected';
+  agentAvailable: true;
+  speechAction: 'none' | 'stop';
+}
+
 export interface TrollyBridge {
   ollama: {
     models(): Promise<OllamaModel[]>;
@@ -106,7 +117,8 @@ export interface TrollyBridge {
     resetVerification(): Promise<Preferences>;
   };
   speech: {
-    voices(): Promise<{ name: string; culture: string }[]>;
+    voices(): Promise<{ id: string; name: string; culture: string; gender: 'female'; engine: 'kokoro'; description: string }[]>;
+    onStatus(cb: (status: { state: 'idle' | 'loading' | 'ready' | 'generating' | 'error'; message: string }) => void): () => void;
     speak(payload: { text: string; voice?: string; rate?: number; volume?: number }): Promise<{
       file: string;
       bytes: number;
@@ -151,7 +163,10 @@ export interface TrollyBridge {
       scheduler?: string;
       checkpoint?: string;
       denoise?: number;
-    }): Promise<{ promptId: string; file: string; url: string; kind: 'image'; outputDir: string }>;
+    }): Promise<
+      | { kind: 'visible'; result: { promptId: string; file: string; url: string; kind: 'image'; outputDir: string } }
+      | { kind: 'suppressed' }
+    >;
   };
   mcp: {
     list(): Promise<McpServerState[]>;
@@ -160,6 +175,25 @@ export interface TrollyBridge {
     tools(id: string): Promise<McpTool[]>;
     call(id: string, name: string, args?: Record<string, unknown>): Promise<{ content?: { type: string; text: string }[] }>;
     onChanged(cb: (servers: McpServerState[]) => void): () => void;
+  };
+  studio: {
+    read(): Promise<StudioDoc>;
+    saveGarment(payload: NewGarment): Promise<StudioDoc['garments'][number]>;
+    saveActor(payload: NewActor): Promise<StudioDoc['actors'][number]>;
+    saveScene(payload: NewScene): Promise<StudioDoc['scenes'][number]>;
+    uploadAsset(payload: { name: string; dataBase64: string; kind: 'image' | 'model' }): Promise<{ path: string; url: string; name: string }>;
+    readAsset(filePath: string): Promise<{ name: string; dataBase64: string }>;
+  };
+  hermes: {
+    status(): Promise<{ online: boolean; model?: string; error?: string }>;
+    review(packet: { feature: string; checks: string[]; counts?: Record<string, number> }): Promise<{ review: string; model: string; sanitized: true }>;
+  };
+  mode: {
+    state(): Promise<SessionModeState>;
+    setAdult(enabled: boolean): Promise<SessionModeState>;
+    clean(): Promise<SessionModeState>;
+    acknowledgeClean(epoch: number): Promise<SessionModeState>;
+    onChanged(cb: (state: SessionModeState) => void): () => void;
   };
   paths(): Promise<{ dataDir: string; appRoot: string }>;
 }
