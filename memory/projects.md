@@ -15,6 +15,11 @@
 | Hermes nodes .08 / .15 | ❌ unreachable from this machine | `.15` alive but all ports dropped; needs `hermes serve --host 0.0.0.0 --port 9119` + firewall rule on .15 |
 | Agent memory | ✅ in repo `memory/` (continuity.md, prefs.md, projects.md, handoff/) — moved from D:\Trolly\memory 2026-11-13 | keep updated; read at session start |
 
+## Alienware .40 after the move
+- Mission-only, **isolated**: never pulls Trollz1004 repos.
+- D: drive moves to Sabretooth; lane data that stays behind may live on
+  Alienware's C: (user-authorized exception to the D:-only rule, 2026-11-13).
+
 ## Known environment gotchas
 - MSYS `git` is permission-denied → use `/c/Program Files/Git/cmd/git.exe`
 - Native Windows tools need `C:/...` forward-slash paths; MSYS conversion is off

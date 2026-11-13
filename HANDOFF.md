@@ -9,7 +9,10 @@ Written on Alienware (.40) before the NSFW lane moves to Sabretooth (.15).
 
 - **Alienware (.40, this machine): mission-only.** Fable orchestrates outreach here
   to fund the existing Trollz1004 platforms. No NSFW work, no test bots, no adult
-  lane on this node. Mission > NSFW, always.
+  lane on this node. Mission > NSFW, always. After the D: drive moves to
+  Sabretooth, this node is **isolated**: it never pulls Trollz1004 repos, and
+  lane data that stays behind may live on its C: drive (user-authorized
+  exception to the usual D:-only rule, 2026-11-13).
 - **Sabretooth (.15): the adult/test lane.** Everything in `D:\Trolly` moves to
   Sabretooth's D: (1TB SSD). Hardware: Intel i7-4960X (6c/12t), 64 GB RAM,
   **AMD Radeon RX 6800 (16 GB)**, 1 TB SSD, Windows x64.
@@ -198,8 +201,9 @@ D:\Trolly\
 
 Paths to migrate (stop every service using them first): the whole `D:\Trolly`
 tree. Clone the repo from GitHub on the new node (do NOT copy the old repo
-folder); robocopy `data\`, `studio-nsfw\`, `workflows\`, `memory\`, `handoff\`
-if you want the generated media and notes. Recreate the junctions on
+folder); robocopy `data\`, `studio-nsfw\`, `workflows\` if you want the
+generated media and notes (agent memory + handoff already live in the repo
+under `memory/`). Recreate the junctions on
 Sabretooth (script: `data\misc\make-junctions.ps1`).
 
 Sabretooth caveats (RX 6800, AMD):
