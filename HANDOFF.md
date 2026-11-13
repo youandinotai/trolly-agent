@@ -169,6 +169,16 @@ youandinotai repos stay separate by design:
   Nothing adult ever touches this repo.
 - `youandinotai/youandinotai` — the DATE APP. Untouched.
 
+## 2C. Agent memory (read at session start)
+
+The lane's agent memory lives **in this repo** under `memory/` — it travels
+with the clone, so Hermes on any node can "be Hermes" by reading it:
+
+- `memory/continuity.md` — characters, canon, kinks, dynamics
+- `memory/prefs.md` — register, heat level, hard likes/dislikes
+- `memory/projects.md` — project states, next steps, env gotchas
+- `memory/handoff/` — cross-node handoff notes + reference images
+
 ## 3. Moving the lane to Sabretooth
 
 **One folder now:** `D:\Trolly` is the entire lane on Alienware (created
