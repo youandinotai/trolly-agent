@@ -39,17 +39,31 @@ test('garment fitting scales with the avatar instead of hardcoded model sizes', 
   assert.ok(Math.abs(tall.pieces[0].position[1]) > Math.abs(small.pieces[0].position[1]));
 });
 
-test('hat brim sits above the eyes instead of across the face', () => {
+test('hat crown is a cap, not a top hat', () => {
   const h = 1.6;
+  const crown = buildGarmentSpec('hat', h).pieces[0];
+  assert.ok(crown.scale[1] <= h * 0.06, 'crown height must stay close to the head');
   const brim = buildGarmentSpec('hat', h).pieces[1];
-  assert.ok(brim.position[1] >= h * 0.1, 'brim must be near the hairline, not the eyes');
+  assert.ok(brim.position[1] >= h * 0.04, 'brim must sit on the skull');
+  assert.ok(brim.scale[0] <= h * 0.18, 'brim must not flare like a top hat');
 });
 
-test('safe dress starts below the shoulders and shoes sit at foot level', () => {
+test('bikini cups stay centered on the chest and clear of the armpits', () => {
+  const h = 1.6;
+  const cups = buildGarmentSpec('bikini', h).pieces;
+  for (const cup of cups.slice(0, 2)) {
+    assert.ok(Math.abs(cup.position[0]) <= h * 0.05, 'cup x must be near the sternum');
+    assert.ok(cup.position[1] > -h * 0.15 && cup.position[1] < -h * 0.05, 'cups must sit on the chest, not the armpit or belly');
+  }
+});
+
+test('safe dress covers chest to below the hips and shoes sit at foot level', () => {
   const h = 1.6;
   const dress = buildGarmentSpec('dress', h).pieces[0];
   const top = dress.position[1] + dress.scale[1] / 2;
-  assert.ok(top <= -h * 0.03, `dress top ${top} should sit below the chest bone`);
+  const bottom = dress.position[1] - dress.scale[1] / 2;
+  assert.ok(top >= -h * 0.05, `dress top ${top} must reach the chest`);
+  assert.ok(bottom <= -h * 0.45, `dress bottom ${bottom} must pass the hips`);
   for (const shoe of buildGarmentSpec('shoes', h).pieces) assert.ok(shoe.position[1] <= 0);
 });
 

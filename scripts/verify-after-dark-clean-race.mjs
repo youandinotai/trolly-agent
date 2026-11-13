@@ -3,13 +3,13 @@ import path from 'node:path';
 import { chromium } from 'playwright-core';
 import { AFTER_DARK_DEFAULT_NEGATIVE, AFTER_DARK_DEFAULT_POSITIVE } from '../src/lib/after-dark-shared.js';
 
-const outDir = 'D:/Grindroid/trolly-agent/verification';
-const adultDir = 'D:/Grindroid/trolly-agent/after-dark';
+const outDir = 'D:/Trolly/data/verification';
+const adultDir = 'D:/Trolly/data/after-dark';
 const referenceFile = fs.readdirSync(adultDir).filter((name) => name.endsWith('.png')).sort().at(-1);
 if (!referenceFile) throw new Error('No existing local reference image for the race test');
 const reference = { name: referenceFile, dataBase64: fs.readFileSync(path.join(adultDir, referenceFile)).toString('base64') };
 const browser = await chromium.connectOverCDP('http://127.0.0.1:48702');
-const page = browser.contexts().flatMap((context) => context.pages()).find((candidate) => candidate.url().includes('trolly-agent'));
+const page = browser.contexts().flatMap((context) => context.pages()).find((candidate) => candidate.url().includes('Trolly/app'));
 if (!page) throw new Error('Trolly Agent page not found');
 const modeButton = (name) => page.locator('.mode-btn', { hasText: name });
 const activeMode = async (name) => page.waitForFunction((label) => {

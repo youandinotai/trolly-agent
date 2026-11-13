@@ -4,7 +4,7 @@ import sys
 
 from cdp import cdp, find_page
 
-out = sys.argv[1] if len(sys.argv) > 1 else 'D:/Grindroid/trolly-agent/verification/cdp-current.png'
+out = sys.argv[1] if len(sys.argv) > 1 else 'D:/Trolly/data/verification/cdp-current.png'
 page = find_page()
 result = cdp(page['webSocketDebuggerUrl'], 'Page.captureScreenshot', {
     'format': 'png',

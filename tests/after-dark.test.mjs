@@ -78,14 +78,14 @@ test('After Dark requires a reference and valid denoise', () => {
 });
 
 test('After Dark output defaults to the adult D: lane and rejects C: or repo output', () => {
-  const appRoot = path.resolve('D:/mira/trolly-agent');
+  const appRoot = path.resolve('D:/Trolly/app');
   const dir = resolveAfterDarkOutputDir({}, appRoot);
   assert.match(dir, /^D:\\/i);
-  assert.match(dir, /Grindroid/i);
+  assert.match(dir, /Trolly/i);
   assert.notEqual(path.resolve(dir), appRoot);
   assert.throws(() => resolveAfterDarkOutputDir({ TROLLY_AFTER_DARK_DIR: 'C:/forbidden' }, appRoot), /D:/i);
   assert.throws(
-    () => resolveAfterDarkOutputDir({ TROLLY_AFTER_DARK_DIR: 'D:/mira/trolly-agent/data/adult' }, appRoot),
+    () => resolveAfterDarkOutputDir({ TROLLY_AFTER_DARK_DIR: 'D:/Trolly/app/data/adult' }, appRoot),
     /outside/i,
   );
 });

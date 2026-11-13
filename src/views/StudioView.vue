@@ -53,7 +53,13 @@ const garmentForm = ref({ name: 'Scarlet bikini', category: 'bikini' as GarmentC
 const actorForm = ref({ name: '', role: 'actress' as 'actor' | 'actress', hair: { color: '#f3f5f7', length: 1, volume: 1 }, smile: 0.25 });
 const sceneForm = ref({ name: 'Neon Midnight', background: '#0d0714', accent: '#67e8f9', lightIntensity: 1.2, imageUrl: undefined as string | undefined });
 
-const filteredGarments = computed(() => doc.value.garments.filter((item) => category.value === 'all' || item.category === category.value));
+const filteredGarments = computed(() => doc.value.garments.filter((item) => {
+  if (category.value !== 'all' && item.category !== category.value) return false;
+  // Clean presentation: intimate pieces stay out of the list until Adult is
+  // deliberately unlocked again.
+  if (!appMode.adult && ['bikini', 'underwear'].includes(item.category)) return false;
+  return true;
+}));
 
 function note(message: string) {
   status.value = message;
@@ -319,6 +325,7 @@ onMounted(async () => {
           <div class="panel-title"><h3>Closet</h3><span>{{ doc.garments.length }}</span></div>
           <label class="studio-upload">Upload clothing artwork<input type="file" accept="image/png,image/jpeg" hidden @change="uploadArtwork" /></label>
           <p class="studio-note">Artwork wraps fitted 3D garments. Color changes stay editable.</p>
+          <p v-if="!appMode.adult" class="studio-note">Intimate pieces are hidden in Clean and return with Adult.</p>
           <select v-model="category" class="studio-select" aria-label="Wardrobe category">
             <option value="all">All pieces</option><option value="hat">Hats</option><option value="top">Tops</option><option value="dress">Dresses</option><option value="bikini">Bikini</option><option value="underwear">Underwear</option><option value="shoes">Shoes</option>
           </select>

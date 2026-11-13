@@ -2,18 +2,18 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { chromium } from 'playwright-core';
 
-const outDir = 'D:/Grindroid/trolly-agent/verification';
+const outDir = 'D:/Trolly/data/verification';
 fs.mkdirSync(outDir, { recursive: true });
 const browser = await chromium.connectOverCDP('http://127.0.0.1:48702');
 const pages = browser.contexts().flatMap((context) => context.pages());
-const page = pages.find((candidate) => candidate.url().includes('trolly-agent'));
+const page = pages.find((candidate) => candidate.url().includes('Trolly/app'));
 if (!page) throw new Error('Trolly Agent page not found');
 
 try {
   await page.locator('.rail-item', { hasText: 'Artistry' }).click();
   await page.locator('.after-dark-tab').click();
   await page.locator('.after-dark-panel').waitFor({ state: 'visible' });
-  await page.locator('.after-dark-panel input[type="file"]').setInputFiles('D:/mira/trolly-nsfw/trolly-source.png');
+  await page.locator('.after-dark-panel input[type="file"]').setInputFiles('D:/Trolly/workflows/trolly-source.png');
   await page.locator('.reference-drop img').waitFor({ state: 'visible' });
   await page.screenshot({ path: path.join(outDir, 'after-dark-panel.png'), fullPage: true });
 

@@ -2,12 +2,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { chromium } from 'playwright-core';
 
-const outDir = 'D:/Grindroid/trolly-agent/verification';
-const adultDir = 'D:/Grindroid/trolly-agent/after-dark';
+const outDir = 'D:/Trolly/data/verification';
+const adultDir = 'D:/Trolly/data/after-dark';
 const referenceFile = fs.readdirSync(adultDir).filter((name) => name.endsWith('.png')).sort().at(-1);
 if (!referenceFile) throw new Error('No local reference image');
 const browser = await chromium.connectOverCDP('http://127.0.0.1:48702');
-const page = browser.contexts().flatMap((context) => context.pages()).find((candidate) => candidate.url().includes('trolly-agent'));
+const page = browser.contexts().flatMap((context) => context.pages()).find((candidate) => candidate.url().includes('Trolly/app'));
 if (!page) throw new Error('Trolly Agent page not found');
 const modeButton = (name) => page.locator('.mode-btn', { hasText: name });
 const activeMode = async (name) => page.waitForFunction((label) => {

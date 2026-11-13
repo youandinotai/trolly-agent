@@ -13,23 +13,23 @@ export interface GarmentPieceSpec {
 export function buildGarmentSpec(category: GarmentCategory, height: number): { shape: GarmentCategory; pieces: GarmentPieceSpec[] } {
   const h = Math.max(0.5, Math.min(3, height));
   if (category === 'hat') return { shape: category, pieces: [
-    { shape: 'cylinder', bone: 'head', position: [0, h * 0.155, 0], scale: [h * 0.15, h * 0.09, h * 0.15] },
-    { shape: 'cylinder', bone: 'head', position: [0, h * 0.11, 0], scale: [h * 0.22, h * 0.012, h * 0.22] },
+    { shape: 'cylinder', bone: 'head', position: [0, h * 0.07, 0], scale: [h * 0.10, h * 0.038, h * 0.10] },
+    { shape: 'cylinder', bone: 'head', position: [0, h * 0.05, 0], scale: [h * 0.13, h * 0.012, h * 0.13] },
   ] };
   if (category === 'top') return { shape: category, pieces: [
     { shape: 'cylinder', bone: 'chest', position: [0, -h * 0.09, h * 0.02], scale: [h * 0.25, h * 0.34, h * 0.2] },
   ] };
   if (category === 'dress') return { shape: category, pieces: [
-    { shape: 'dress', bone: 'chest', position: [0, -h * 0.30, h * 0.02], scale: [h * 0.29, h * 0.5, h * 0.23] },
+    { shape: 'dress', bone: 'chest', position: [0, -h * 0.20, h * 0.02], scale: [h * 0.34, h * 0.56, h * 0.28] },
   ] };
   if (category === 'shoes') return { shape: category, pieces: [
-    { shape: 'sphere', bone: 'leftFoot', position: [0, -h * 0.015, h * 0.065], scale: [h * 0.08, h * 0.035, h * 0.12] },
-    { shape: 'sphere', bone: 'rightFoot', position: [0, -h * 0.015, h * 0.065], scale: [h * 0.08, h * 0.035, h * 0.12] },
+    { shape: 'sphere', bone: 'leftFoot', position: [0, -h * 0.015, h * 0.07], scale: [h * 0.07, h * 0.025, h * 0.11] },
+    { shape: 'sphere', bone: 'rightFoot', position: [0, -h * 0.015, h * 0.07], scale: [h * 0.07, h * 0.025, h * 0.11] },
   ] };
   if (category === 'bikini') return { shape: category, pieces: [
-    { shape: 'sphere', bone: 'chest', position: [-h * 0.052, -h * 0.09, h * 0.075], scale: [h * 0.095, h * 0.07, h * 0.06] },
-    { shape: 'sphere', bone: 'chest', position: [h * 0.052, -h * 0.09, h * 0.075], scale: [h * 0.095, h * 0.07, h * 0.06] },
-    { shape: 'sphere', bone: 'hips', position: [0, -h * 0.09, h * 0.06], scale: [h * 0.14, h * 0.08, h * 0.065] },
+    { shape: 'sphere', bone: 'chest', position: [-h * 0.05, -h * 0.11, h * 0.08], scale: [h * 0.09, h * 0.065, h * 0.055] },
+    { shape: 'sphere', bone: 'chest', position: [h * 0.05, -h * 0.11, h * 0.08], scale: [h * 0.09, h * 0.065, h * 0.055] },
+    { shape: 'sphere', bone: 'hips', position: [0, -h * 0.17, h * 0.06], scale: [h * 0.12, h * 0.09, h * 0.07] },
   ] };
   return { shape: category, pieces: [
     { shape: 'sphere', bone: 'hips', position: [0, -h * 0.09, h * 0.055], scale: [h * 0.16, h * 0.1, h * 0.07] },
@@ -167,6 +167,9 @@ export class AvatarWardrobe {
     this.cleanMode = enabled;
     if (!this.model) return false;
     if (enabled) {
+      // Restore any Adult-mode torso-discard shaders before hiding base cloth,
+      // or the base torso stays discarded in Clean too.
+      for (const [material] of this.clothingMaterials) this.restoreMaterialShader(material);
       for (const pieces of this.garments.values()) pieces.forEach((piece) => { piece.visible = false; });
       for (const [material] of this.clothingMaterials) material.visible = false;
       if (!this.safePieces.length) {
@@ -226,9 +229,9 @@ export class AvatarWardrobe {
         cacheKey: material.customProgramCacheKey(),
       });
     }
-    const halfWidth = this.height * 0.18;
-    const lower = this.height * 0.44;
-    const upper = this.height * 0.82;
+    const halfWidth = this.height * 0.16;
+    const lower = this.height * 0.40;
+    const upper = this.height * 0.70;
     material.onBeforeCompile = (shader) => {
       shader.vertexShader = `varying vec3 vStudioWorldPosition;\n${shader.vertexShader}`;
       shader.vertexShader = shader.vertexShader.replace(

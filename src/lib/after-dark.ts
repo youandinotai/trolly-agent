@@ -117,7 +117,7 @@ export function resolveAfterDarkOutputDir(
   env: Record<string, string | undefined>,
   appRoot: string,
 ): string {
-  const dir = path.resolve(env.TROLLY_AFTER_DARK_DIR || 'D:/Grindroid/trolly-agent/after-dark');
+  const dir = path.resolve(env.TROLLY_AFTER_DARK_DIR || 'D:/Trolly/data/after-dark');
   if (!/^d:/i.test(dir)) throw new Error('After Dark output must be on the D: drive.');
   const relative = path.relative(path.resolve(appRoot), dir);
   if (!relative || (!relative.startsWith('..') && !path.isAbsolute(relative))) {

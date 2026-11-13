@@ -16,7 +16,7 @@ export class StudioStore {
     // Validate lexically first so a rejected path never creates a directory.
     const lexical = path.resolve(dataDir);
     if (!/^d:/i.test(lexical)) throw new Error('Studio data must be on the D: drive.');
-    const sourceRoot = fs.realpathSync(path.resolve('D:/mira/trolly-agent'));
+    const sourceRoot = fs.realpathSync(path.resolve('D:/Trolly/app'));
     const outsideSource = (candidate: string) => {
       const relative = path.relative(sourceRoot, candidate);
       return !relative || (!relative.startsWith('..') && !path.isAbsolute(relative));
@@ -128,7 +128,14 @@ export class StudioStore {
 
   readAsset(filePath: string): { name: string; dataBase64: string } {
     // Canonical comparison: a junction inside the store cannot escape it.
-    const resolved = fs.realpathSync(path.resolve(filePath));
+    // A missing file falls back to the lexical path so a moved store reports
+    // "outside" instead of crashing with ENOENT.
+    let resolved: string;
+    try {
+      resolved = fs.realpathSync(path.resolve(filePath));
+    } catch {
+      resolved = path.resolve(filePath);
+    }
     const relative = path.relative(this.assetsDir, resolved);
     if (relative.startsWith('..') || path.isAbsolute(relative)) throw new Error('Asset path is outside the studio store.');
     return { name: path.basename(resolved), dataBase64: fs.readFileSync(resolved).toString('base64') };
@@ -154,7 +161,7 @@ export class StudioStore {
     }
     this.saveActor({
       id: 'actor-trolly', name: 'Trolly', role: 'actress', modelPath,
-      hair: { color: '#f3f5f7', length: 1, volume: 1 }, smile: 0.25,
+      hair: { color: '#dff4ff', length: 1, volume: 1 }, smile: 0.25,
       garmentIds: ['garment-bikini'], sceneId: neon.id,
     });
   }

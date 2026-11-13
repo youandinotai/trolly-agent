@@ -174,10 +174,10 @@ and a strict CSP. Every capability crosses the preload bridge.
 ## All state lives on D:
 
 `electron/main/index.ts` redirects Electron's `userData`, `sessionData`, `temp`, and
-`logs` into `D:\mira\trolly-agent\data`. Override with `TROLLY_DATA_DIR`.
+`logs` into `D:\Trolly\app\data`. Override with `TROLLY_DATA_DIR`.
 
 ```
-D:\mira\trolly-agent\data\
+D:\Trolly\app\data\
   mcp-servers.json     MCP server registry
   mind.json            persona, memories, recipes, preferences
   artistry\            generated media

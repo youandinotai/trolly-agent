@@ -10,10 +10,9 @@ Written on Alienware (.40) before the NSFW lane moves to Sabretooth (.15).
 - **Alienware (.40, this machine): mission-only.** Fable orchestrates outreach here
   to fund the existing Trollz1004 platforms. No NSFW work, no test bots, no adult
   lane on this node. Mission > NSFW, always.
-- **Sabretooth (.15): the adult/test lane.** Trolly Agent, `D:\Grindroid`, and the
-  other NSFW/test bots on D: move to Sabretooth's D: (1TB SSD).
-  Hardware: Intel i7-4960X (6c/12t), 64 GB RAM, **AMD Radeon RX 6800 (16 GB)**,
-  1 TB SSD, Windows x64.
+- **Sabretooth (.15): the adult/test lane.** Everything in `D:\Trolly` moves to
+  Sabretooth's D: (1TB SSD). Hardware: Intel i7-4960X (6c/12t), 64 GB RAM,
+  **AMD Radeon RX 6800 (16 GB)**, 1 TB SSD, Windows x64.
 - **Hermes account:** the SAME Nous Research account on both nodes. The user is
   open and public about Nous agent-harness usage — no grey areas. All adult
   tooling in this lane is designed to PROTECT against accidental AI-generated
@@ -25,7 +24,7 @@ Written on Alienware (.40) before the NSFW lane moves to Sabretooth (.15).
 
 ## 1. Trolly Agent — what exists now
 
-Repo: `D:\mira\trolly-agent` → GitHub private `youandinotai/trolly-agent`,
+Repo: `D:\Trolly\app` → GitHub private `youandinotai/trolly-agent`,
 branch `feature/initial-build`. Identity rule: push ONLY as `youandinotai`
 (repo-local credential helper `D:/git-helpers/gh-youandinotai.sh` +
 `credential.https://github.com.username youandinotai` are pinned — verified).
@@ -40,6 +39,13 @@ Local-first Electron + Vue 3 + TS companion:
   admin store), Mind (persona/memories/recipes/age-gated preferences),
   JEV task router (eve-cpu with deterministic offline fallback),
   Hermes ethics-review packet sender (sanitized; no images/prompts/paths).
+
+**"Agent Forge NSFW" note:** the user's NSFW studio app is
+`D:\Trolly\studio-nsfw\grins-no-sins-studio` — a separate React/Vite app
+(branch `feature/grins-studio`, commit 0d9f293) that was never merged into
+Trolly. Trolly's Studio tab is the successor. Either port unique Grins
+features into Trolly or keep it as a lane sibling; do not delete it without
+asking.
 
 ### Clean/Adult safety system (the part that matters most)
 - **One GUI, shared runtime.** `SessionMode` in `src/lib/session-mode.ts` is the
@@ -80,7 +86,7 @@ Local-first Electron + Vue 3 + TS companion:
   result + library covered, work unblocked.
 - `scripts/smoke-avatar.mjs`: PASS (VRM load, expressions, controls) and Kokoro
   produced a valid RIFF WAV (1,015,244 bytes) on D:.
-- Screenshots: `D:\Grindroid\trolly-agent\verification\`.
+- Screenshots: `D:\Trolly\data\verification\`.
 - Research report with citations: `reports/Trolly safe mode.md` (in repo).
 
 ### Process gate status
@@ -130,11 +136,12 @@ NOT yet run** — run it before treating the branch as fully reviewed:
    on the chest; the "Midnight cap" reads as a tall top hat (crown height
    wrong); the base body stays partially exposed around the primitives; and the
    flat-shaded parametric pieces clash with the model's toon shading (no
-   material/lighting match). Root causes are known: hardcoded proportional
-   offsets per bone, no authored skinning, and primitives instead of real
-   cloth. Fix = authored SkinnedMesh garments + versioned mesh manifests per
-   VRM version (see report §Wardrobe). T-pose is fixed visually on
-   AvatarSample_K (VRM 1.0); regression-test against a VRM 0.x model.
+   material/lighting match). First-pass fixes landed 2026-11-13 (cups recentered
+   ±0.045h at −0.07h, cap crown cut to 0.045h, hair default now white-bluish
+   `#dff4ff`) — **still needs a visual pass on Sabretooth**; the real fix is
+   authored SkinnedMesh garments + versioned mesh manifests per VRM version
+   (see report §Wardrobe). Reference target image for the formal-gown style:
+   `assets/references/formal-gown-example.jpg` (user-supplied, in repo).
 4b. **Dangling garment references.** Live `studio.json` showed actor
    `garmentIds` pointing at deleted garment records (stale UUIDs from earlier
    upload cycles). Add pruning on `read()`/`loadActor` (drop ids with no
@@ -153,11 +160,26 @@ NOT yet run** — run it before treating the branch as fully reviewed:
 
 ## 3. Moving the lane to Sabretooth
 
-Paths to migrate (stop every service using them first):
-`D:\mira\trolly-agent` (repo — better: `git clone --branch feature/initial-build`
-from GitHub on the new node instead of copying), `D:\Grindroid\trolly-agent`
-(studio data, after-dark output, verification), plus the rest of the adult D:
-lane (SoW `D:\sow`, D:\Grindroid root, test bots) as user directs.
+**One folder now:** `D:\Trolly` is the entire lane on Alienware (created
+2026-11-13). Layout:
+
+```
+D:\Trolly\
+  app\                    ← the repo (git clone target on Sabretooth)
+  data\                   ← studio\, after-dark\, verification\, test-tmp\, misc\
+  studio-nsfw\            ← grins-no-sins-studio (the separate NSFW studio app)
+  workflows\              ← trolly-nsfw workflow artifacts
+  memory\ handoff\        ← Mira memory + cross-node notes
+  tools\ airi\ uncensored-local-studio\
+  sow\ comfy\ pinokio\ ollama\ remake-engine\ remakes\
+  hermes-skills\ git-helpers\ npm-global\   ← junctions to the shared engines
+```
+
+Paths to migrate (stop every service using them first): the whole `D:\Trolly`
+tree. Clone the repo from GitHub on the new node (do NOT copy the old repo
+folder); robocopy `data\`, `studio-nsfw\`, `workflows\`, `memory\`, `handoff\`
+if you want the generated media and notes. Recreate the junctions on
+Sabretooth (script: `data\misc\make-junctions.ps1`).
 
 Sabretooth caveats (RX 6800, AMD):
 - SoW's current deployment is CUDA (torch 2.10.0+cu128) — that does NOT carry to

@@ -1,8 +1,8 @@
 $ErrorActionPreference = 'Continue'
 # Launch Trolly Agent on the desktop (visible window, not headless).
-# Everything stays on D: — the app redirects its own userData/temp/logs to D:\mira\trolly-agent\data.
+# Everything stays on D: — the app redirects its own userData/temp/logs to D:\Trolly\app\data.
 
-$root = 'D:\mira\trolly-agent'
+$root = 'D:\Trolly\app'
 $electron = Join-Path $root 'node_modules\electron\dist\electron.exe'
 
 if (-not (Test-Path $electron)) { Write-Output "MISSING electron: $electron"; exit 1 }

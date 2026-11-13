@@ -6,10 +6,10 @@ Target host: Alienware node `.40` (Windows 11, RTX 3070 8GB, 40GB RAM). All payl
 ## 0. Provenance & rules (from REA + Remake)
 
 ### Source artifact studied
-- `D:\mira\airi\` — AIRI v0.14.1, Electron + Vue 3 + Vite/Rolldown, `app.asar` 526 MB
+- `D:\Trolly\airi\` — AIRI v0.14.1, Electron + Vue 3 + Vite/Rolldown, `app.asar` 526 MB
 - `moeru-ai/airi` on GitHub, MIT licensed. Original author: Moeru AI.
-- REA analysis: `D:\mira\trolly-agent\rea\airi-evidence.json` (evidence bundle), extracted tree
-  `D:\mira\trolly-agent\rea\airi-src\`
+- REA analysis: `D:\Trolly\app\rea\airi-evidence.json` (evidence bundle), extracted tree
+  `D:\Trolly\app\rea\airi-src\`
 
 ### What we take (facts / ideas, MIT-permissible, re-implemented)
 - Feature *concepts*: a local-first desktop AI-companion shell with a 3D/2D stage, provider
@@ -44,7 +44,7 @@ Core screens
 Electron (main + preload + renderer), Vue 3 + Pinia renderer, TypeScript, Vite.
 
 ```
-D:\mira\trolly-agent\
+D:\Trolly\app\
   package.json          # name: "trolly-agent", our own metadata
   electron/
     main/index.ts       # window, tray, IPC, MCP supervisor, ComfyUI client
@@ -85,7 +85,7 @@ D:\mira\trolly-agent\
 
 ## 3. Hard requirements
 
-- Everything runs from **D:**. Config/state under `D:\mira\trolly-agent\data\`
+- Everything runs from **D:**. Config/state under `D:\Trolly\app\data\`
   (electron `userData` redirected there in `main/index.ts`).
 - No outbound network at runtime except to the user-configured providers.
 - No secrets in the repo. `.env`-style keys live in the data dir, gitignored.

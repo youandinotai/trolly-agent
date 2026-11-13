@@ -40,7 +40,7 @@ const speech = new SpeechClient(DATA_DIR, (status) => {
 const mind = new MindStore(DATA_DIR);
 const contentMode = new SessionMode();
 contentMode.restore(mind.readPreferences());
-const studio = new StudioStore(process.env.TROLLY_STUDIO_DIR || 'D:/Grindroid/trolly-agent/studio');
+const studio = new StudioStore(process.env.TROLLY_STUDIO_DIR || 'D:/Trolly/data/studio');
 const hermes = new HermesReviewer(process.env.TROLLY_HERMES_URL || 'http://127.0.0.1:8645');
 
 function publishMode(state: SessionModeSnapshot = contentMode.snapshot()): void {

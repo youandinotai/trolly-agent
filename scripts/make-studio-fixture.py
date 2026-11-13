@@ -1,7 +1,7 @@
 from pathlib import Path
 from PIL import Image, ImageDraw
 
-out = Path('D:/Grindroid/trolly-agent/verification')
+out = Path('D:/Trolly/data/verification')
 out.mkdir(parents=True, exist_ok=True)
 image = Image.new('RGB', (512, 512), '#24101f')
 draw = ImageDraw.Draw(image)

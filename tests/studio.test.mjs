@@ -6,13 +6,13 @@ import path from 'node:path';
 import { StudioStore } from '../electron/main/studio.ts';
 
 function tmpDir() {
-  fs.mkdirSync('D:/Grindroid/trolly-agent/test-tmp', { recursive: true });
-  return fs.mkdtempSync('D:/Grindroid/trolly-agent/test-tmp/studio-');
+  fs.mkdirSync('D:/Trolly/data/test-tmp', { recursive: true });
+  return fs.mkdtempSync('D:/Trolly/data/test-tmp/studio-');
 }
 
 test('studio refuses output outside the D: adult lane', () => {
   assert.throws(() => new StudioStore('C:/forbidden', { seedDefaults: false }), /D:/i);
-  assert.throws(() => new StudioStore('D:/mira/trolly-agent/data/studio', { seedDefaults: false }), /outside/i);
+  assert.throws(() => new StudioStore('D:/Trolly/app/data/studio', { seedDefaults: false }), /outside/i);
 });
 
 test('actors, garments, and scenes round-trip through the admin store', () => {

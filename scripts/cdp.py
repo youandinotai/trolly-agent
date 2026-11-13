@@ -16,7 +16,7 @@ def targets():
 
 def find_page():
     for t in targets():
-        if t.get('type') == 'page' and 'trolly-agent' in t.get('url', ''):
+        if t.get('type') == 'page' and ('Trolly/app' in t.get('url', '') or t.get('url', '').startswith('file://')):
             return t
     for t in targets():
         if t.get('type') == 'page':

@@ -123,7 +123,7 @@ onMounted(chooseDefaultModel);
           <span v-if="reference" class="reference-name">{{ reference.name }}</span>
           <div class="privacy-note">
             <strong>No cloud. No repo output.</strong>
-            <span>D:\Grindroid\trolly-agent\after-dark</span>
+            <span>D:\Trolly\data\after-dark</span>
           </div>
         </div>
 

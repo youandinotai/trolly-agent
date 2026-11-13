@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import { chromium } from 'playwright-core';
 
-const outDir = 'D:/Grindroid/trolly-agent/verification';
+const outDir = 'D:/Trolly/data/verification';
 fs.mkdirSync(outDir, { recursive: true });
 const browser = await chromium.connectOverCDP('http://127.0.0.1:48702');
-const page = browser.contexts().flatMap((context) => context.pages()).find((candidate) => candidate.url().includes('trolly-agent'));
+const page = browser.contexts().flatMap((context) => context.pages()).find((candidate) => candidate.url().includes('Trolly/app'));
 if (!page) throw new Error('Trolly Agent page not found');
 
 try {
