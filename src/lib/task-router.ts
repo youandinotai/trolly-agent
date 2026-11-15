@@ -7,7 +7,7 @@ export interface TaskRoute {
   model: string;
   reason: string;
   prompt: string;
-  source: 'jev' | 'fallback';
+  source: 'jev' | 'panda' | 'fallback';
   routerModel?: string;
 }
 

@@ -20,6 +20,14 @@
 - D: drive moves to Sabretooth; lane data that stays behind may live on
   Alienware's C: (user-authorized exception to the D:-only rule, 2026-11-13).
 
+## Sabretooth (this node, verified 2026-11-13)
+- Hostname SABRETOOTH, RX 6800 16GB, 64 GB RAM. D: is the drive moved from Alienware.
+- `youandinotai/trolly-agent` at `D:\Trolly\app`, branch `feature/initial-build`, head `a0da076`, remote only that repo. Git needs `safe.directory` because the Alienware SID owns the files. GitHub CLI is installed but not logged in, so the youandinotai helper cannot fetch yet.
+- App rebuilt and launched (Electron pid with window title "Trolly Agent", CDP 127.0.0.1:48702). `npm test` 67/67. `node scripts/verify-safe-mode.mjs` 9/9 pass.
+- Ollama user env `OLLAMA_MODELS=D:\ollama\models`. 127.0.0.1:11434 serves the moved store, including `eve-cpu:latest` and `qwen2.5vl:7b`. AMD driver warning: GPU seen via Vulkan, driver reported too old for the native AMD path.
+- Not carried over from Alienware C:: Comfy Desktop app, Pinokio launcher. GitHub CLI is installed but not logged in, so fetch still cannot use the youandinotai helper.
+- Comfy: moved torch is `2.12.1+cu130` and was not started. DirectML import works (`torch-directml` on torch 2.4.1) but ComfyUI 0.43.2 `comfy-kitchen` cannot start on that pin. Smoke server is a separate CPU env at `D:\Comfy-Desktop\cpu-env` (`torch 2.15.0+cpu`), launched with `--cpu` on `127.0.0.1:8188`. GPU generation is not available until an AMD-capable stack exists for this Windows 10 box.
+
 ## Known environment gotchas
 - MSYS `git` is permission-denied → use `/c/Program Files/Git/cmd/git.exe`
 - Native Windows tools need `C:/...` forward-slash paths; MSYS conversion is off

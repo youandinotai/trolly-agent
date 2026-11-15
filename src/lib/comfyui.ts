@@ -66,6 +66,18 @@ const DEFAULTS = {
   negative: 'blurry, low quality, distorted, watermark',
 };
 
+/** Always appended. Callers cannot drop this by passing their own negative. */
+export const SAFETY_NEGATIVE = [
+  'blood, bloody, gore, gory, violence, torture, mutilation, dismemberment',
+  'snuff, corpse, injury, wounds, weapons, self-harm, suicide',
+  'underage, minor, child, loli, shota, non-consensual, rape',
+].join(', ');
+
+function withSafetyNegative(negative: string | undefined, fallback: string): string {
+  const base = (negative && negative.trim()) || fallback;
+  return base.includes('gore') ? base : `${base}, ${SAFETY_NEGATIVE}`;
+}
+
 const LTXV_DEFAULTS = {
   seed: 42,
   width: 512,
@@ -209,7 +221,7 @@ export function buildTxt2ImgWorkflow(options: Txt2ImgOptions): ComfyPromptGraph 
   if (!options?.positive || !options.positive.trim()) {
     throw new Error('positive prompt is required');
   }
-  const opt = { ...DEFAULTS, ...options };
+  const opt = { ...DEFAULTS, ...options, negative: withSafetyNegative(options.negative, DEFAULTS.negative) };
   requirePositive(opt.width, 'width');
   requirePositive(opt.height, 'height');
 
@@ -273,7 +285,7 @@ export function buildLtxvVideoWorkflow(options: LtxvVideoOptions): ComfyPromptGr
   if (!options?.positive || !options.positive.trim()) {
     throw new Error('positive prompt is required');
   }
-  const opt = { ...LTXV_DEFAULTS, ...options };
+  const opt = { ...LTXV_DEFAULTS, ...options, negative: withSafetyNegative(options.negative, LTXV_DEFAULTS.negative) };
   requirePositive(opt.width, 'width');
   requirePositive(opt.height, 'height');
   requirePositive(opt.length, 'length');

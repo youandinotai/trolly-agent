@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 
 import type { NewActor, NewGarment, NewScene, StudioActor, StudioDoc, StudioGarment, StudioScene } from '../../src/lib/studio-types.js';
+import { WARDROBE_CATALOG } from '../../src/lib/wardrobe-catalog.ts';
 
 const CATEGORIES = new Set(['hat', 'top', 'dress', 'bikini', 'underwear', 'shoes']);
 
@@ -145,11 +146,11 @@ export class StudioStore {
     const doc = this.read();
     const neon = doc.scenes.find((item) => item.id === 'scene-neon') ?? this.saveScene({ id: 'scene-neon', name: 'Neon Midnight', background: '#0d0714', accent: '#67e8f9', lightIntensity: 1.2 });
     if (!doc.scenes.some((item) => item.id === 'scene-soft')) this.saveScene({ id: 'scene-soft', name: 'Soft Studio', background: '#202733', accent: '#ffd7e0', lightIntensity: 1 });
-    if (!doc.garments.some((item) => item.id === 'garment-dress')) this.saveGarment({ id: 'garment-dress', name: 'Clean day dress', category: 'dress', color: '#334155', scale: 1 });
-    if (!doc.garments.some((item) => item.id === 'garment-bikini')) this.saveGarment({ id: 'garment-bikini', name: 'Scarlet bikini', category: 'bikini', color: '#e11d48', scale: 1 });
-    if (!doc.garments.some((item) => item.id === 'garment-hat')) this.saveGarment({ id: 'garment-hat', name: 'Midnight cap', category: 'hat', color: '#24101f', scale: 1 });
-    if (!doc.garments.some((item) => item.id === 'garment-underwear')) this.saveGarment({ id: 'garment-underwear', name: 'Rose underwear', category: 'underwear', color: '#fb7185', scale: 1 });
-    if (!doc.garments.some((item) => item.id === 'garment-shoes')) this.saveGarment({ id: 'garment-shoes', name: 'Black ankle boots', category: 'shoes', color: '#24101f', scale: 1 });
+    for (const pick of WARDROBE_CATALOG) {
+      if (!doc.garments.some((item) => item.id === pick.id)) {
+        this.saveGarment({ id: pick.id, name: pick.name, category: pick.category, color: pick.color, scale: 1 });
+      }
+    }
     if (doc.actors.length) return;
 
     let modelPath = '';

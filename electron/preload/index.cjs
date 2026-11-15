@@ -75,5 +75,17 @@ contextBridge.exposeInMainWorld('trolly', {
       return () => ipcRenderer.removeListener('trolly:mode:changed', listener);
     },
   },
+  vault: {
+    status: () => ipcRenderer.invoke('trolly:vault:status'),
+    lock: () => ipcRenderer.invoke('trolly:vault:lock'),
+    setPassword: (password) => ipcRenderer.invoke('trolly:vault:set', password),
+    unlock: (password) => ipcRenderer.invoke('trolly:vault:unlock', password),
+    changePassword: (current, next) => ipcRenderer.invoke('trolly:vault:change', current, next),
+    reset: (password) => ipcRenderer.invoke('trolly:vault:reset', password),
+    list: () => ipcRenderer.invoke('trolly:vault:list'),
+    add: (payload) => ipcRenderer.invoke('trolly:vault:add', payload),
+    read: (name) => ipcRenderer.invoke('trolly:vault:read', name),
+    remove: (name) => ipcRenderer.invoke('trolly:vault:remove', name),
+  },
   paths: () => ipcRenderer.invoke('trolly:paths'),
 });

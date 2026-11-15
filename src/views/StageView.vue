@@ -77,8 +77,8 @@ async function loadModels() {
     if (!selectedModel.value && models.value.length) {
       // Prefer a local chat model with a decent context window.
       const preferred =
-        models.value.find((m) => m.name.includes('eve-v2')) ??
-        models.value.find((m) => (m.contextLength ?? 0) >= 32768) ??
+        models.value.find((m) => /eve-v2/i.test(m.name) && !/eve-cpu/i.test(m.name)) ??
+        models.value.find((m) => (m.contextLength ?? 0) >= 32768 && !/eve-cpu/i.test(m.name)) ??
         models.value[0];
       selectedModel.value = preferred.name;
     }
@@ -226,7 +226,11 @@ async function send() {
   try {
     const route = await window.trolly.router.classify(text);
     if (route.task !== 'chat') {
-      const routerName = route.source === 'jev' ? `JEV · ${route.routerModel ?? 'local'}` : 'Router · deterministic fallback';
+      const routerName = route.source === 'panda'
+        ? 'Panda'
+        : route.source === 'jev'
+          ? `JEV · ${route.routerModel ?? 'local'}`
+          : 'Router · deterministic fallback';
       messages.value.push({
         role: 'tool',
         name: routerName,
@@ -248,7 +252,7 @@ async function send() {
     const last = history[history.length - 1];
     if (attached) last.images = [attached.base64];
     const reply = await window.trolly.ollama.chat({
-      model: selectedModel.value,
+      model: route.source === 'panda' && route.task === 'chat' ? route.model : selectedModel.value,
       messages: [{ role: 'system', content: systemPrompt() }, ...history],
       temperature: 0.85,
       maxTokens: 1024,

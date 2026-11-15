@@ -7,11 +7,14 @@ import ProvidersView from './views/ProvidersView.vue';
 import ArtistryView from './views/ArtistryView.vue';
 import MindView from './views/MindView.vue';
 import StudioView from './views/StudioView.vue';
+import FloatingPets from './components/FloatingPets.vue';
+import VaultPanel from './components/VaultPanel.vue';
 import { appMode, applyModeState, loadMode, setAdultMode } from './lib/mode';
 
 type ViewId = 'stage' | 'mcp' | 'providers' | 'artistry' | 'studio' | 'mind';
 
 const view = ref<ViewId>('stage');
+const vaultOpen = ref(false);
 
 const NAV: { id: ViewId; label: string }[] = [
   { id: 'stage', label: 'Stage' },
@@ -147,7 +150,7 @@ onMounted(async () => {
             :class="{ active: !appMode.adult }"
             @click="setAdultMode(false)"
           >
-            Clean
+            SFW
           </button>
           <button
             class="mode-btn"
@@ -173,11 +176,14 @@ onMounted(async () => {
           <span class="led" />
           Brainstorm
         </button>
+        <button class="chip" type="button" title="Locked image vault" @click="vaultOpen = true">
+          Vault
+        </button>
       </header>
 
       <section v-if="!appMode.adult" class="clean-status" role="status">
-        <strong>Clean visual protection</strong>
-        <span>Agent, chat, tools, and tasks stay available · instant hotkey Ctrl+Alt+C</span>
+        <strong>SFW</strong>
+        <span>Top switch covers every picture, pet, and clip · Ctrl+Alt+C</span>
       </section>
       <StageView v-show="view === 'stage'" @navigate="view = $event" />
       <McpView v-show="view === 'mcp'" />
@@ -185,6 +191,18 @@ onMounted(async () => {
       <ArtistryView v-show="view === 'artistry'" />
       <StudioView v-show="view === 'studio'" />
       <MindView v-show="view === 'mind'" />
+      <VaultPanel v-if="vaultOpen" @back="vaultOpen = false" />
     </main>
+    <FloatingPets />
+    <button
+      class="clean-pet"
+      :class="{ armed: appMode.adult }"
+      type="button"
+      title="SFW. Hides every adult picture, pet, and clip."
+      @click="setAdultMode(false)"
+    >
+      <span class="clean-pet-mark" aria-hidden="true" />
+      <span>SFW</span>
+    </button>
   </div>
 </template>

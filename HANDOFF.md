@@ -154,12 +154,7 @@ NOT yet run** — run it before treating the branch as fully reviewed:
    interrupt, end-call. Build only after P0/P1 above.
 6. **Comfy Desktop state.** Currently OFFLINE on Alienware; start it for Artistry.
    On Sabretooth, ComfyUI must be installed fresh (see §3).
-7. **OmniRoute fallback.** Alias plan (Hermes `.env`: `OMNIROUTE_API_KEY`,
-   `model.aliases.omni-best` → `http://192.168.0.15:20128/v1`, `key_env`) is
-   configured conceptually but the endpoint **times out from .40** — .15 drops
-   all probed ports. Open OmniRoute publicly + firewall on Sabretooth, then add
-   `hermes fallback add` chain: Kimi/Nous → opencode-zen (already keyed) →
-   omni-best → local eve-cpu.
+7. **OmniRoute on this node.** Fresh install at `D:\Trolly\omniroute`. Dashboard is `http://192.168.0.8:20128/dashboard` (no `/v1`). API clients use `http://192.168.0.8:20128/v1`. Do not use localhost or `192.168.0.15`. MCP stdio is `omniroute --mcp`. Streamable HTTP is `http://192.168.0.8:20128/api/mcp/stream`.
 
 ## 2B. One repo for the lane
 

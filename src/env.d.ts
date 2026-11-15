@@ -94,7 +94,7 @@ export interface TrollyBridge {
       model: string;
       reason: string;
       prompt: string;
-      source: 'jev' | 'fallback';
+      source: 'jev' | 'panda' | 'fallback';
       routerModel?: string;
     }>;
   };
@@ -194,6 +194,18 @@ export interface TrollyBridge {
     clean(): Promise<SessionModeState>;
     acknowledgeClean(epoch: number): Promise<SessionModeState>;
     onChanged(cb: (state: SessionModeState) => void): () => void;
+  };
+  vault: {
+    status(): Promise<{ hasPassword: boolean; unlocked: boolean }>;
+    lock(): Promise<{ hasPassword: boolean; unlocked: boolean }>;
+    setPassword(password: string): Promise<{ hasPassword: boolean; unlocked: boolean }>;
+    unlock(password: string): Promise<{ hasPassword: boolean; unlocked: boolean }>;
+    changePassword(current: string, next: string): Promise<{ hasPassword: boolean; unlocked: boolean }>;
+    reset(password: string): Promise<{ hasPassword: boolean; unlocked: boolean }>;
+    list(): Promise<{ name: string }[]>;
+    add(payload: { name: string; dataBase64: string }): Promise<{ name: string }>;
+    read(name: string): Promise<{ name: string; dataBase64: string } | null>;
+    remove(name: string): Promise<void>;
   };
   paths(): Promise<{ dataDir: string; appRoot: string }>;
 }

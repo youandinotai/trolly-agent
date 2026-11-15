@@ -17,7 +17,7 @@ Full technical handoff lives in the repo: `D:\mira\trolly-agent\HANDOFF.md`
 - Trolly safety system verified: 66/66 tests, typecheck, leak scan, 9/9 live
   safe-mode checks, real After Dark suppression race, valid Kokoro WAV.
 - Independent re-review of the fix batch is the remaining process gate.
-- OS-global hotkey unverified; OmniRoute 192.168.0.15:20128 unreachable (ports
+- OmniRoute for this node is `http://192.168.0.8:20128`. Dashboard has no `/v1`. Do not call `192.168.0.15`.
   dropped); Comfy Desktop offline at handoff time.
 - AMD GPU on Sabretooth: SoW venv and ComfyUI must be reinstalled fresh
   (no CUDA carry-over; DirectML or CPU for ComfyUI).

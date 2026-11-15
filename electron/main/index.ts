@@ -15,19 +15,21 @@ import { SpeechClient } from './speech.js';
 import { MindStore } from './mind.js';
 import { resolveAfterDarkOutputDir } from '../../src/lib/after-dark.js';
 import { SessionMode, type SessionModeSnapshot } from '../../src/lib/session-mode.js';
+import { MediaVault } from './vault.js';
 
 const __dirname_ = path.dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = path.resolve(__dirname_, '..', '..', '..');
 
 /** All mutable state lives on D: — never on the system drive. */
 const DATA_DIR = process.env.TROLLY_DATA_DIR || path.join(APP_ROOT, 'data');
+const vault = new MediaVault(process.env.TROLLY_VAULT_DIR || 'D:/Trolly/data/vault');
 
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let supervisor: McpSupervisor | null = null;
 
 const ollama = new OllamaClient('http://127.0.0.1:11434');
-const router = new JevTaskRouter('http://127.0.0.1:11434', process.env.TROLLY_ROUTER_MODEL || 'eve-cpu:latest');
+const router = new JevTaskRouter('http://127.0.0.1:11434', process.env.TROLLY_PANDA_URL || 'http://127.0.0.1:48710');
 const comfy = new ComfyClient('http://127.0.0.1:8188');
 const afterDark = new AfterDarkClient(
   'http://127.0.0.1:8188',
@@ -90,6 +92,7 @@ function setSessionAdult(enabled: boolean): SessionModeSnapshot {
 }
 
 function cleanNow(): SessionModeSnapshot {
+  vault.lock();
   // Dedupe the renderer keydown and Electron globalShortcut firing together.
   const now = Date.now();
   if (now - lastCleanAt < 400 && cleanShield) return contentMode.snapshot();
@@ -236,6 +239,19 @@ function registerIpc() {
     return contentMode.snapshot();
   });
   ipcMain.handle('trolly:paths', async () => ({ dataDir: DATA_DIR, appRoot: APP_ROOT }));
+  ipcMain.handle('trolly:vault:status', async () => vault.status());
+  ipcMain.handle('trolly:vault:lock', async () => vault.lock());
+  ipcMain.handle('trolly:vault:set', async (_e, password: string) => vault.setPassword(password));
+  ipcMain.handle('trolly:vault:unlock', async (_e, password: string) => vault.unlock(password));
+  ipcMain.handle('trolly:vault:change', async (_e, current: string, next: string) => vault.changePassword(current, next));
+  ipcMain.handle('trolly:vault:reset', async (_e, password: string) => vault.reset(password));
+  ipcMain.handle('trolly:vault:list', async () => (contentMode.snapshot().adult ? vault.list() : []));
+  ipcMain.handle('trolly:vault:add', async (_e, payload: { name: string; dataBase64: string }) => {
+    if (!contentMode.snapshot().adult) throw new Error('Vault images stay hidden while SFW is on.');
+    return vault.add(payload.name, payload.dataBase64);
+  });
+  ipcMain.handle('trolly:vault:read', async (_e, name: string) => (contentMode.snapshot().adult ? vault.read(name) : null));
+  ipcMain.handle('trolly:vault:remove', async (_e, name: string) => vault.remove(name));
   ipcMain.handle('trolly:studio:read', async () => studio.read());
   ipcMain.handle('trolly:studio:garment:save', async (_e, payload) => studio.saveGarment(payload));
   ipcMain.handle('trolly:studio:actor:save', async (_e, payload) => studio.saveActor(payload));

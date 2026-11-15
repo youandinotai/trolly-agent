@@ -5,6 +5,7 @@ import AvatarStage from '../components/AvatarStage.vue';
 import SafeMedia from '../components/SafeMedia.vue';
 import { appMode } from '../lib/mode';
 import type { GarmentCategory, StudioActor, StudioDoc, StudioGarment, StudioScene } from '../lib/studio-types.js';
+import { WARDROBE_CATALOG } from '../lib/wardrobe-catalog.js';
 
 type Tab = 'wardrobe' | 'actors' | 'scenes';
 const tabs: { id: Tab; label: string }[] = [
@@ -19,7 +20,9 @@ const doc = ref<StudioDoc>({ actors: [], garments: [], scenes: [], activeActorId
 const actor = ref<StudioActor | null>(null);
 const selectedGarment = ref<StudioGarment | null>(null);
 const scene = ref<StudioScene | null>(null);
-const category = ref<'all' | GarmentCategory>('all');
+const category = ref<'all' | GarmentCategory>('top');
+const page = ref(1);
+const PAGE_SIZE = 6;
 const busy = ref(false);
 const error = ref('');
 const status = ref('');
@@ -55,11 +58,20 @@ const sceneForm = ref({ name: 'Neon Midnight', background: '#0d0714', accent: '#
 
 const filteredGarments = computed(() => doc.value.garments.filter((item) => {
   if (category.value !== 'all' && item.category !== category.value) return false;
-  // Clean presentation: intimate pieces stay out of the list until Adult is
-  // deliberately unlocked again.
   if (!appMode.adult && ['bikini', 'underwear'].includes(item.category)) return false;
   return true;
 }));
+const pageCount = computed(() => Math.max(1, Math.ceil(filteredGarments.value.length / PAGE_SIZE)));
+const pagedGarments = computed(() => {
+  const start = (Math.min(page.value, pageCount.value) - 1) * PAGE_SIZE;
+  return filteredGarments.value.slice(start, start + PAGE_SIZE);
+});
+const selectedShop = computed(() => WARDROBE_CATALOG.find((item) => item.id === selectedGarment.value?.id) ?? null);
+
+function setCategory(value: 'all' | GarmentCategory) {
+  category.value = value;
+  page.value = 1;
+}
 
 function note(message: string) {
   status.value = message;
@@ -322,18 +334,25 @@ onMounted(async () => {
     <div class="studio-grid">
       <aside class="studio-panel studio-library">
         <template v-if="tab === 'wardrobe'">
-          <div class="panel-title"><h3>Closet</h3><span>{{ doc.garments.length }}</span></div>
+          <div class="panel-title"><h3>Clothing type: {{ category === 'all' ? 'All' : category }}</h3><span>Page {{ Math.min(page, pageCount) }} of {{ pageCount }}</span></div>
           <label class="studio-upload">Upload clothing artwork<input type="file" accept="image/png,image/jpeg" hidden @change="uploadArtwork" /></label>
-          <p class="studio-note">Artwork wraps fitted 3D garments. Color changes stay editable.</p>
+          <p class="studio-note">A small modern closet. Shop links open a public search. No affiliate code is attached yet.</p>
           <p v-if="!appMode.adult" class="studio-note">Intimate pieces are hidden in Clean and return with Adult.</p>
-          <select v-model="category" class="studio-select" aria-label="Wardrobe category">
+          <select class="studio-select" aria-label="Wardrobe category" :value="category" @change="setCategory(($event.target as HTMLSelectElement).value as 'all' | GarmentCategory)">
             <option value="all">All pieces</option><option value="hat">Hats</option><option value="top">Tops</option><option value="dress">Dresses</option><option value="bikini">Bikini</option><option value="underwear">Underwear</option><option value="shoes">Shoes</option>
           </select>
-          <div class="library-list">
-            <div v-for="garment in filteredGarments" :key="garment.id" class="library-item" :class="{ active: actor?.garmentIds.includes(garment.id) }">
-              <button class="library-main" @click="applyGarment(garment)"><span class="swatch" :style="{ background: garment.color }" /><span><strong>{{ garment.name }}</strong><small>{{ garment.category }}</small></span></button>
+          <div class="wardrobe-grid">
+            <div v-for="garment in pagedGarments" :key="garment.id" class="wardrobe-card" :class="{ active: actor?.garmentIds.includes(garment.id) }">
+              <button class="wardrobe-wear" @click="applyGarment(garment)">
+                <span class="wardrobe-swatch" :style="{ background: garment.color }" />
+                <strong>{{ garment.name }}</strong>
+              </button>
               <button class="library-remove" title="Remove from current outfit" @click="removeGarment(garment.id)">×</button>
             </div>
+          </div>
+          <div class="wardrobe-pages">
+            <button type="button" :disabled="page <= 1" @click="page -= 1">Prev</button>
+            <button type="button" :disabled="page >= pageCount" @click="page += 1">Next</button>
           </div>
         </template>
 
@@ -376,6 +395,7 @@ onMounted(async () => {
           <div v-if="garmentForm.imageUrl" class="artwork-preview"><SafeMedia :src="garmentForm.imageUrl" kind="image" alt="Uploaded garment artwork" /></div>
           <button class="studio-action" @click="saveGarment">Save + wear</button>
           <button class="studio-action secondary" @click="clearWardrobe">Clear outfit</button>
+          <a v-if="selectedShop" class="studio-shop" :href="selectedShop.shopUrl" target="_blank" rel="noreferrer">{{ selectedShop.shopLabel }}</a>
           <p class="studio-note">Parametric 3D fitting, not one-click cloth reconstruction. Each piece follows the avatar bones.</p>
         </template>
 
@@ -430,6 +450,15 @@ onMounted(async () => {
 .studio-select, .studio-field input, .studio-field select { width: 100%; padding: 7px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg-panel); color: var(--text); }
 .studio-select { margin: 8px 0 12px; }
 .library-list { display: flex; flex-direction: column; gap: 6px; }
+.wardrobe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.wardrobe-card { display: flex; align-items: stretch; border: 1px solid transparent; border-radius: 8px; background: #1a1a1a; overflow: hidden; }
+.wardrobe-card.active { border-color: var(--accent-dim); }
+.wardrobe-wear { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 8px; text-align: left; color: inherit; }
+.wardrobe-swatch { display: block; height: 72px; border-radius: 6px; }
+.wardrobe-wear strong { font-size: 11px; font-weight: 560; }
+.wardrobe-pages { display: flex; justify-content: space-between; margin-top: 10px; }
+.wardrobe-pages button:disabled { opacity: .4; }
+.studio-shop { display: block; margin-top: 10px; color: var(--accent); font-size: 12px; }
 .library-item, .actor-card, .scene-card { display: flex; align-items: center; border: 1px solid transparent; border-radius: 7px; background: var(--bg-panel); }
 .library-item.active, .actor-card.active, .scene-card.active { border-color: var(--accent-dim); }
 .library-main, .actor-card, .scene-card { flex: 1; display: flex; align-items: center; gap: 10px; padding: 9px; text-align: left; }
