@@ -235,8 +235,8 @@ async function send() {
         role: 'tool',
         name: routerName,
         text: route.task === 'avatar'
-          ? `Avatar → Stage VRM · ${route.model}. Choose a VRM or GLB on the stage to continue.`
-          : `${route.task} → ${route.backend} · ${route.model}. Opening Artistry with your prompt.`,
+          ? `Avatar → Stage VRM · ${route.model}. Skill ${route.specialist || 'product'}.`
+          : `${route.task} → ${route.backend} · ${route.model}. Skill ${route.specialist || 'product'}. Opening Artistry with your prompt.`,
       });
       if (route.task !== 'avatar') {
         window.dispatchEvent(new CustomEvent('trolly:task-route', { detail: route }));

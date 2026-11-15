@@ -9,6 +9,7 @@ export interface TaskRoute {
   prompt: string;
   source: 'jev' | 'panda' | 'fallback';
   routerModel?: string;
+  specialist?: string;
 }
 
 const ROUTES: Record<TaskKind, { backend: TaskBackend; model: string }> = {

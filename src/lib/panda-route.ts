@@ -7,7 +7,7 @@ export interface LocalModelRef {
 
 export interface PandaCard {
   id: string;
-  provider: 'ollama';
+  provider: 'ollama' | 'agency';
   model: string;
   description: string;
   skills: Record<string, { theta: number; se: number }>;
@@ -62,7 +62,47 @@ export function pandaRouteRequest(prompt: string, models: LocalModelRef[]) {
   };
 }
 
-/** Keep the studio assignment. Panda only chooses the local model that handles the text. */
+export function agencySkillCard(division: string): PandaCard {
+  const name = String(division ?? '').trim().toLowerCase();
+  if (!name || /health/i.test(name)) throw new Error('That skill is not in the router.');
+  const skills = Object.fromEntries(SKILL_AXES.map((axis) => [axis, { theta: name === 'engineering' && axis === 'coding' ? 8 : 5, se: 1.5 }]));
+  return {
+    id: `agency-${name}`,
+    provider: 'agency',
+    model: name,
+    description: `Local agency skill ${name}. The app assigns it. Panda does not run it.`,
+    skills,
+    modalities: { input: ['text'], output: ['text'] },
+    limits: { context_tokens: 8192 },
+    cost: { input_per_mtok: 0, output_per_mtok: 0, currency: 'USD' },
+    features: { tools: true, json_mode: false },
+    local: true,
+    provenance: 'estimated',
+  };
+}
+
+export function pandaAgencyRequest(prompt: string, divisions: string[] = []) {
+  const pool = divisions.filter((name) => name && !/health/i.test(name)).map(agencySkillCard);
+  return {
+    task: {
+      text: prompt,
+      context: { repo_languages: ['typescript'] },
+    },
+    pool,
+    constraints: { local_only: true },
+    preferences: { mode: 'max_utility' as const, min_p_success: 0.4 },
+    return_top_k: 1,
+  };
+}
+
+/** Same split as image routing: Panda names the skill, the app keeps the job. */
+export function applyAgencyChoice(route: TaskRoute, response: any, cards: PandaCard[]): TaskRoute {
+  const choiceId = String(response?.choice?.model_id ?? '');
+  const card = cards.find((item) => item.id === choiceId);
+  const specialist = card?.model || '';
+  if (/health/i.test(specialist)) throw new Error('Healthcare is not a router option.');
+  return { ...route, specialist: specialist || undefined, source: card ? 'panda' : route.source, routerModel: card ? 'panda-router' : route.routerModel };
+}
 export function applyPandaChoice(route: TaskRoute, response: any, cards: PandaCard[]): TaskRoute {
   const choiceId = String(response?.choice?.model_id ?? '');
   const card = cards.find((item) => item.id === choiceId || item.model === choiceId);

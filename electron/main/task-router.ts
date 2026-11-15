@@ -1,4 +1,5 @@
-import { applyPandaChoice, pandaRouteRequest } from '../../src/lib/panda-route.js';
+import { applyAgencyChoice, applyPandaChoice, pandaAgencyRequest, pandaRouteRequest } from '../../src/lib/panda-route.ts';
+import { AGENCY_DIVISIONS, fallbackSpecialist } from '../../src/lib/agency-roster.ts';
 import { routeTaskDeterministic, type TaskRoute } from '../../src/lib/task-router.js';
 
 /** Panda picks the local model. Studio assignment stays in the deterministic map. */
@@ -34,10 +35,26 @@ export class JevTaskRouter {
         body: JSON.stringify(request),
       });
       if (!response.ok) throw new Error(`Panda returned HTTP ${response.status}`);
-      return applyPandaChoice(fallback, await response.json(), request.pool);
+      const routed = applyPandaChoice(fallback, await response.json(), request.pool);
+      const agency = pandaAgencyRequest(prompt, [...AGENCY_DIVISIONS]);
+      try {
+        const skillResponse = await fetch(`${this.pandaUrl}/route`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(15000),
+          body: JSON.stringify(agency),
+        });
+        if (!skillResponse.ok) throw new Error(`Panda skill route returned HTTP ${skillResponse.status}`);
+        const skilled = applyAgencyChoice(routed, await skillResponse.json(), agency.pool);
+        return { ...skilled, specialist: skilled.specialist || fallbackSpecialist(prompt) };
+      } catch {
+        const picked = applyAgencyChoice(routed, {}, agency.pool);
+        return { ...picked, specialist: picked.specialist || fallbackSpecialist(prompt) };
+      }
     } catch {
       return {
         ...fallback,
+        specialist: fallbackSpecialist(prompt),
         reason: `${fallback.reason} Panda was unavailable, so deterministic routing was used.`,
       };
     }

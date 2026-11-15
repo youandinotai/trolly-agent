@@ -96,6 +96,7 @@ export interface TrollyBridge {
       prompt: string;
       source: 'jev' | 'panda' | 'fallback';
       routerModel?: string;
+      specialist?: string;
     }>;
   };
   mind: {

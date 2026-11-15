@@ -10,11 +10,14 @@ import StudioView from './views/StudioView.vue';
 import FloatingPets from './components/FloatingPets.vue';
 import VaultPanel from './components/VaultPanel.vue';
 import { appMode, applyModeState, loadMode, setAdultMode } from './lib/mode';
+import { HARNESSES, customEndpointOrEmpty, type HarnessId } from './lib/harness';
 
 type ViewId = 'stage' | 'mcp' | 'providers' | 'artistry' | 'studio' | 'mind';
 
 const view = ref<ViewId>('stage');
 const vaultOpen = ref(false);
+const harness = ref<HarnessId>('local');
+const customEndpoint = ref('');
 
 const NAV: { id: ViewId; label: string }[] = [
   { id: 'stage', label: 'Stage' },
@@ -182,8 +185,19 @@ onMounted(async () => {
         <button class="chip" type="button" title="Locked image vault" @click="vaultOpen = true">
           Vault
         </button>
+        <select class="chip" :value="harness" aria-label="Agent harness" @change="harness = ($event.target as HTMLSelectElement).value as HarnessId">
+          <option v-for="item in HARNESSES" :key="item.id" :value="item.id">{{ item.label }}</option>
+        </select>
       </header>
 
+      <section v-if="harness === 'custom'" class="clean-status">
+        <strong>Endpoint</strong>
+        <input :value="customEndpoint" placeholder="http://192.168.0.8:9119" @change="customEndpoint = customEndpointOrEmpty(($event.target as HTMLInputElement).value)" />
+      </section>
+      <section class="clean-status">
+        <strong>{{ HARNESSES.find((item) => item.id === harness)?.label }}</strong>
+        <span>{{ harness === 'custom' ? (customEndpoint || 'URL only. Keys stay in Hermes or OmniRoute.') : HARNESSES.find((item) => item.id === harness)?.detail }}</span>
+      </section>
       <section v-if="!appMode.adult" class="clean-status" role="status">
         <strong>SFW</strong>
         <span>Top switch covers every picture, pet, and clip · Ctrl+Alt+C</span>
