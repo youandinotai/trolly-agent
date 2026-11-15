@@ -16,6 +16,7 @@ import { MindStore } from './mind.js';
 import { resolveAfterDarkOutputDir } from '../../src/lib/after-dark.js';
 import { SessionMode, type SessionModeSnapshot } from '../../src/lib/session-mode.js';
 import { MediaVault } from './vault.js';
+import { GLANCE_NEWS_URL } from '../../src/lib/glance-cover.js';
 
 const __dirname_ = path.dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = path.resolve(__dirname_, '..', '..', '..');
@@ -52,6 +53,7 @@ function publishMode(state: SessionModeSnapshot = contentMode.snapshot()): void 
 /** Opaque native cover: up before any renderer work, down only after the
  * renderer acknowledges the safe presentation is on screen. */
 let cleanShield: BrowserView | null = null;
+let glanceCover: BrowserView | null = null;
 let lastCleanAt = 0;
 
 function showCleanShield(): void {
@@ -77,6 +79,42 @@ function hideCleanShield(): void {
   cleanShield = null;
 }
 
+function showGlance(): void {
+  if (!mainWindow) return;
+  if (!glanceCover) {
+    glanceCover = new BrowserView({
+      webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false },
+    });
+    mainWindow.addBrowserView(glanceCover);
+    const [width, height] = mainWindow.getContentSize();
+    glanceCover.setBounds({ x: 0, y: 0, width, height });
+    glanceCover.setAutoResize({ width: true, height: true });
+    glanceCover.setBackgroundColor('#111111');
+    glanceCover.webContents.on('before-input-event', (_event, input) => {
+      if (input.type === 'keyDown' && (input.key === 'Escape' || (input.control && input.alt && input.key.toLowerCase() === 'g'))) {
+        hideGlance();
+      }
+    });
+    void glanceCover.webContents.loadURL(GLANCE_NEWS_URL).catch(() => {});
+  }
+  mainWindow?.webContents.setAudioMuted(true);
+}
+
+function hideGlance(): void {
+  if (!mainWindow || !glanceCover) return;
+  try {
+    mainWindow.removeBrowserView(glanceCover);
+    glanceCover.webContents.close();
+  } catch { /* window may already be gone */ }
+  glanceCover = null;
+  if (contentMode.snapshot().adult) mainWindow.webContents.setAudioMuted(false);
+}
+
+function toggleGlance(): void {
+  if (glanceCover) hideGlance();
+  else showGlance();
+}
+
 /** Clean is fail-closed: in-memory protection applies even if preference
  * persistence fails. Adult is deliberate: persistence must succeed first. */
 function setSessionAdult(enabled: boolean): SessionModeSnapshot {
@@ -92,6 +130,7 @@ function setSessionAdult(enabled: boolean): SessionModeSnapshot {
 }
 
 function cleanNow(): SessionModeSnapshot {
+  hideGlance();
   vault.lock();
   // Dedupe the renderer keydown and Electron globalShortcut firing together.
   const now = Date.now();
@@ -177,6 +216,7 @@ function createTray() {
     Menu.buildFromTemplate([
       { label: 'Show Trolly Agent', click: () => mainWindow?.show() },
       { label: 'Clean now · Ctrl+Alt+C', click: () => cleanNow() },
+      { label: 'News cover · Ctrl+Alt+G', click: () => toggleGlance() },
       { type: 'separator' },
       { label: 'Quit', click: () => app.quit() },
     ]),
@@ -230,6 +270,7 @@ function registerIpc() {
   ipcMain.handle('trolly:mode:state', async () => contentMode.snapshot());
   ipcMain.handle('trolly:mode:adult', async (_e, enabled: boolean) => setSessionAdult(enabled));
   ipcMain.handle('trolly:mode:clean', async () => cleanNow());
+  ipcMain.handle('trolly:glance:toggle', async () => { toggleGlance(); return { covered: !!glanceCover }; });
   ipcMain.handle('trolly:mode:clean-ack', async (_e, epoch: number) => {
     const state = contentMode.snapshot();
     if (!state.adult && epoch === state.epoch) {
@@ -284,6 +325,9 @@ app.whenReady().then(async () => {
   createTray();
   if (!globalShortcut.register('Control+Alt+C', cleanNow)) {
     console.warn('Clean hotkey Ctrl+Alt+C could not be registered; the top-bar and tray controls remain available.');
+  }
+  if (!globalShortcut.register('Control+Alt+G', toggleGlance)) {
+    console.warn('News cover hotkey Ctrl+Alt+G could not be registered; the top-bar control remains available.');
   }
 
   app.on('activate', () => {

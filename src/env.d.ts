@@ -195,6 +195,9 @@ export interface TrollyBridge {
     acknowledgeClean(epoch: number): Promise<SessionModeState>;
     onChanged(cb: (state: SessionModeState) => void): () => void;
   };
+  glance: {
+    toggle(): Promise<{ covered: boolean }>;
+  };
   vault: {
     status(): Promise<{ hasPassword: boolean; unlocked: boolean }>;
     lock(): Promise<{ hasPassword: boolean; unlocked: boolean }>;

@@ -176,6 +176,9 @@ onMounted(async () => {
           <span class="led" />
           Brainstorm
         </button>
+        <button class="chip" type="button" title="Quick cover. Opens an AI news page. Esc brings this screen back. Does not change SFW." @click="window.trolly.glance.toggle()">
+          News
+        </button>
         <button class="chip" type="button" title="Locked image vault" @click="vaultOpen = true">
           Vault
         </button>

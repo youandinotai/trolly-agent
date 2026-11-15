@@ -75,6 +75,9 @@ contextBridge.exposeInMainWorld('trolly', {
       return () => ipcRenderer.removeListener('trolly:mode:changed', listener);
     },
   },
+  glance: {
+    toggle: () => ipcRenderer.invoke('trolly:glance:toggle'),
+  },
   vault: {
     status: () => ipcRenderer.invoke('trolly:vault:status'),
     lock: () => ipcRenderer.invoke('trolly:vault:lock'),
