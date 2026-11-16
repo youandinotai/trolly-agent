@@ -1,6 +1,7 @@
 node_modules/
-dist/
 data/
+dist/
+graphify-out/
 .tmp/
 rea/
 *.log

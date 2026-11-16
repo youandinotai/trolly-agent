@@ -1,0 +1,5 @@
+mcp_servers:
+  chrome-devtools:
+    command: "cmd.exe"
+    args: ["/c", "npx", "-y", "chrome-devtools-mcp@latest", "--autoConnect", "--no-usage-statistics"]
+    timeout: 60
