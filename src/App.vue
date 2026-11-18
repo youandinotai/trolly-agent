@@ -211,15 +211,5 @@ onMounted(async () => {
       <VaultPanel v-if="vaultOpen" @back="vaultOpen = false" />
     </main>
     <FloatingPets />
-    <button
-      class="clean-pet"
-      :class="{ armed: appMode.adult }"
-      type="button"
-      title="SFW. Hides every adult picture, pet, and clip."
-      @click="setAdultMode(false)"
-    >
-      <span class="clean-pet-mark" aria-hidden="true" />
-      <span>SFW</span>
-    </button>
   </div>
 </template>

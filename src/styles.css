@@ -568,34 +568,22 @@ input, textarea, select {
 
 .float-pet {
   position: fixed;
-  left: 18px;
-  bottom: 18px;
-  z-index: 40;
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  padding: 6px 10px;
-  border: 1px solid #31545b;
-  border-radius: 18px;
-  background: rgba(13, 18, 24, 0.92);
-  color: #bce8e2;
+  right: 8px;
+  bottom: 0;
+  z-index: 30;
+  padding: 0;
+  border: none;
+  background: transparent;
   cursor: pointer;
 }
-.float-pet-sprite, .float-pet-mark {
-  width: 72px;
-  height: 96px;
+.float-pet-sprite {
+  display: block;
+  width: 168px;
+  height: auto;
   object-fit: contain;
-  transform-origin: 50% 100%;
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.45));
+  pointer-events: none;
 }
-.float-pet-mark {
-  border-radius: 40% 40% 46% 46%;
-  background:
-    radial-gradient(circle at 50% 28%, #f3d7c4 0 14px, transparent 15px),
-    linear-gradient(#f7f7f7, #f7f7f7) 28px 42px / 16px 18px no-repeat,
-    linear-gradient(#1c2430, #1c2430) 22px 58px / 28px 28px no-repeat,
-    #243044;
-}
-.float-pet-name { font: 600 11px var(--mono); letter-spacing: .04em; }
 .float-pet.idle { animation: pet-idle 2.4s ease-in-out infinite; }
 .float-pet.blink .float-pet-sprite, .float-pet.blink .float-pet-mark { animation: pet-blink 0.4s steps(2); }
 .float-pet.hop { animation: pet-hop 0.6s ease-in-out; }
