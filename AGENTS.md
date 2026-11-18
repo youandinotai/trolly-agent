@@ -22,6 +22,10 @@ Chat and media jobs do not start when the user sends a message. The router class
 - Studio `read()` drops garment IDs that no longer exist and writes that prune back.
 - Clean hides bikini and underwear. Wear with no actor selected must show an error, not fail silently.
 
+## Floating avatar
+
+The SFW floating avatar is the Hermes hatch pet, `src/assets/pets/hermes-pet.png`: full body, white shirt, black skirt, pinned to the right. A click runs Clean. Do not replace it with a corner chip or a CSS blob. `/hatch` in Hermes is how that pet is made. Trolly displays the installed sprite. It does not generate a new one.
+
 ## Files agents must keep current
 
 Any behavior change updates, in the same commit:
