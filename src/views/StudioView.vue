@@ -20,7 +20,7 @@ const doc = ref<StudioDoc>({ actors: [], garments: [], scenes: [], activeActorId
 const actor = ref<StudioActor | null>(null);
 const selectedGarment = ref<StudioGarment | null>(null);
 const scene = ref<StudioScene | null>(null);
-const category = ref<'all' | GarmentCategory>('top');
+const category = ref<'all' | GarmentCategory>('all');
 const page = ref(1);
 const PAGE_SIZE = 6;
 const busy = ref(false);
@@ -52,7 +52,7 @@ async function reviewWithHermes() {
   }
 }
 
-const garmentForm = ref({ name: 'Scarlet bikini', category: 'bikini' as GarmentCategory, color: '#e11d48', scale: 1, imageUrl: undefined as string | undefined });
+const garmentForm = ref({ name: 'White oxford', category: 'top' as GarmentCategory, color: '#f4f4f4', scale: 1, imageUrl: undefined as string | undefined });
 const actorForm = ref({ name: '', role: 'actress' as 'actor' | 'actress', hair: { color: '#f3f5f7', length: 1, volume: 1 }, smile: 0.25 });
 const sceneForm = ref({ name: 'Neon Midnight', background: '#0d0714', accent: '#67e8f9', lightIntensity: 1.2, imageUrl: undefined as string | undefined });
 
@@ -154,7 +154,10 @@ async function saveGarment() {
 }
 
 function applyGarment(garment: StudioGarment) {
-  if (!actor.value) return;
+  if (!actor.value) {
+    error.value = 'Pick an actor before wearing a piece.';
+    return;
+  }
   for (const id of [...actor.value.garmentIds]) {
     const existing = doc.value.garments.find((item) => item.id === id);
     if (existing && existing.id !== garment.id && existing.category === garment.category) {

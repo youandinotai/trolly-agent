@@ -5,6 +5,7 @@ import AvatarStage from '../components/AvatarStage.vue';
 import SafeMedia from '../components/SafeMedia.vue';
 import type { OllamaModel } from '../env';
 import { appMode, loadMode, systemPrompt } from '../lib/mode';
+import { planRouteSteps, type TaskRoute } from '../lib/task-router';
 import { DEFAULT_VOICE, type SpeechVoice } from '../lib/voices';
 
 const emit = defineEmits<{ (e: 'navigate', view: 'mcp' | 'providers' | 'artistry'): void }>();
@@ -25,6 +26,7 @@ const messages = ref<Msg[]>([
 
 const draft = ref('');
 const busy = ref(false);
+const preview = ref<{ route: TaskRoute; steps: string[]; text: string; images?: string[] } | null>(null);
 
 /* Speech: offline SAPI synthesis for replies. */
 const voiceEnabled = ref(false);
@@ -216,15 +218,42 @@ async function transcribe(blob: Blob): Promise<string> {
 
 async function send() {
   const text = draft.value.trim();
-  if (!text || busy.value) return;
+  if (!text || busy.value || preview.value) return;
   draft.value = '';
   const attached = attachment.value;
   attachment.value = null;
   messages.value.push({ role: 'user', name: 'You', text });
-  busy.value = true;
-
   try {
     const route = await window.trolly.router.classify(text);
+    const model = route.task === 'chat'
+      ? (route.source === 'panda' ? route.model : selectedModel.value)
+      : route.model;
+    preview.value = {
+      route: { ...route, model },
+      steps: planRouteSteps({ ...route, model }, selectedModel.value),
+      text,
+      images: attached ? [attached.base64] : undefined,
+    };
+  } catch (err: any) {
+    messages.value.push({ role: 'assistant', name: 'Trolly', text: `Router failed before any model call: ${err?.message ?? err}` });
+  }
+  await nextTick();
+  logEl.value?.scrollTo({ top: logEl.value.scrollHeight });
+}
+
+function stopPreview() {
+  if (!preview.value) return;
+  messages.value.push({ role: 'tool', name: 'Director', text: 'Stopped. No model call was made.' });
+  preview.value = null;
+}
+
+async function runPreview() {
+  const pending = preview.value;
+  if (!pending || busy.value) return;
+  preview.value = null;
+  const route = pending.route;
+  busy.value = true;
+  try {
     if (route.task !== 'chat') {
       const routerName = route.source === 'panda'
         ? 'Panda'
@@ -236,7 +265,7 @@ async function send() {
         name: routerName,
         text: route.task === 'avatar'
           ? `Avatar → Stage VRM · ${route.model}. Skill ${route.specialist || 'product'}.`
-          : `${route.task} → ${route.backend} · ${route.model}. Skill ${route.specialist || 'product'}. Opening Artistry with your prompt.`,
+          : `${route.task} → ${route.backend} · ${route.model}. Skill ${route.specialist || 'product'}. Opening Artistry.`,
       });
       if (route.task !== 'avatar') {
         window.dispatchEvent(new CustomEvent('trolly:task-route', { detail: route }));
@@ -250,9 +279,9 @@ async function send() {
         .filter((m): m is Msg & { role: 'user' | 'assistant' } => m.role !== 'tool')
         .map((m) => ({ role: m.role, content: m.text }));
     const last = history[history.length - 1];
-    if (attached) last.images = [attached.base64];
+    if (pending.images && last) last.images = pending.images;
     const reply = await window.trolly.ollama.chat({
-      model: route.source === 'panda' && route.task === 'chat' ? route.model : selectedModel.value,
+      model: route.model,
       messages: [{ role: 'system', content: systemPrompt() }, ...history],
       temperature: 0.85,
       maxTokens: 1024,
@@ -335,6 +364,21 @@ onMounted(async () => {
             </div>
           </div>
         </div>
+
+        <aside v-if="preview" class="route-preview" aria-label="Director preview">
+          <div class="route-preview-head">
+            <strong>Director</strong>
+            <span>{{ preview.route.specialist || 'product' }}</span>
+          </div>
+          <p>{{ preview.route.task }} · {{ preview.route.model }}</p>
+          <ol>
+            <li v-for="step in preview.steps" :key="step">{{ step }}</li>
+          </ol>
+          <div class="route-preview-actions">
+            <button type="button" class="btn sm" @click="stopPreview">Stop</button>
+            <button type="button" class="btn sm primary" @click="runPreview">Run</button>
+          </div>
+        </aside>
 
         <div class="stage-tool-actions" v-if="toolButtons.length">
           <div class="stage-tool-actions-inner">

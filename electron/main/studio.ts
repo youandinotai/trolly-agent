@@ -49,12 +49,23 @@ export class StudioStore {
       try { fs.copyFileSync(this.file, backup); } catch { /* preserve nothing if unreadable */ }
       return { actors: [], garments: [], scenes: [], activeActorId: null };
     }
-    return {
-      actors: Array.isArray(parsed.actors) ? parsed.actors : [],
-      garments: Array.isArray(parsed.garments) ? parsed.garments : [],
+    const garments = Array.isArray(parsed.garments) ? parsed.garments : [];
+    const known = new Set(garments.map((item: { id?: string }) => item.id).filter(Boolean));
+    const actors = (Array.isArray(parsed.actors) ? parsed.actors : []).map((actor: StudioActor) => ({
+      ...actor,
+      garmentIds: (actor.garmentIds ?? []).filter((id) => known.has(id)),
+    }));
+    const doc = {
+      actors,
+      garments,
       scenes: Array.isArray(parsed.scenes) ? parsed.scenes : [],
       activeActorId: typeof parsed.activeActorId === 'string' ? parsed.activeActorId : null,
     };
+    const hadGhosts = (parsed.actors ?? []).some((actor: StudioActor) =>
+      (actor.garmentIds ?? []).some((id) => !known.has(id)),
+    );
+    if (hadGhosts) this.write(doc);
+    return doc;
   }
 
   private write(doc: StudioDoc): void {

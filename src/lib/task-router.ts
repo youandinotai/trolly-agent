@@ -46,6 +46,22 @@ export function routeTaskDeterministic(input: string): TaskRoute {
   return routeFor('chat', prompt, 'The request is conversational rather than a clear media job.');
 }
 
+/** Steps shown before any paid or local generation call. */
+export function planRouteSteps(route: TaskRoute, chatModel: string): string[] {
+  const who = route.specialist || 'product';
+  const model = route.task === 'chat' ? (chatModel || route.model) : route.model;
+  const hold = route.task === 'chat'
+    ? 'No reply is generated until you press Run.'
+    : 'No image, video, or edit job starts until you press Run.';
+  return [
+    `Director chose ${who}.`,
+    `Task ${route.task} on ${route.backend}.`,
+    `Model ${model}. Router ${route.source}.`,
+    route.reason,
+    hold,
+  ];
+}
+
 /** Validate JEV output and map it to known local capabilities only. */
 export function parseTaskRoute(answer: string, prompt: string): TaskRoute {
   let parsed: any;

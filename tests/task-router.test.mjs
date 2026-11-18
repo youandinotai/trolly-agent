@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { parseTaskRoute, routeTaskDeterministic } from '../src/lib/task-router.ts';
+import { parseTaskRoute, planRouteSteps, routeTaskDeterministic } from '../src/lib/task-router.ts';
 
 test('deterministic router separates image, video, edit, avatar, and chat', () => {
   assert.equal(routeTaskDeterministic('make an image of a cabin').task, 'image');
@@ -35,4 +35,12 @@ test('JEV route parser accepts a valid local route and tags its source', () => {
 test('JEV parser rejects invalid or ambiguous output instead of guessing', () => {
   assert.throws(() => parseTaskRoute('probably an image', 'draw something'), /route|JSON/i);
   assert.throws(() => parseTaskRoute('{"task":"sing"}', 'sing something'), /route|task/i);
+});
+
+test('Director plan names the choice and holds the model call', () => {
+  const route = routeTaskDeterministic('draw a cabin');
+  const steps = planRouteSteps(route, 'eve-v2');
+  assert.match(steps[0], /Director chose/);
+  assert.match(steps.join('\n'), /No image, video, or edit job starts until you press Run/);
+  assert.doesNotMatch(steps.join('\n'), /healthcare/i);
 });

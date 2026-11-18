@@ -4,7 +4,7 @@
 shipped product and nothing is claimed past what ran.
 
 ## Verified green
-- Full suite: **82 tests / 82 pass / 0 fail** (`npm test`).
+- Full suite: **83 tests / 83 pass / 0 fail** (`npm test`).
 - Safety gate + merge guard: `tests/safety-gate.test.mjs` (subjects are always
   explicit legal adults; the scan refuses a minor, coercion, or harm).
 - Startup script: `D:\Trolly\start-lane.ps1` — starts Panda, OmniRoute, the
@@ -34,5 +34,7 @@ shipped product and nothing is claimed past what ran.
 
 ## Already done earlier this lane
 - Announce/panda-to-agency routing (healthcare is not a card).
-- Harness dropdown (Local / Hermes local / Hermes via OmniRoute / custom).
+- Harness dropdown (Local / Hermes local / Hermes via OmniRoute / OpenCode via OmniRoute / custom).
 - News cover (open AI news; Esc returns; does not swap SFW).
+- Director hold: Stage shows the chosen specialist, model, and steps before any chat or media call. Stop spends nothing. Agent rules live in `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`.
+- Wardrobe closet defaults to All. Studio read drops garment IDs that no longer exist.

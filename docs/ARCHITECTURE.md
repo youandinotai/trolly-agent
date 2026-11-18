@@ -3,7 +3,9 @@
 ```mermaid
 graph TD
   subgraph In["User prompt (Trolly chat)"]
-    U[Prompt] --> P[Panda router]
+    U[Prompt] --> D[Director preview]
+    D -->|Run| P[Panda router]
+    D -->|Stop| X[No model call]
   end
   P -->|local_only| M[Local vision de-aligned model]
   P -->|agency skill cards| A[Agency agent SKILL]

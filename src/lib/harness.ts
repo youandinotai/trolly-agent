@@ -28,6 +28,12 @@ export const HARNESSES: HarnessOption[] = [
     endpoint: 'http://192.168.0.8:20128/v1',
   },
   {
+    id: 'opencode-omni',
+    label: 'OpenCode via OmniRoute',
+    detail: 'OpenCode can point to OmniRoute /v1. Keys stay in Hermes or OmniRoute.',
+    endpoint: 'http://192.168.0.8:20128/v1',
+  },
+  {
     id: 'custom',
     label: 'Custom endpoint',
     detail: 'A URL only. Add a ChatGPT or Claude key in Hermes or OmniRoute, not here.',

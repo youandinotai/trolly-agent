@@ -291,7 +291,22 @@ input, textarea, select {
   background: var(--bg-raised);
   min-height: 0;
   overflow: hidden;
+  position: relative;
 }
+.route-preview {
+  margin: 0 12px 8px;
+  padding: 10px 12px;
+  border: 1px solid #31545b;
+  border-radius: 8px;
+  background: #121820;
+  color: #d5e4ea;
+  font-size: 12px;
+}
+.route-preview-head { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.route-preview-head span { color: #5eead4; font: 600 11px var(--mono); }
+.route-preview ol { margin: 8px 0; padding-left: 18px; }
+.route-preview li { margin: 3px 0; }
+.route-preview-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
 .chat-log {
   flex: 1;
