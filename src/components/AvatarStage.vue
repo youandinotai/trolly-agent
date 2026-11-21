@@ -61,7 +61,7 @@ function applyPresentation(adult: boolean) {
     engine?.stopAudio();
     if (engine && modelName.value) {
       safeReady.value = engine.setCleanMode(true);
-      customBackground.value = '#202733';
+      customBackground.value = '#25211d';
       customImage.value = '';
       requestAnimationFrame(() => {
         if (epoch !== presentationEpoch) return;
@@ -232,9 +232,9 @@ function clearGarments() {
 function setScene(scene: { background: string; accent: string; lightIntensity: number; imageUrl?: string }) {
   adultScene = { ...scene };
   if (!props.adult) {
-    customBackground.value = '#202733';
+    customBackground.value = '#25211d';
     customImage.value = '';
-    engine?.setSceneLighting({ accent: '#67e8f9', intensity: 1 });
+    engine?.setSceneLighting({ accent: '#ffd21a', intensity: 1 });
     return;
   }
   customBackground.value = scene.background;
@@ -414,7 +414,7 @@ onBeforeUnmount(() => {
 .scene-backdrop-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .72; }
 .scene-backdrop-image + .avatar-canvas { z-index: 1; }
 .avatar-studio.compact { width: 100%; height: 100%; min-height: 420px; }
-.avatar-safety-cover { position: absolute; inset: 0; z-index: 8; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 24px; background: #142027; color: #c5f3ec; text-align: center; }
+.avatar-safety-cover { position: absolute; inset: 0; z-index: 8; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 24px; background: #15120f; color: #ffd21a; text-align: center; }
 .avatar-safety-cover strong { font-size: 18px; }
-.avatar-safety-cover span { max-width: 340px; color: #8fbab8; font-size: 12px; line-height: 1.5; }
+.avatar-safety-cover span { max-width: 340px; color: #c1b6a6; font-size: 12px; line-height: 1.5; }
 </style>

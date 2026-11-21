@@ -1,40 +1,34 @@
-# Status — what is built, what is real
+# Status — local development and verification
 
-**Date:** 2026-11-15. Personal dev/test lane on `D:\Trolly`. Nothing here is a
-shipped product and nothing is claimed past what ran.
+This records results observed in the current worktree. No deployment or
+publication was performed.
 
-## Verified green
-- Full suite: **83 tests / 83 pass / 0 fail** (`npm test`).
-- Safety gate + merge guard: `tests/safety-gate.test.mjs` (subjects are always
-  explicit legal adults; the scan refuses a minor, coercion, or harm).
-- Startup script: `D:\Trolly\start-lane.ps1` — starts Panda, OmniRoute, the
-  browser companion, the Electron app, and the Hermes A2A gateway; starts only
-  what is down; never touches the OmniRoute password.
-- `docs/ARCHITECTURE.md` — the Mermaid pyramid/flow of route → judge → gate →
-  single-branch merge.
-- `scripts/merge-gate.mjs` — only the merge judge may merge; it re-runs the
-  real test suite before allowing `feature/initial-build`.
-- `scripts/gen-legal-adult-image.mjs` + `poll-comfy.mjs` + `watch-image.mjs`.
-- `mcp-servers.example.yaml` — chrome-devtools MCP for all Trolly agents.
+## Verified
 
-## Real, in progress (not yet done)
-- ComfyUI is up on `192.168.0.8:8188` and **has successfully submitted and
-  begun sampling** a legal-adult still image with the locked negative. This box
-  is AMD CPU-only for Comfy, so one 24-step image is ~50 min. **No finished
-  render to show yet** — the queue is 1 running + 3 pending.
-- Video (~5 s) needs the LTX text-to-video workflow; not yet run.
+- `npm run build` — passed. Electron, renderer, and yellow/red app and tray icons built. Vite reports a 982.67 kB minified JavaScript chunk, above its 500 kB advisory threshold.
+- `npm run typecheck` — passed for Electron and Vue.
+- `npm test` — **95 passed, 0 failed**.
+- `node --test tests/data-paths.test.mjs tests/studio.test.mjs` — **5 passed, 0 failed**.
+- `git diff --check` — passed.
+- `npm run verify:leak` — passed; **0 source-brand tokens** found in the shipped surface.
+- `remake report` (from `airi-remake/`) — **exit 2** because the overall gate is incomplete. Capture passed (1 page, 886 files); desktop and phone matches were 100.00%, motion match was 99.69%; the swap checklist passed at **43/43 (100%)**. “Live and private” is NOT YET because deployment was intentionally not requested.
+- `remake images` (from `airi-remake/`) — **exit 0**; 0 original images remain to replace.
+- The Impeccable detector reports only an advisory on the transparency checkerboard in `src/styles.css`; it is retained because it communicates the transparent viewport.
+- `npm ci` completed. Its install summary reported 8 dependency advisories (3 moderate, 5 high); they were not investigated or changed in this task.
 
-## Honest blockers
-- No safe, local, non-abliterated vision model is installed to act as judge 2.
-  The only vision-capable model is `abliterant/qwen3.5-rana` (de-aligned), which
-  is not a trustworthy safety judge. Recommend pulling a stock Qwen-VL before
-  the vision judge runs.
-- No merge has happened and no branch was created/pushed from this work. Single
-  branch `feature/initial-build` is untouched by this session, per policy.
+## Implemented
 
-## Already done earlier this lane
-- Announce/panda-to-agency routing (healthcare is not a card).
-- Harness dropdown (Local / Hermes local / Hermes via OmniRoute / OpenCode via OmniRoute / custom).
-- News cover (open AI news; Esc returns; does not swap SFW).
-- Director hold: Stage shows the chosen specialist, model, and steps before any chat or media call. Stop spends nothing. Agent rules live in `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`.
-- Wardrobe closet defaults to All. Studio read drops garment IDs that no longer exist.
+- Provider selection at startup for Ollama, OmniRoute, OpenCode-through-OmniRoute, Hermes local proxy, and custom OpenAI-compatible endpoints. Provider/model choices flow through the main-process adapter; endpoint and model choices persist locally.
+- Agent profiles load from `agent-profiles.json`, can be selected in Stage, and show visible run state. The Director Run/Stop hold remains the only path into task execution; profiles do not auto-run.
+- MCP templates support filesystem, custom agent tools, browser, and Playwright stdio servers. Fresh setup has no commands or auto-connections; filesystem access requires an explicit root.
+- Local Ollama model inventory, pull, and confirmed delete actions.
+- Local task workspace with status updates and resume-to-Stage behavior; resume does not submit or run the task.
+- Runtime data defaults under Electron's `userData` location, with `TROLLY_*` directory overrides; Vault and Studio reject source-tree paths.
+- Yellow/red with black/gray app palette and generated icons.
+
+## Known limits
+
+- Non-Ollama providers must expose OpenAI-compatible `/models` and `/chat/completions` endpoints; credentials must be configured in that provider service. OpenCode uses OmniRoute by default rather than its native HTTP API.
+- Image attachments are currently supported only through Ollama.
+- MCP transport is stdio only. New server connections require explicit action; existing config entries marked `enabled` may reconnect at startup.
+- One selected agent profile is applied per task; this does not fan out or execute every profile.

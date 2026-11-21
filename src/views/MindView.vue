@@ -372,7 +372,7 @@ onMounted(load);
 }
 .tab.active {
   background: var(--accent);
-  color: #06121a;
+  color: #17110a;
   font-weight: 600;
 }
 .field {
@@ -381,14 +381,14 @@ onMounted(load);
 .boundaries {
   padding: 12px 14px;
   margin-bottom: 18px;
-  background: var(--bg-panel);
+  background: linear-gradient(90deg, var(--accent-glow), transparent 42%), var(--bg-panel);
   border: 1px solid var(--line);
-  border-left: 3px solid var(--accent);
   border-radius: var(--radius-sm);
 }
 .boundaries h3 {
   margin: 0 0 8px;
   font-size: 13px;
+  color: var(--accent);
 }
 .boundaries ul {
   margin: 0;
@@ -418,7 +418,7 @@ onMounted(load);
   cursor: pointer;
 }
 .error {
-  color: #ff9b8a;
+  color: var(--danger);
   font-size: 12.5px;
 }
 .field label {

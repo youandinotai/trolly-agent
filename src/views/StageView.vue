@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 
 import AvatarStage from '../components/AvatarStage.vue';
 import SafeMedia from '../components/SafeMedia.vue';
 import type { OllamaModel } from '../env';
+import type { AgentProfile } from '../lib/agency-roster';
+import type { HarnessId } from '../lib/harness';
+import { HARNESSES } from '../lib/harness';
 import { appMode, loadMode, systemPrompt } from '../lib/mode';
 import { planRouteSteps, type TaskRoute } from '../lib/task-router';
 import { DEFAULT_VOICE, type SpeechVoice } from '../lib/voices';
 
 const emit = defineEmits<{ (e: 'navigate', view: 'mcp' | 'providers' | 'artistry'): void }>();
+const props = defineProps<{ provider: HarnessId; providerEndpoint: string }>();
 
 interface Msg {
   role: 'user' | 'assistant' | 'tool';
@@ -16,17 +20,30 @@ interface Msg {
   text: string;
 }
 
+interface RoutePreview {
+  route: TaskRoute;
+  steps: string[];
+  text: string;
+  images?: string[];
+  provider: HarnessId;
+  endpoint: string;
+  agent?: AgentProfile;
+}
+
 const messages = ref<Msg[]>([
   {
     role: 'assistant',
     name: 'Trolly',
-    text: 'Hey — I am running locally on your machine. I can talk, and with the tool servers connected I can drive ComfyUI, Maestro, and your browser. Say something.',
+    text: 'Hey — choose a provider and agent profile, then send a message. The Director will show the plan before anything runs.',
   },
 ]);
 
 const draft = ref('');
 const busy = ref(false);
-const preview = ref<{ route: TaskRoute; steps: string[]; text: string; images?: string[] } | null>(null);
+const preview = ref<RoutePreview | null>(null);
+const previewProviderLabel = computed(() =>
+  preview.value ? HARNESSES.find((item) => item.id === preview.value?.provider)?.label ?? preview.value.provider : '',
+);
 
 /* Speech: offline SAPI synthesis for replies. */
 const voiceEnabled = ref(false);
@@ -45,7 +62,15 @@ const mediaRecorder = ref<MediaRecorder | null>(null);
 const recordedChunks = ref<Blob[]>([]);
 const models = ref<OllamaModel[]>([]);
 const selectedModel = ref('');
+const profiles = ref<AgentProfile[]>([]);
+const selectedAgentId = ref(localStorage.getItem('trolly-agent-profile') ?? 'auto');
+const modelError = ref('');
+const agentError = ref('');
+const runStatus = ref('');
 const logEl = ref<HTMLElement | null>(null);
+let modelRequest = 0;
+let removeSpeechListener: (() => void) | null = null;
+let removeMcpListener: (() => void) | null = null;
 
 const DEFAULT_PERSONA = [
   'You are Trolly, a warm and candid companion living inside the Trolly Agent desktop app.',
@@ -74,18 +99,53 @@ async function loadPersona() {
 }
 
 async function loadModels() {
+  const request = ++modelRequest;
+  modelError.value = '';
   try {
-    models.value = await window.trolly.ollama.models();
-    if (!selectedModel.value && models.value.length) {
+    const inventory = await window.trolly.provider.models({
+      provider: props.provider,
+      endpoint: props.providerEndpoint,
+    });
+    if (request !== modelRequest) return;
+    models.value = inventory;
+    const saved = localStorage.getItem(`trolly-model-${props.provider}`);
+    if (saved && inventory.some((model) => model.name === saved)) {
+      selectedModel.value = saved;
+    } else if (inventory.length) {
       // Prefer a local chat model with a decent context window.
       const preferred =
-        models.value.find((m) => /eve-v2/i.test(m.name) && !/eve-cpu/i.test(m.name)) ??
-        models.value.find((m) => (m.contextLength ?? 0) >= 32768 && !/eve-cpu/i.test(m.name)) ??
-        models.value[0];
+        inventory.find((m) => /eve-v2/i.test(m.name) && !/eve-cpu/i.test(m.name)) ??
+        inventory.find((m) => (m.contextLength ?? 0) >= 32768 && !/eve-cpu/i.test(m.name)) ??
+        inventory[0];
       selectedModel.value = preferred.name;
+    } else {
+      selectedModel.value = '';
     }
-  } catch {
+  } catch (error: any) {
+    if (request !== modelRequest) return;
     models.value = [];
+    selectedModel.value = '';
+    modelError.value = String(error?.message ?? error);
+  }
+}
+
+watch(() => [props.provider, props.providerEndpoint] as const, () => { void loadModels(); });
+watch(selectedModel, (model) => {
+  if (model) localStorage.setItem(`trolly-model-${props.provider}`, model);
+});
+watch(selectedAgentId, (id) => localStorage.setItem('trolly-agent-profile', id));
+
+async function loadAgentProfiles() {
+  try {
+    const result = await window.trolly.agents.list();
+    profiles.value = result.profiles;
+    agentError.value = result.error;
+  } catch (error: any) {
+    profiles.value = [];
+    agentError.value = String(error?.message ?? error);
+  }
+  if (selectedAgentId.value !== 'auto' && !profiles.value.some((profile) => profile.id === selectedAgentId.value)) {
+    selectedAgentId.value = 'auto';
   }
 }
 
@@ -225,14 +285,21 @@ async function send() {
   messages.value.push({ role: 'user', name: 'You', text });
   try {
     const route = await window.trolly.router.classify(text);
-    const model = route.task === 'chat'
-      ? (route.source === 'panda' ? route.model : selectedModel.value)
-      : route.model;
+    const model = route.task === 'chat' ? selectedModel.value : route.model;
+    const selectedProfile = profiles.value.find((profile) => profile.id === selectedAgentId.value);
+    const plannedRoute = {
+      ...route,
+      model,
+      specialist: selectedProfile?.name ?? route.specialist,
+    };
     preview.value = {
-      route: { ...route, model },
-      steps: planRouteSteps({ ...route, model }, selectedModel.value),
+      route: plannedRoute,
+      steps: planRouteSteps(plannedRoute, selectedModel.value),
       text,
       images: attached ? [attached.base64] : undefined,
+      provider: props.provider,
+      endpoint: props.providerEndpoint,
+      agent: selectedProfile,
     };
   } catch (err: any) {
     messages.value.push({ role: 'assistant', name: 'Trolly', text: `Router failed before any model call: ${err?.message ?? err}` });
@@ -253,6 +320,7 @@ async function runPreview() {
   preview.value = null;
   const route = pending.route;
   busy.value = true;
+  runStatus.value = `${route.specialist || 'Trolly'} · ${HARNESSES.find((item) => item.id === pending.provider)?.label ?? pending.provider}`;
   try {
     if (route.task !== 'chat') {
       const routerName = route.source === 'panda'
@@ -280,9 +348,14 @@ async function runPreview() {
         .map((m) => ({ role: m.role, content: m.text }));
     const last = history[history.length - 1];
     if (pending.images && last) last.images = pending.images;
-    const reply = await window.trolly.ollama.chat({
+    const instructions = pending.agent && pending.agent.name === route.specialist
+      ? `${systemPrompt()}\n\n${pending.agent.systemPrompt}`
+      : systemPrompt();
+    const reply = await window.trolly.provider.chat({
+      provider: pending.provider,
+      endpoint: pending.endpoint,
       model: route.model,
-      messages: [{ role: 'system', content: systemPrompt() }, ...history],
+      messages: [{ role: 'system', content: instructions }, ...history],
       temperature: 0.85,
       maxTokens: 1024,
     });
@@ -296,9 +369,27 @@ async function runPreview() {
     });
   } finally {
     busy.value = false;
+    runStatus.value = '';
     await nextTick();
     logEl.value?.scrollTo({ top: logEl.value.scrollHeight });
   }
+}
+
+async function saveDraftAsTask() {
+  const text = draft.value.trim();
+  if (!text) return;
+  try {
+    const title = text.split(/\r?\n/, 1)[0].slice(0, 160) || 'New task';
+    await window.trolly.workspace.create({ title, description: text });
+    messages.value.push({ role: 'tool', name: 'Workspace', text: 'Saved this prompt as a task.' });
+  } catch (error: any) {
+    messages.value.push({ role: 'tool', name: 'Workspace', text: `Could not save task: ${error?.message ?? error}` });
+  }
+}
+
+function resumeTask(event: Event) {
+  const prompt = (event as CustomEvent<string>).detail;
+  if (typeof prompt === 'string') draft.value = prompt;
 }
 
 async function runTool(serverId: string, toolName: string, args: Record<string, unknown>) {
@@ -335,12 +426,20 @@ async function loadToolButtons() {
 }
 
 onMounted(async () => {
+  window.addEventListener('trolly:resume-task', resumeTask);
+  await loadAgentProfiles();
   await loadModels();
   await syncPersona();
   await loadVoices();
-  window.trolly.speech.onStatus((status) => { speechStatus.value = status.message; });
+  removeSpeechListener = window.trolly.speech.onStatus((status) => { speechStatus.value = status.message; });
   await loadToolButtons();
-  window.trolly.mcp.onChanged(() => loadToolButtons());
+  removeMcpListener = window.trolly.mcp.onChanged(() => loadToolButtons());
+});
+
+onUnmounted(() => {
+  window.removeEventListener('trolly:resume-task', resumeTask);
+  removeSpeechListener?.();
+  removeMcpListener?.();
 });
 </script>
 
@@ -359,8 +458,8 @@ onMounted(async () => {
           </div>
           <div v-if="busy" class="msg assistant">
             <div class="msg-body">
-              <div class="msg-name">Trolly</div>
-              <div class="bubble"><span class="spinner" /> thinking</div>
+              <div class="msg-name">Agent run · {{ runStatus }}</div>
+              <div class="bubble"><span class="spinner" /> Working through the approved plan…</div>
             </div>
           </div>
         </div>
@@ -370,7 +469,7 @@ onMounted(async () => {
             <strong>Director</strong>
             <span>{{ preview.route.specialist || 'product' }}</span>
           </div>
-          <p>{{ preview.route.task }} · {{ preview.route.model }}</p>
+          <p>{{ previewProviderLabel }} · {{ preview.route.task }} · {{ preview.route.backend }} · {{ preview.route.model }}</p>
           <ol>
             <li v-for="step in preview.steps" :key="step">{{ step }}</li>
           </ol>
@@ -402,11 +501,18 @@ onMounted(async () => {
         <div class="chat-input">
           <select
             v-model="selectedModel"
+            aria-label="Model"
             style="max-width: 210px; background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--text); padding: 0 8px"
           >
             <option v-for="m in models" :key="m.name" :value="m.name">{{ m.name }}</option>
           </select>
-          <button class="btn sm" title="Attach an image for the vision model" @click="pickImage">
+          <select v-model="selectedAgentId" aria-label="Agent profile">
+            <option value="auto">Auto specialist</option>
+            <option v-for="profile in profiles" :key="profile.id" :value="profile.id">{{ profile.name }}</option>
+          </select>
+          <div v-if="agentError" class="provider-error" role="status">{{ agentError }}</div>
+          <div v-if="modelError" class="provider-error" role="status">{{ modelError }}</div>
+          <button class="btn sm" :disabled="provider !== 'local'" title="Image attachments are currently supported only with Ollama" @click="pickImage">
             Attach
           </button>
           <button
@@ -422,6 +528,7 @@ onMounted(async () => {
             placeholder="Talk to Trolly…"
             @keydown.enter.exact.prevent="send"
           />
+          <button class="btn sm" :disabled="!draft.trim()" @click="saveDraftAsTask">Save task</button>
           <button class="btn sm" :class="{ primary: voiceEnabled }" @click="voiceEnabled = !voiceEnabled">
             {{ voiceEnabled ? 'Voice on' : 'Voice off' }}
           </button>

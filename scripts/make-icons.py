@@ -14,9 +14,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASSETS = os.path.join(ROOT, 'assets')
 os.makedirs(ASSETS, exist_ok=True)
 
-TEAL = (45, 212, 191)
-INDIGO = (124, 156, 245)
-DARK = (13, 15, 20)
+YELLOW = (255, 210, 26)
+RED = (255, 85, 69)
+DARK = (12, 11, 9)
 
 
 def write_png(path: str, width: int, height: int, pixels: bytes) -> None:
@@ -69,9 +69,9 @@ def render(size: int, rounded: bool) -> bytes:
 
             t = y / max(1, size - 1)
             bg = (
-                int(TEAL[0] * (1 - t) + INDIGO[0] * t),
-                int(TEAL[1] * (1 - t) + INDIGO[1] * t),
-                int(TEAL[2] * (1 - t) + INDIGO[2] * t),
+                int(YELLOW[0] * (1 - t) + RED[0] * t),
+                int(YELLOW[1] * (1 - t) + RED[1] * t),
+                int(YELLOW[2] * (1 - t) + RED[2] * t),
             )
 
             glyph = 0

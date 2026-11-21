@@ -33,7 +33,7 @@ export interface GenerateOptions {
 }
 
 export class ComfyClient {
-  constructor(private baseUrl = 'http://127.0.0.1:8188') {}
+  constructor(private baseUrl: string, private dataDir: string) {}
 
   private url(p: string) {
     return `${this.baseUrl.replace(/\/+$/, '')}${p}`;
@@ -165,7 +165,7 @@ export class ComfyClient {
       const fileRes = await fetch(viewUrl);
       if (!fileRes.ok) throw new Error(`ComfyUI /view failed: ${fileRes.status}`);
 
-      const outDir = path.join(process.env.TROLLY_DATA_DIR ?? path.join(process.cwd(), 'data'), 'artistry');
+      const outDir = path.join(this.dataDir, 'artistry');
       fs.mkdirSync(outDir, { recursive: true });
       const file = path.join(outDir, image.filename);
       fs.writeFileSync(file, Buffer.from(await fileRes.arrayBuffer()));

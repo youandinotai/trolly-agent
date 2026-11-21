@@ -38,9 +38,9 @@ const protectedNow = computed(() => !appMode.adult);
 <style scoped>
 .safe-media { position: relative; width: 100%; min-height: 92px; overflow: hidden; border-radius: var(--radius-sm); }
 .safe-media-content { display: block; width: 100%; max-width: 100%; border-radius: var(--radius-sm); }
-.safe-media.covered { display: grid; place-items: center; min-height: 116px; border: 1px solid #31545b; background: radial-gradient(circle at 50% 0%, #1d3439, #111820 72%); }
-.safe-media-cover { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 18px; text-align: center; color: #bce8e2; }
+.safe-media.covered { display: grid; place-items: center; min-height: 116px; border: 1px solid var(--line); background: radial-gradient(circle at 50% 0%, #35291b, var(--bg-raised) 72%); }
+.safe-media-cover { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 18px; text-align: center; color: var(--text); }
 .safe-media-cover strong { font-size: 13px; letter-spacing: .04em; }
-.safe-media-cover span { font: 10px var(--mono); color: #7fb8b2; text-transform: uppercase; }
+.safe-media-cover span { font: 10px var(--mono); color: var(--accent); text-transform: uppercase; }
 .safe-media-cover small { color: var(--text-dim); font-size: 11px; }
 </style>

@@ -123,7 +123,7 @@ onMounted(chooseDefaultModel);
           <span v-if="reference" class="reference-name">{{ reference.name }}</span>
           <div class="privacy-note">
             <strong>No cloud. No repo output.</strong>
-            <span>D:\Trolly\data\after-dark</span>
+            <span>Private local output · outside the repository</span>
           </div>
         </div>
 
@@ -178,38 +178,38 @@ onMounted(chooseDefaultModel);
 </template>
 
 <style scoped>
-.after-dark-panel { --adult-accent: #fb7185; border-color: #4c2938; background: linear-gradient(145deg, rgba(251,113,133,.045), transparent 42%), var(--bg-raised); }
+.after-dark-panel { --adult-accent: var(--danger); border-color: #582a22; background: linear-gradient(145deg, rgba(255,85,69,.055), transparent 42%), var(--bg-raised); }
 .after-dark-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 16px; }
-.after-dark-head h2 { color: #fda4af; }
+.after-dark-head h2 { color: #ff9a83; }
 .after-dark-head .hint { max-width: 720px; line-height: 1.6; }
-.after-dark-badge { flex: none; padding: 5px 8px; border: 1px solid #6b3547; border-radius: 5px; color: #fda4af; font: 9px var(--mono); letter-spacing: .08em; }
-.gate-message { padding: 15px; border: 1px solid #6b3547; border-radius: var(--radius-sm); background: rgba(251,113,133,.06); color: #d8b5bf; line-height: 1.7; }
+.after-dark-badge { flex: none; padding: 5px 8px; border: 1px solid #7d3028; border-radius: 5px; color: #ff9a83; font: 9px var(--mono); letter-spacing: .08em; }
+.gate-message { padding: 15px; border: 1px solid #7d3028; border-radius: var(--radius-sm); background: rgba(255,85,69,.06); color: #e2b9ae; line-height: 1.7; }
 .after-dark-layout { display: grid; grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); gap: 20px; }
 .reference-column { min-width: 0; }
-.reference-drop { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 832 / 1216; overflow: hidden; border: 1px dashed #704052; border-radius: 10px; background: #11151e; cursor: pointer; }
-.reference-drop:hover, .reference-drop:focus-within { border-color: #fb7185; }
+.reference-drop { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 832 / 1216; overflow: hidden; border: 1px dashed #704032; border-radius: 10px; background: #171411; cursor: pointer; }
+.reference-drop:hover, .reference-drop:focus-within { border-color: var(--danger); }
 .reference-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .reference-drop img { width: 100%; height: 100%; object-fit: cover; }
-.reference-placeholder { display: flex; flex-direction: column; gap: 8px; text-align: center; color: #fda4af; }
+.reference-placeholder { display: flex; flex-direction: column; gap: 8px; text-align: center; color: #ff9a83; }
 .reference-placeholder small { color: var(--text-dim); }
 .reference-name { display: block; margin-top: 7px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-dim); font: 10px var(--mono); }
-.privacy-note { display: flex; flex-direction: column; gap: 5px; margin-top: 14px; padding: 11px; border-left: 2px solid #fb7185; background: rgba(251,113,133,.04); font-size: 11px; line-height: 1.5; }
+.privacy-note { display: flex; flex-direction: column; gap: 5px; margin-top: 14px; padding: 11px; border: 1px solid rgba(255,85,69,.28); border-radius: var(--radius-sm); background: rgba(255,85,69,.04); font-size: 11px; line-height: 1.5; }
 .privacy-note span { color: var(--text-dim); font-family: var(--mono); overflow-wrap: anywhere; }
 .after-dark-controls { min-width: 0; }
 .after-dark-controls textarea, .after-dark-controls select, .after-dark-controls input[type="number"] { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--bg-panel); color: var(--text); }
 .after-dark-controls textarea { resize: vertical; line-height: 1.5; }
 .after-dark-grid { display: grid; grid-template-columns: repeat(3, minmax(90px, 1fr)); gap: 0 10px; }
 .field label { display: block; margin-bottom: 5px; color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
-.field-warning { color: #fda4af; font-size: 11px; }
+.field-warning { color: #ff9a83; font-size: 11px; }
 .denoise-field { grid-column: span 2; }
-.denoise-field input { width: 100%; accent-color: #fb7185; }
+.denoise-field input { width: 100%; accent-color: var(--danger); }
 .denoise-field small { display: block; margin-top: 4px; color: var(--text-faint); }
-.boundaries-line { color: #a98c96; font-size: 10.5px; }
-.after-dark-generate { background: #e11d48 !important; border-color: #e11d48 !important; color: white !important; min-width: 190px; }
-.after-dark-error { margin-top: 14px; padding: 10px 12px; border: 1px solid #7f1d1d; border-radius: 7px; background: rgba(127,29,29,.2); color: #fecaca; white-space: pre-wrap; }
-.after-dark-result { display: grid; grid-template-columns: minmax(220px, 480px) minmax(180px, 1fr); gap: 18px; margin-top: 20px; padding-top: 18px; border-top: 1px solid #4c2938; }
-.after-dark-result img { width: 100%; border: 1px solid #6b3547; border-radius: 10px; }
-.result-path { display: flex; flex-direction: column; gap: 8px; align-self: center; color: #fda4af; }
+.boundaries-line { color: #b89a8e; font-size: 10.5px; }
+.after-dark-generate { background: var(--danger) !important; border-color: var(--danger) !important; color: #1b0e0b !important; min-width: 190px; }
+.after-dark-error { margin-top: 14px; padding: 10px 12px; border: 1px solid #7d3028; border-radius: 7px; background: rgba(125,48,40,.2); color: #ffd2c9; white-space: pre-wrap; }
+.after-dark-result { display: grid; grid-template-columns: minmax(220px, 480px) minmax(180px, 1fr); gap: 18px; margin-top: 20px; padding-top: 18px; border-top: 1px solid #582a22; }
+.after-dark-result img { width: 100%; border: 1px solid #7d3028; border-radius: 10px; }
+.result-path { display: flex; flex-direction: column; gap: 8px; align-self: center; color: #ff9a83; }
 .result-path code { color: var(--text-dim); white-space: normal; overflow-wrap: anywhere; line-height: 1.6; }
 @media (max-width: 1000px) { .after-dark-layout { grid-template-columns: 220px minmax(0, 1fr); } .after-dark-grid { grid-template-columns: 1fr 1fr; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

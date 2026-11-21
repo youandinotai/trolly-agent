@@ -7,6 +7,21 @@ contextBridge.exposeInMainWorld('trolly', {
   ollama: {
     models: () => ipcRenderer.invoke('trolly:ollama:models'),
     chat: (payload) => ipcRenderer.invoke('trolly:ollama:chat', payload),
+    pull: (name) => ipcRenderer.invoke('trolly:ollama:pull', name),
+    delete: (name) => ipcRenderer.invoke('trolly:ollama:delete', name),
+  },
+  provider: {
+    models: (input) => ipcRenderer.invoke('trolly:provider:models', input),
+    chat: (input) => ipcRenderer.invoke('trolly:provider:chat', input),
+  },
+  agents: {
+    list: () => ipcRenderer.invoke('trolly:agents:list'),
+  },
+  workspace: {
+    list: () => ipcRenderer.invoke('trolly:workspace:list'),
+    create: (input) => ipcRenderer.invoke('trolly:workspace:create', input),
+    setStatus: (id, status) => ipcRenderer.invoke('trolly:workspace:status', { id, status }),
+    delete: (id) => ipcRenderer.invoke('trolly:workspace:delete', id),
   },
   router: {
     classify: (prompt) => ipcRenderer.invoke('trolly:router:classify', prompt),
@@ -42,10 +57,13 @@ contextBridge.exposeInMainWorld('trolly', {
   },
   mcp: {
     list: () => ipcRenderer.invoke('trolly:mcp:list'),
+    error: () => ipcRenderer.invoke('trolly:mcp:error'),
     connect: (id) => ipcRenderer.invoke('trolly:mcp:connect', id),
     disconnect: (id) => ipcRenderer.invoke('trolly:mcp:disconnect', id),
     tools: (id) => ipcRenderer.invoke('trolly:mcp:tools', id),
     call: (id, name, args) => ipcRenderer.invoke('trolly:mcp:call', { id, name, args }),
+    add: (input) => ipcRenderer.invoke('trolly:mcp:add', input),
+    remove: (id) => ipcRenderer.invoke('trolly:mcp:remove', id),
     onChanged: (cb) => {
       const listener = (_e, servers) => cb(servers);
       ipcRenderer.on('trolly:mcp:changed', listener);

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Trolly mark</title>
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="#090909"/>
+  <path d="M28 34h72v16H72v48H56V50H28z" fill="#ffd500"/>
+  <circle cx="92" cy="87" r="13" fill="#ff3333"/>
+  <path d="M82 87h10V77" fill="none" stroke="#090909" stroke-linecap="round" stroke-linejoin="round" stroke-width="5"/>
+</svg>

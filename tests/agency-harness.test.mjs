@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { agencyDivisions, fallbackSpecialist } from '../src/lib/agency-roster.ts';
-import { customEndpointOrEmpty, harnessById } from '../src/lib/harness.ts';
+import { customEndpointOrEmpty, harnessById, HARNESSES } from '../src/lib/harness.ts';
 import { pandaAgencyRequest } from '../src/lib/panda-route.ts';
 
 test('agency routing drops healthcare and stays local', () => {
@@ -15,8 +15,10 @@ test('agency routing drops healthcare and stays local', () => {
 });
 
 test('harness choices keep keys out of the app', () => {
-  assert.equal(harnessById('hermes-local').endpoint, 'http://192.168.0.8:9119');
-  assert.equal(harnessById('hermes-omni').endpoint, 'http://192.168.0.8:20128/v1');
-  assert.equal(customEndpointOrEmpty('http://192.168.0.8:9119'), 'http://192.168.0.8:9119');
+  assert.deepEqual(HARNESSES.map((item) => item.id), ['local', 'omniroute', 'opencode', 'hermes', 'custom']);
+  assert.equal(harnessById('hermes').endpoint, 'http://127.0.0.1:8645/v1');
+  assert.equal(harnessById('omniroute').endpoint, 'http://127.0.0.1:20128/v1');
+  assert.equal(customEndpointOrEmpty('http://127.0.0.1:9119/'), 'http://127.0.0.1:9119');
   assert.equal(customEndpointOrEmpty('https://api.example.test/v1?api_key=secret'), '');
+  assert.equal(customEndpointOrEmpty('https://user:pass@example.test/v1'), '');
 });

@@ -1,8 +1,8 @@
 # Trolly Agent
 
-A desktop AI companion that runs entirely on your own machine. It talks to a local
-LLM, gives the character real tools through the Model Context Protocol, and renders
-imagery on your own GPU.
+A local-first desktop companion and agent workspace. Choose a provider and profile,
+review each routed task before it runs, manage local Ollama models, and connect only
+the MCP tools you configure.
 
 Clean-room reimplementation of the AIRI desktop agent's *feature set* (Moeru AI,
 v0.14.1). Feature-matched and visually distinct — no original code, artwork, copy,
@@ -14,13 +14,15 @@ fonts, or brand tokens are reused.
 
 | Surface | What you get |
 |---|---|
-| **Stage** | The companion's stage, plus a live chat panel. Attach images, dictate, speak replies, and fire tool calls. |
-| **Tools (MCP)** | Register MCP servers, test the handshake, list every tool, and call them. |
-| **Providers** | Every model your local Ollama daemon serves, grouped by job: Chat, Vision, Speech, Transcription, Artistry. |
+| **Stage** | Select a provider, model, and loaded agent profile. Every request waits in the Director preview; Stop makes no call. |
+| **Workspace** | Save tasks and notes locally, update their status, and resume them into Stage without auto-running. |
+| **Tools (MCP)** | Configure stdio filesystem, agent, browser, or Playwright servers; connect new servers manually, inspect tools, and call them explicitly. |
+| **Providers** | Use local Ollama, OmniRoute-compatible endpoints, OpenCode through OmniRoute, or a Hermes proxy. Pull and delete local Ollama models. |
 | **Artistry** | Generate video or images on your local ComfyUI backend. Nothing is uploaded. |
 | **Mind** | Consciousness (the persona), long-term memories, prompt recipes, and content preferences. |
 
-Everything runs on **D:** — source, dependencies, state, and generated media.
+Runtime data remains on this device unless a provider endpoint or MCP server is
+explicitly configured. Provider credentials stay in the provider service, not Trolly.
 
 ---
 
@@ -51,7 +53,10 @@ All of these are **clients** — Trolly Agent never owns the server.
 
 | Backend | Default | Used for |
 |---|---|---|
-| Ollama | `http://127.0.0.1:11434` | Local + cloud LLMs. Model store on `D:\ollama\models`. |
+| Ollama | `http://127.0.0.1:11434` | Local + cloud LLMs; manage installed local models. |
+| OmniRoute | `http://127.0.0.1:20128/v1` | OpenAI-compatible provider gateway; credentials are configured in OmniRoute. |
+| OpenCode | OmniRoute by default | Uses the selected OpenCode-backed model exposed by the configured gateway. |
+| Hermes | `http://127.0.0.1:8645/v1` | Local OpenAI-compatible proxy, when available. |
 | ComfyUI | `http://127.0.0.1:8188` | Video / image generation on your GPU. |
 | MCP servers | per-config | Tools the character can call. |
 
@@ -69,17 +74,19 @@ On this machine Comfy Desktop stores its launch arguments in
 `%APPDATA%\Comfy Desktop\installations.json` under `launchArgs`; that file
 already carries `--enable-cors-header "*"` for every installed instance.
 
-### MCP servers shipped in the default config
+### MCP servers
 
-`data/mcp-servers.json` is created on first run and pre-wired to this machine:
+Fresh installs have no preconfigured or auto-started MCP processes. The Tools
+view provides templates for filesystem, custom agent tools, browser, and
+Playwright servers. The filesystem template requires an explicit allowed folder.
+New servers stay disconnected until the user chooses **Connect**; an existing
+server explicitly marked `enabled` in local configuration may reconnect at
+startup. MCP transport is currently stdio only. Configuration is saved in
+`data/mcp-servers.json`.
 
-| id | Server | Tools |
-|---|---|---|
-| `comfyui` | ComfyUI FL-MCP (`D:\Comfy-Desktop\...\comfyui-fl-mcp`) | 136 |
-| `maestro` | Maestro (`D:\pinokio\api\maestro\app\env-agent`) | 24 |
-| `computer-use` | `cua-driver mcp` | 57 — desktop + browser control |
-
-Enabled servers connect automatically at launch. Edit the JSON to add your own.
+Agent profiles load from `data/agent-profiles.json` and are selectable in Stage.
+Loading profiles does not execute them. The selected profile is applied only
+after the user approves the Director plan with **Run**.
 
 ---
 
@@ -149,9 +156,12 @@ Both run locally, with no cloud service:
 
 ```
 electron/
-  main/index.ts            window, tray, IPC, auto-connect, D: path redirection
-  main/mcp-supervisor.ts   owns each MCP server; stdio transport; tool registry
-  main/ollama.ts           Ollama client (models + chat)
+  main/index.ts            window, tray, IPC, provider/profile/workspace startup
+  main/mcp-supervisor.ts   owns explicitly configured stdio MCP servers
+  main/provider.ts         Ollama and OpenAI-compatible provider adapter
+  main/ollama.ts           Ollama models, chat, pull, and delete
+  main/agent-registry.ts   local agent profile registry
+  main/workspace.ts        persistent local task store
   main/comfy.ts            ComfyUI client (status, checkpoints, generate)
   main/speech.ts           offline SAPI speech synthesis
   main/mind.ts             persona, memories, recipes, preferences
@@ -159,7 +169,7 @@ electron/
 src/
   lib/mcp-client.ts        JSON-RPC 2.0 over newline-delimited JSON
   lib/comfyui.ts           workflow graph builders + history parsing
-  views/                   Stage, MCP, Providers, Artistry, Mind
+  views/                   Stage, Workspace, MCP, Providers, Artistry, Mind
 scripts/
   verify-no-leak.mjs       Remake "100% Yours" leak scanner
   make-icons.py            icon generator (no dependencies)
@@ -171,14 +181,20 @@ and a strict CSP. Every capability crosses the preload bridge.
 
 ---
 
-## All state lives on D:
+## Local data
 
-`electron/main/index.ts` redirects Electron's `userData`, `sessionData`, `temp`, and
-`logs` into `D:\Trolly\app\data`. Override with `TROLLY_DATA_DIR`.
+The app's data directory defaults to a `data` folder under Electron's
+runtime-resolved `userData` location. Set `TROLLY_DATA_DIR` to override that
+root. `TROLLY_VAULT_DIR` and `TROLLY_STUDIO_DIR` can override the vault and
+studio folders; both must remain outside the application source tree.
+`TROLLY_STUDIO_SAMPLE_MODEL` optionally points to a local model copied into the
+studio assets on first setup.
 
 ```
-D:\Trolly\app\data\
+data\
+  agent-profiles.json  loaded local agent roster
   mcp-servers.json     MCP server registry
+  tasks.json           workspace tasks and notes
   mind.json            persona, memories, recipes, preferences
   artistry\            generated media
   speech\              synthesized WAV files
@@ -194,8 +210,11 @@ product surface (`src/`, `electron/`, `assets/`). `npm run verify:leak` fails th
 build if they do. Provenance documents and the test-suite are not product surface and
 are excluded by design.
 
-**2. Nothing is uploaded.** Generation, chat, and tool calls all stay on the machine.
-The only outbound requests are to the providers you configure.
+**2. No surprise endpoints.** Trolly uses local services by default. External
+network requests occur only when a user-configured provider or MCP server makes
+them; provider credentials are not stored in Trolly. OpenAI-compatible providers
+must expose `/models` and `/chat/completions`. Image attachments currently work
+with the Ollama provider only.
 
 ---
 

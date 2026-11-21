@@ -2,28 +2,27 @@
 <html lang="en">
   <head><script src="/_remake/runtime.js"></script><meta name="robots" content="noindex, nofollow">
     <meta charset="UTF-8" />
-    <title>AIRI</title>
+    <title>Trolly Project Online</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <meta name="description" content="Open source attempt to create cyber companion.">
-    <meta name="apple-mobile-web-app-title" content="AIRI" />
+    <link rel="icon" type="image/svg+xml" href="/assets/trolly-mark.svg" sizes="any" />
+    <link rel="apple-touch-icon" href="/assets/trolly-mark.svg" />
+    <meta name="description" content="Choose providers, agents, and tools for local-first AI work.">
+    <meta name="apple-mobile-web-app-title" content="Trolly Project Online" />
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="rgb(18,18,18)" id="themeColor" />
+    <meta name="theme-color" content="#090909" id="themeColor" />
 
     <!-- Open Graph Protocol -->
-    <meta property="og:title" content="AIRI">
-    <meta property="og:site_name" content="AIRI">
-    <meta property="og:image" content="/open-graph.png">
-    <meta property="og:description" content="Top 1 open source attempt to create cyber companion, capable of playing Minecraft, Factorio, Balatro, etc. .">
-    <meta property="og:url" content="/docs/en/">
+    <meta property="og:title" content="Trolly Project Online">
+    <meta property="og:site_name" content="Trolly Project Online">
+    <meta property="og:image" content="/trolly-social.svg">
+    <meta property="og:description" content="A local-first workspace for choosing an agent, provider, and tools before work runs.">
+    <meta property="og:url" content="/">
 
     <!-- Open Graph Protocol extension, Twitter cards -->
-    <meta name="twitter:title" content="AIRI">
-    <meta name="twitter:description" content="Top 1 open source attempt to create cyber companion, capable of playing Minecraft, Factorio, Balatro, etc. .">
-    <meta name="twitter:image" content="/open-graph.png">
+    <meta name="twitter:title" content="Trolly Project Online">
+    <meta name="twitter:description" content="A local-first workspace for choosing an agent, provider, and tools before work runs.">
+    <meta name="twitter:image" content="/trolly-social.svg">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:creator" content="Moeru AI">
     <script>
       ;(function () {
         const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -45,7 +44,15 @@
           document.documentElement.style.setProperty('--chromatic-hue', hue.toString())
       })()
     </script>
-    <style>#boot-splash{z-index:9999;box-sizing:border-box;padding:max(calc(env(safe-area-inset-top) + 48px), calc(40vh - 82px)) 24px calc(env(safe-area-inset-bottom) + clamp(48px, 8vh, 96px));color:#262626;background:#fff;flex-direction:column;justify-content:space-between;align-items:center;gap:24px;font-family:Comfortaa Variable,Comfortaa,ui-sans-serif,system-ui,sans-serif;display:flex;position:fixed;inset:0}#boot-splash .brand{flex-direction:column;flex-shrink:0;align-items:center;gap:20px;display:flex}#boot-splash img{width:96px;height:96px;filter:hue-rotate(calc(var(--chromatic-hue,220.44) * 1deg))}#boot-splash strong{letter-spacing:.07em;-webkit-text-stroke:.5px currentColor;padding-left:.07em;font-size:32px;font-weight:700}#boot-splash .status{flex-direction:column;flex-shrink:0;align-items:center;width:min(220px,60vw);height:44px;display:flex}#boot-splash .track-space{width:48px;height:3px;margin-top:28px}#boot-splash .boot-error{bottom:max(calc(env(safe-area-inset-bottom) + 48px), 8vh);text-align:center;flex-direction:column;align-items:center;gap:12px;max-width:80vw;font-size:13px;display:none;position:absolute}#boot-splash .boot-error button{background:oklch(65% .16 var(--chromatic-hue,220.44));color:#fff;font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 20px}#boot-splash.failed .boot-error{display:flex}#app:not(:empty)+#boot-splash{display:none}html.dark #boot-splash{color:#f5f5f5;background:#171717}</style>
+    <style>#boot-splash{z-index:9999;box-sizing:border-box;padding:max(calc(env(safe-area-inset-top) + 48px), calc(40vh - 82px)) 24px calc(env(safe-area-inset-bottom) + clamp(48px, 8vh, 96px));color:#262626;background:#0b0b0b;flex-direction:column;justify-content:space-between;align-items:center;gap:24px;font-family:Comfortaa Variable,Comfortaa,ui-sans-serif,system-ui,sans-serif;display:flex;position:fixed;inset:0}#boot-splash .brand{flex-direction:column;flex-shrink:0;align-items:center;gap:20px;display:flex}#boot-splash img{width:96px;height:96px;filter:hue-rotate(calc(var(--chromatic-hue,220.44) * 1deg))}#boot-splash strong{letter-spacing:.07em;-webkit-text-stroke:.5px currentColor;padding-left:.07em;font-size:32px;font-weight:700}#boot-splash .status{flex-direction:column;flex-shrink:0;align-items:center;width:min(220px,60vw);height:44px;display:flex}#boot-splash .track-space{width:48px;height:3px;margin-top:28px}#boot-splash .boot-error{bottom:max(calc(env(safe-area-inset-bottom) + 48px), 8vh);text-align:center;flex-direction:column;align-items:center;gap:12px;max-width:80vw;font-size:13px;display:none;position:absolute}#boot-splash .boot-error button{background:oklch(65% .16 var(--chromatic-hue,220.44));color:#0b0b0b;font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 20px}#boot-splash.failed .boot-error{display:flex}#app:not(:empty)+#boot-splash{display:none}html.dark #boot-splash{color:#f5f5f5;background:#151515}</style>
+    <style>
+      #boot-splash { color: #f5f5f5; background: #090909; font-family: system-ui, sans-serif; }
+      #boot-splash img { filter: none; }
+      #boot-splash strong { max-width: 100%; text-align: center; letter-spacing: .02em; font-size: clamp(20px, 7vw, 32px); }
+      #boot-splash .boot-error button { background: #ffd500; color: #090909; font-weight: 700; border-radius: 8px; }
+      #boot-splash .boot-error button:focus-visible { outline: 2px solid #ff3333; outline-offset: 3px; }
+      html.dark #boot-splash { color: #f5f5f5; background: #090909; }
+    </style>
     <noscript><style>#boot-splash{display:none}</style></noscript>
     <script type="module" crossorigin src="/assets/index-DfNk3FsW.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-DZyG74sE.js">
@@ -164,19 +171,19 @@
     <link rel="stylesheet" crossorigin href="/assets/components-r0uZLuAN.css">
     <link rel="stylesheet" crossorigin href="/assets/HeaderLink-CgR8yqLo.css">
     <link rel="stylesheet" crossorigin href="/assets/index-CeY-JOUM.css">
-  <link rel="manifest" href="/manifest.webmanifest.bin"></head>
+  <link rel="manifest" href="/manifest.webmanifest.bin"><link rel="stylesheet" href="/_remake/fonts.css"></head>
   <body class="font-sans">
     <div id="app"></div>
     <div id="boot-splash" role="status" aria-busy="true">
       <div class="brand">
-        <img src="/favicon.svg" alt="" />
-        <strong>AIRI</strong>
+        <img src="/assets/trolly-mark.svg" alt="" />
+        <strong>Trolly Project Online</strong>
       </div>
       <div class="status"><span class="track-space" aria-hidden="true"></span></div>
-      <div class="boot-error" role="alert"><span>AIRI could not start.</span><button type="button" onclick="location.reload()">Retry</button></div>
+      <div class="boot-error" role="alert"><span>Trolly could not start.</span><button type="button" onclick="location.reload()">Try again</button></div>
     </div>
     <script src="/assets/js/CubismSdkForWeb-5-r.3/Core/live2dcubismcore.min.js"></script>
-    <script id="boot-splash-locales" type="application/json">{"labels":{"en":{"failed":"Startup failed","retry":"Retry"},"es":{"failed":"Error al iniciar","retry":"Reintentar"},"fr":{"failed":"Échec du démarrage","retry":"Réessayer"},"ko":{"failed":"시작 실패","retry":"다시 시도"},"ja":{"failed":"起動に失敗しました","retry":"再試行"},"ru":{"failed":"Ошибка запуска","retry":"Повторить"},"th":{"failed":"การเริ่มต้นล้มเหลว","retry":"ลองอีกครั้ง"},"vi":{"failed":"Khởi động thất bại","retry":"Thử lại"},"zh-Hans":{"failed":"启动失败","retry":"重新启动 AIRI"},"zh-Hant":{"failed":"啟動失敗","retry":"重試"}},"localeRemap":{"zh-CN":"zh-Hans","zh-TW":"zh-Hant","zh-HK":"zh-Hant","zh-Hant":"zh-Hant","zh-Hans":"zh-Hans","en":"en","en-US":"en","en-GB":"en","en-AU":"en","es":"es","es-ES":"es","es-MX":"es","es-AR":"es","fr":"fr","fr-FR":"fr","ja":"ja","ja-JP":"ja","ko":"ko","ko-KR":"ko","ru":"ru","ru-RU":"ru","th":"th","th-TH":"th","vi":"vi","vi-VN":"vi"}}</script>
+    <script id="boot-splash-locales" type="application/json">{"labels":{"en":{"failed":"Startup failed","retry":"Retry"},"es":{"failed":"Error al iniciar","retry":"Reintentar"},"fr":{"failed":"Échec du démarrage","retry":"Réessayer"},"ko":{"failed":"시작 실패","retry":"다시 시도"},"ja":{"failed":"起動に失敗しました","retry":"再試行"},"ru":{"failed":"Ошибка запуска","retry":"Повторить"},"th":{"failed":"การเริ่มต้นล้มเหลว","retry":"ลองอีกครั้ง"},"vi":{"failed":"Khởi động thất bại","retry":"Thử lại"},"zh-Hans":{"failed":"启动失败","retry":"重新启动 Trolly"},"zh-Hant":{"failed":"啟動失敗","retry":"重試"}},"localeRemap":{"zh-CN":"zh-Hans","zh-TW":"zh-Hant","zh-HK":"zh-Hant","zh-Hant":"zh-Hant","zh-Hans":"zh-Hans","en":"en","en-US":"en","en-GB":"en","en-AU":"en","es":"es","es-ES":"es","es-MX":"es","es-AR":"es","fr":"fr","fr-FR":"fr","ja":"ja","ja-JP":"ja","ko":"ko","ko-KR":"ko","ru":"ru","ru-RU":"ru","th":"th","th-TH":"th","vi":"vi","vi-VN":"vi"}}</script>
     <script>
       ;(function () {
         const data = JSON.parse(document.querySelector('#boot-splash-locales').textContent)

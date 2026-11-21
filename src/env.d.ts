@@ -1,5 +1,7 @@
 /** The typed surface the preload script exposes to the renderer. */
 import type { NewActor, NewGarment, NewScene, StudioDoc } from './lib/studio-types.js';
+import type { AgentProfile } from './lib/agency-roster.js';
+import type { HarnessId } from './lib/harness.js';
 
 export interface McpTool {
   name: string;
@@ -25,6 +27,17 @@ export interface OllamaModel {
   size: number;
   contextLength?: number;
   family?: string;
+}
+
+export type WorkspaceTaskStatus = 'open' | 'in-progress' | 'done';
+
+export interface WorkspaceTask {
+  id: string;
+  title: string;
+  description: string;
+  status: WorkspaceTaskStatus;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Persona {
@@ -75,6 +88,8 @@ export interface SessionModeState {
 export interface TrollyBridge {
   ollama: {
     models(): Promise<OllamaModel[]>;
+    pull(name: string): Promise<void>;
+    delete(name: string): Promise<void>;
     chat(payload: {
       model: string;
       messages: {
@@ -86,6 +101,30 @@ export interface TrollyBridge {
       temperature?: number;
       maxTokens?: number;
     }): Promise<string>;
+  };
+  provider: {
+    models(input: { provider: HarnessId; endpoint?: string }): Promise<OllamaModel[]>;
+    chat(input: {
+      provider: HarnessId;
+      endpoint?: string;
+      model: string;
+      messages: {
+        role: 'system' | 'user' | 'assistant';
+        content: string;
+        images?: string[];
+      }[];
+      temperature?: number;
+      maxTokens?: number;
+    }): Promise<string>;
+  };
+  agents: {
+    list(): Promise<{ profiles: AgentProfile[]; error: string }>;
+  };
+  workspace: {
+    list(): Promise<WorkspaceTask[]>;
+    create(input: { title: string; description?: string }): Promise<WorkspaceTask>;
+    setStatus(id: string, status: WorkspaceTaskStatus): Promise<WorkspaceTask>;
+    delete(id: string): Promise<void>;
   };
   router: {
     classify(prompt: string): Promise<{
@@ -171,10 +210,13 @@ export interface TrollyBridge {
   };
   mcp: {
     list(): Promise<McpServerState[]>;
+    error(): Promise<string>;
     connect(id: string): Promise<McpServerState[]>;
     disconnect(id: string): Promise<McpServerState[]>;
     tools(id: string): Promise<McpTool[]>;
     call(id: string, name: string, args?: Record<string, unknown>): Promise<{ content?: { type: string; text: string }[] }>;
+    add(input: { name: string; command: string; args?: string[] }): Promise<McpServerState[]>;
+    remove(id: string): Promise<McpServerState[]>;
     onChanged(cb: (servers: McpServerState[]) => void): () => void;
   };
   studio: {

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Trolly Project Online</title>
+  <desc id="desc">A local-first agent workspace with visible provider routes, agents, and tools.</desc>
+  <rect width="1200" height="630" fill="#090909"/>
+  <path d="M0 500 460 180l160 146L940 92l260 180v358H0z" fill="#151515"/>
+  <path d="M840 0h360v160L985 270 770 90z" fill="#232323"/>
+  <circle cx="1010" cy="178" r="84" fill="#ff3333"/>
+  <path d="M0 540 330 310l120 104 290-210 222 190 238-185v421H0z" fill="#101010"/>
+  <rect x="72" y="72" width="90" height="90" rx="24" fill="#ffd500"/>
+  <path d="M95 96h44v11h-17v35h-11v-35H95z" fill="#090909"/>
+  <text x="72" y="282" fill="#f5f5f5" font-family="Segoe UI,Arial,sans-serif" font-size="64" font-weight="800" letter-spacing="-2">Trolly Project Online</text>
+  <text x="76" y="338" fill="#d0d0d0" font-family="Segoe UI,Arial,sans-serif" font-size="28">Choose your provider. Load your agents. Run only what you approve.</text>
+  <rect x="76" y="390" width="342" height="60" rx="14" fill="#ffd500"/>
+  <text x="247" y="429" text-anchor="middle" fill="#090909" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700">LOCAL-FIRST AGENT WORKSPACE</text>
+</svg>

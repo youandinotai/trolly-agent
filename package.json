@@ -12,7 +12,7 @@
     "dev": "vite",
     "build:electron": "tsc -p tsconfig.electron.json && node scripts/copy-assets.mjs",
     "build:renderer": "vite build",
-    "build": "npm run build:electron && npm run build:renderer && npm run build:assets",
+    "build": "npm run build:assets && npm run build:electron && npm run build:renderer",
     "typecheck": "tsc -p tsconfig.electron.json --noEmit && vue-tsc -p tsconfig.json --noEmit",
     "test": "node --test tests/",
     "test:avatar": "npm run build && node scripts/smoke-avatar.mjs",

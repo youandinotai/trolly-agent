@@ -17,21 +17,29 @@ import { resolveAfterDarkOutputDir } from '../../src/lib/after-dark.js';
 import { SessionMode, type SessionModeSnapshot } from '../../src/lib/session-mode.js';
 import { MediaVault } from './vault.js';
 import { GLANCE_NEWS_URL } from '../../src/lib/glance-cover.js';
+import { AgentRegistry } from './agent-registry.js';
+import { ProviderClient } from './provider.js';
+import { WorkspaceStore } from './workspace.js';
+import { resolveTrollyDataPaths } from './data-paths.js';
 
 const __dirname_ = path.dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = path.resolve(__dirname_, '..', '..', '..');
 
-/** All mutable state lives on D: — never on the system drive. */
-const DATA_DIR = process.env.TROLLY_DATA_DIR || path.join(APP_ROOT, 'data');
-const vault = new MediaVault(process.env.TROLLY_VAULT_DIR || 'D:/Trolly/data/vault');
+/** App state stays in its local data directory or a user-configured override. */
+const DATA_PATHS = resolveTrollyDataPaths(app.getPath('userData'), process.env);
+const DATA_DIR = DATA_PATHS.dataDir;
+const vault = new MediaVault(DATA_PATHS.vaultDir, APP_ROOT);
 
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let supervisor: McpSupervisor | null = null;
 
 const ollama = new OllamaClient('http://127.0.0.1:11434');
+const provider = new ProviderClient();
+const agents = new AgentRegistry(DATA_DIR);
+const workspace = new WorkspaceStore(DATA_DIR);
 const router = new JevTaskRouter('http://127.0.0.1:11434', process.env.TROLLY_PANDA_URL || 'http://127.0.0.1:48710');
-const comfy = new ComfyClient('http://127.0.0.1:8188');
+const comfy = new ComfyClient('http://127.0.0.1:8188', DATA_DIR);
 const afterDark = new AfterDarkClient(
   'http://127.0.0.1:8188',
   resolveAfterDarkOutputDir(process.env, APP_ROOT),
@@ -43,7 +51,7 @@ const speech = new SpeechClient(DATA_DIR, (status) => {
 const mind = new MindStore(DATA_DIR);
 const contentMode = new SessionMode();
 contentMode.restore(mind.readPreferences());
-const studio = new StudioStore(process.env.TROLLY_STUDIO_DIR || 'D:/Trolly/data/studio');
+const studio = new StudioStore(DATA_PATHS.studioDir, { sourceRoot: APP_ROOT });
 const hermes = new HermesReviewer(process.env.TROLLY_HERMES_URL || 'http://127.0.0.1:8645');
 
 function publishMode(state: SessionModeSnapshot = contentMode.snapshot()): void {
@@ -65,8 +73,8 @@ function showCleanShield(): void {
   const [width, height] = mainWindow.getContentSize();
   cleanShield.setBounds({ x: 0, y: 0, width, height });
   cleanShield.setAutoResize({ width: true, height: true });
-  cleanShield.setBackgroundColor('#142027');
-  const html = `<!doctype html><html><body style="margin:0;background:#142027;color:#c5f3ec;font:600 16px system-ui;display:flex;align-items:center;justify-content:center;height:100vh;user-select:none"><div style="text-align:center"><div style="font-size:22px;margin-bottom:8px">Clean protection</div><div style="font-weight:400;font-size:13px;color:#8fbab8">Visuals are secured. The workspace returns in a moment.</div></div></body></html>`;
+  cleanShield.setBackgroundColor('#15120f');
+  const html = `<!doctype html><html><body style="margin:0;background:#15120f;color:#ffd21a;font:600 16px system-ui;display:flex;align-items:center;justify-content:center;height:100vh;user-select:none"><div style="text-align:center"><div style="font-size:22px;margin-bottom:8px">Clean protection</div><div style="font-weight:400;font-size:13px;color:#c1b6a6">Visuals are secured. The workspace returns in a moment.</div></div></body></html>`;
   void cleanShield.webContents.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`).catch(() => {});
 }
 
@@ -151,7 +159,7 @@ function cleanNow(): SessionModeSnapshot {
 
 function ensureDataDir() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
-  // Redirect Electron's own userData (cache, localStorage) onto D: as well.
+  // Keep Electron's cache and localStorage with the configured app data.
   app.setPath('userData', path.join(DATA_DIR, 'userData'));
   app.setPath('sessionData', path.join(DATA_DIR, 'sessionData'));
   app.setPath('temp', path.join(DATA_DIR, 'temp'));
@@ -167,7 +175,7 @@ function createWindow() {
     minWidth: 1080,
     minHeight: 700,
     show: false,
-    backgroundColor: '#0d0f14',
+    backgroundColor: '#0c0b09',
     title: 'Trolly Agent',
     icon: path.join(__dirname_, 'assets', 'icon.png'),
     autoHideMenuBar: true,
@@ -231,6 +239,15 @@ function createTray() {
 function registerIpc() {
   ipcMain.handle('trolly:ollama:models', async () => ollama.listModels());
   ipcMain.handle('trolly:ollama:chat', async (_e, payload) => ollama.chat(payload));
+  ipcMain.handle('trolly:ollama:pull', async (_e, name: string) => ollama.pullModel(name));
+  ipcMain.handle('trolly:ollama:delete', async (_e, name: string) => ollama.deleteModel(name));
+  ipcMain.handle('trolly:provider:models', async (_e, input) => provider.listModels(input));
+  ipcMain.handle('trolly:provider:chat', async (_e, input) => provider.chat(input));
+  ipcMain.handle('trolly:agents:list', async () => ({ profiles: agents.list(), error: agents.error() }));
+  ipcMain.handle('trolly:workspace:list', async () => workspace.list());
+  ipcMain.handle('trolly:workspace:create', async (_e, input) => workspace.create(input));
+  ipcMain.handle('trolly:workspace:status', async (_e, input) => workspace.setStatus(input.id, input.status));
+  ipcMain.handle('trolly:workspace:delete', async (_e, id: string) => workspace.delete(id));
   ipcMain.handle('trolly:router:classify', async (_e, prompt: string) => router.classify(prompt));
   ipcMain.handle('trolly:comfy:status', async () => comfy.status());
   ipcMain.handle('trolly:comfy:generate', async (_e, payload) => comfy.generate(payload));
@@ -243,10 +260,13 @@ function registerIpc() {
   });
 
   ipcMain.handle('trolly:mcp:list', async () => supervisor?.listServers() ?? []);
+  ipcMain.handle('trolly:mcp:error', async () => supervisor?.error() ?? '');
   ipcMain.handle('trolly:mcp:connect', async (_e, id: string) => supervisor?.connect(id));
   ipcMain.handle('trolly:mcp:disconnect', async (_e, id: string) => supervisor?.disconnect(id));
   ipcMain.handle('trolly:mcp:tools', async (_e, id: string) => supervisor?.listTools(id) ?? []);
   ipcMain.handle('trolly:mcp:call', async (_e, payload) => supervisor?.callTool(payload.id, payload.name, payload.args));
+  ipcMain.handle('trolly:mcp:add', async (_e, input) => supervisor?.addServer(input));
+  ipcMain.handle('trolly:mcp:remove', async (_e, id: string) => supervisor?.removeServer(id));
   ipcMain.handle('trolly:speech:voices', async () => speech.voices());
   ipcMain.handle('trolly:speech:speak', async (_e, payload) => speech.speak(payload?.text, payload));
   ipcMain.handle('trolly:mind:read', async () => mind.read());
@@ -305,6 +325,7 @@ function registerIpc() {
 
 app.whenReady().then(async () => {
   ensureDataDir();
+  agents.load();
   registerIpc();
 
   supervisor = new McpSupervisor(path.join(DATA_DIR, 'mcp-servers.json'));
@@ -317,7 +338,9 @@ app.whenReady().then(async () => {
   // from the moment the window opens.
   for (const cfg of supervisor.listServers()) {
     if (cfg.enabled && cfg.command) {
-      supervisor.connect(cfg.id).catch(() => {});
+      supervisor.connect(cfg.id).catch((error) => {
+        console.warn(`Configured MCP server ${cfg.name} failed to connect:`, error);
+      });
     }
   }
 

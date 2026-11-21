@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { nextTick, onMounted, ref } from 'vue';
 
 import StageView from './views/StageView.vue';
 import McpView from './views/McpView.vue';
@@ -7,20 +7,26 @@ import ProvidersView from './views/ProvidersView.vue';
 import ArtistryView from './views/ArtistryView.vue';
 import MindView from './views/MindView.vue';
 import StudioView from './views/StudioView.vue';
+import WorkspaceView from './views/WorkspaceView.vue';
 import FloatingPets from './components/FloatingPets.vue';
 import VaultPanel from './components/VaultPanel.vue';
 import { appMode, applyModeState, loadMode, setAdultMode } from './lib/mode';
-import { HARNESSES, customEndpointOrEmpty, type HarnessId } from './lib/harness';
+import { HARNESSES, customEndpointOrEmpty, harnessById, type HarnessId } from './lib/harness';
 
-type ViewId = 'stage' | 'mcp' | 'providers' | 'artistry' | 'studio' | 'mind';
+type ViewId = 'stage' | 'workspace' | 'mcp' | 'providers' | 'artistry' | 'studio' | 'mind';
 
 const view = ref<ViewId>('stage');
 const vaultOpen = ref(false);
-const harness = ref<HarnessId>('local');
-const customEndpoint = ref('');
+const harness = ref<HarnessId>(harnessById(localStorage.getItem('trolly-provider') ?? 'local').id);
+const providerEndpoint = ref(
+  customEndpointOrEmpty(
+    localStorage.getItem(`trolly-endpoint-${harness.value}`) ?? harnessById(harness.value).endpoint,
+  ),
+);
 
 const NAV: { id: ViewId; label: string }[] = [
   { id: 'stage', label: 'Stage' },
+  { id: 'workspace', label: 'Workspace' },
   { id: 'mcp', label: 'Tools (MCP)' },
   { id: 'providers', label: 'Providers' },
   { id: 'artistry', label: 'Artistry' },
@@ -36,6 +42,30 @@ const mcpConnected = ref(0);
 const mcpTotal = ref(0);
 const dataDir = ref('');
 const modeBusy = ref(false);
+
+function changeProvider(event: Event) {
+  const selected = harnessById((event.target as HTMLSelectElement).value);
+  harness.value = selected.id;
+  providerEndpoint.value = customEndpointOrEmpty(
+    localStorage.getItem(`trolly-endpoint-${selected.id}`) ?? selected.endpoint,
+  );
+  localStorage.setItem('trolly-provider', selected.id);
+}
+
+function saveProviderEndpoint(event: Event) {
+  providerEndpoint.value = customEndpointOrEmpty((event.target as HTMLInputElement).value);
+  localStorage.setItem(`trolly-endpoint-${harness.value}`, providerEndpoint.value);
+}
+
+async function resumeWorkspaceTask(prompt: string) {
+  view.value = 'stage';
+  await nextTick();
+  window.dispatchEvent(new CustomEvent('trolly:resume-task', { detail: prompt }));
+}
+
+function toggleGlance() {
+  void window.trolly.glance.toggle();
+}
 
 /** Toggle the global content mode. The age gate lives in the Mind store. */
 function onCleanHotkey(event: KeyboardEvent) {
@@ -121,7 +151,7 @@ onMounted(async () => {
       </nav>
 
       <div class="rail-foot">
-        <div><code>{{ dataDir || 'D:\\…' }}</code></div>
+        <div><code>{{ dataDir || 'Local app data' }}</code></div>
         <div>{{ mcpConnected }}/{{ mcpTotal }} tool servers</div>
       </div>
     </aside>
@@ -179,30 +209,31 @@ onMounted(async () => {
           <span class="led" />
           Brainstorm
         </button>
-        <button class="chip" type="button" title="Quick cover. Opens an AI news page. Esc brings this screen back. Does not change SFW." @click="window.trolly.glance.toggle()">
+        <button class="chip" type="button" title="Quick cover. Opens an AI news page. Esc brings this screen back. Does not change SFW." @click="toggleGlance">
           News
         </button>
         <button class="chip" type="button" title="Locked image vault" @click="vaultOpen = true">
           Vault
         </button>
-        <select class="chip" :value="harness" aria-label="Agent harness" @change="harness = ($event.target as HTMLSelectElement).value as HarnessId">
+        <select class="chip provider-switcher" :value="harness" aria-label="Provider" @change="changeProvider">
           <option v-for="item in HARNESSES" :key="item.id" :value="item.id">{{ item.label }}</option>
         </select>
       </header>
 
-      <section v-if="harness === 'custom'" class="clean-status">
+      <section v-if="harness !== 'local'" class="clean-status">
         <strong>Endpoint</strong>
-        <input :value="customEndpoint" placeholder="http://192.168.0.8:9119" @change="customEndpoint = customEndpointOrEmpty(($event.target as HTMLInputElement).value)" />
+        <input :value="providerEndpoint" :aria-label="`${HARNESSES.find((item) => item.id === harness)?.label} endpoint`" placeholder="http://127.0.0.1:port/v1" @change="saveProviderEndpoint" />
       </section>
       <section class="clean-status">
         <strong>{{ HARNESSES.find((item) => item.id === harness)?.label }}</strong>
-        <span>{{ harness === 'custom' ? (customEndpoint || 'URL only. Keys stay in Hermes or OmniRoute.') : HARNESSES.find((item) => item.id === harness)?.detail }}</span>
+        <span>{{ harness === 'local' ? HARNESSES.find((item) => item.id === harness)?.detail : (providerEndpoint || 'Enter a valid local or configured provider endpoint. Credentials stay in the provider service.') }}</span>
       </section>
       <section v-if="!appMode.adult" class="clean-status" role="status">
         <strong>SFW</strong>
         <span>Top switch covers every picture, pet, and clip · Ctrl+Alt+C</span>
       </section>
-      <StageView v-show="view === 'stage'" @navigate="view = $event" />
+      <StageView v-show="view === 'stage'" :provider="harness" :provider-endpoint="providerEndpoint" @navigate="view = $event" />
+      <WorkspaceView v-show="view === 'workspace'" @resume="resumeWorkspaceTask" />
       <McpView v-show="view === 'mcp'" />
       <ProvidersView v-show="view === 'providers'" />
       <ArtistryView v-show="view === 'artistry'" />

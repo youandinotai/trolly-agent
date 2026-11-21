@@ -20,7 +20,11 @@ export interface ChatMessage {
 }
 
 export class OllamaClient {
-  constructor(private baseUrl = 'http://127.0.0.1:11434') {}
+  private readonly baseUrl: string;
+
+  constructor(baseUrl = 'http://127.0.0.1:11434') {
+    this.baseUrl = baseUrl;
+  }
 
   private url(p: string) {
     return `${this.baseUrl.replace(/\/+$/, '')}${p}`;
@@ -36,6 +40,39 @@ export class OllamaClient {
       contextLength: m.details?.context_length,
       family: m.details?.family,
     }));
+  }
+
+  async pullModel(name: string): Promise<void> {
+    const model = String(name ?? '').trim();
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9._:/-]{0,149}$/.test(model)) {
+      throw new Error('Enter a valid Ollama model name.');
+    }
+    const res = await fetch(this.url('/api/pull'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: model, stream: false }),
+      signal: AbortSignal.timeout(30 * 60 * 1000),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`Ollama pull failed: ${res.status} ${body.slice(0, 200)}`);
+    }
+  }
+
+  async deleteModel(name: string): Promise<void> {
+    const model = String(name ?? '').trim();
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9._:/-]{0,149}$/.test(model)) {
+      throw new Error('Enter a valid Ollama model name.');
+    }
+    const res = await fetch(this.url('/api/delete'), {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: model }),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`Ollama delete failed: ${res.status} ${body.slice(0, 200)}`);
+    }
   }
 
   async chat({

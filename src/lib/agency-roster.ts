@@ -19,8 +19,30 @@ export const AGENCY_DIVISIONS = [
   'testing',
 ] as const;
 
+export interface AgentProfile {
+  id: string;
+  name: string;
+  description: string;
+  systemPrompt: string;
+}
+
 export function agencyDivisions(names: string[] = [...AGENCY_DIVISIONS]): string[] {
   return names.filter((name) => name && !/health/i.test(name));
+}
+
+export function defaultAgentProfiles(): AgentProfile[] {
+  return agencyDivisions().map((id) => {
+    const name = id
+      .split('-')
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+    return {
+      id,
+      name,
+      description: `Focused Trolly profile for ${name.toLowerCase()} work.`,
+      systemPrompt: `Act as Trolly's ${name} specialist. Be accurate, stay within this role, state uncertainty, and never claim tools or results you did not use. Do not execute actions without the user's explicit Run approval.`,
+    };
+  });
 }
 
 export function fallbackSpecialist(prompt: string): string {
