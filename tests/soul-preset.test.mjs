@@ -76,4 +76,6 @@ test('Clean save redacts sexual memory and Adult save seals it', () => {
   assert.equal(sealed.memoryContext, undefined);
   const memory = JSON.parse(decryptVaultBytes(Buffer.from(sealed.sealedMemory, 'base64'), key).toString('utf8'));
   assert.deepEqual(memory, ['likes yellow', 'sexual memory']);
+  assert.deepEqual(loadSoulPresetFile(dataDir, 'note-01.soul', { key }).memoryContext, memory);
+  assert.throws(() => saveSoulPresetFile(dataDir, { ...preset, id: '../escape' }, { clean: true }), /inside the data directory/);
 });

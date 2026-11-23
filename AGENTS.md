@@ -36,7 +36,8 @@ Chat and media jobs do not start when the user sends a message. The router class
 - Check a full, self-reported date of birth against 21+ in memory; never persist the date or imply identity verification. Older year-only verification is invalid.
 - Vault IPC requires 21+ verification and Adult mode. Media bytes and file names are AES-256-GCM encrypted at rest; legacy plaintext Vault files require an explicit migration confirmation. Locking clears the in-memory key.
 - Validate After Dark prompts before uploading the reference image. Require a clearly stated numeric age of 21+ for every depicted person and keep the local visual check fail-closed.
-- `.soul` presets load and save only inside the runtime data directory. An NSFW preset is rejected until the current 21+ check passes. Clean saves redact sexual memory. Adult saves seal memory with AES-256-GCM. Loading or saving does not run a model, apply a LoRA, or expand the avatar.
+- `.soul` presets load and save only inside the runtime data directory. An NSFW preset is rejected until the current 21+ check passes. Clean saves redact sexual memory. Adult saves seal memory with AES-256-GCM and reload it only with the Vault key. Loading or saving does not run a model, apply a LoRA, or expand the avatar.
+- Incoming Telegram text is accepted locally and passes the active text filter. No bot token is stored or sent, and no Telegram network call is made.
 
 ## Visual system
 
