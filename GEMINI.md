@@ -11,6 +11,7 @@ Follow `AGENTS.md`. This file exists so Gemini loads the same rules.
 - Fresh MCP setup has no commands or auto-connections. New templates are stdio-only and stay disconnected; previously enabled entries may reconnect at startup only after 21+ verification. Connect and tool calls require 21+ verification. MCP output is text-filtered in both modes; non-text output is blocked, but server side effects can occur before filtering. The filesystem template passes a chosen root but does not sandbox the server process.
 - Vault media and names are AES-256-GCM encrypted at rest; migrating legacy files requires explicit confirmation. Lock clears the in-memory key.
 - Chat image attachments are blocked until they can be age/content classified. After Dark prompts require numeric 21+ ages and are validated before image upload.
+- `.soul` presets are parsed data only. NSFW presets stay rejected until the current 21+ check passes, and loading one does not run a model or apply a LoRA.
 - Ollama model pull/delete are explicit, with confirmation before delete. Provider keys stay in the provider service.
 - App palette: vivid yellow/red with black/gray neutrals and accessible contrast.
 - Wardrobe defaults to All and a Clean top. Ghost garment IDs are pruned on studio read.

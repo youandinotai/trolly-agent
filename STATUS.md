@@ -5,7 +5,7 @@ publication was performed.
 
 ## Verified
 
-- `npm test` — **108 passed, 0 failed**, including the 21+ access, content-policy, MCP, After Dark, and encrypted Vault tests.
+- `node --test tests/soul-preset.test.mjs` — **2 passed, 0 failed**. NSFW `.soul` data is rejected until 21+ verification; parsing does not run a model or apply a LoRA.
 - `npm run typecheck` — passed for Electron and Vue.
 - `npm run build` — passed. Electron, renderer, and yellow/red app and tray icons built. Vite reports a 987.26 kB minified JavaScript chunk, above its 500 kB advisory threshold.
 - `node --test tests/data-paths.test.mjs tests/studio.test.mjs` — **5 passed, 0 failed**.
@@ -32,6 +32,7 @@ publication was performed.
 - Clean-mode text checks are limited heuristics. Standard media prompts reject adult, under-21, and gore terms; image/video outputs and MCP side effects are not automatically classified.
 - MCP output is filtered in both modes; Adult sexual text requires explicit 21+ ages and non-text output is withheld. The tool may already have caused a server-side effect before output filtering.
 - Chat image attachments are disabled. Bounded local WebM dictation remains available, and its transcript passes the active text-content policy.
+- `.soul` preset parsing validates shape and blocks NSFW presets until the current 21+ check. It does not read files, save presets, apply LoRA weights, or change the avatar.
 
 ## Known limits
 
