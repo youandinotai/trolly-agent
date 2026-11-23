@@ -6,7 +6,7 @@ publication was performed.
 ## Verified
 
 - `node --test tests/soul-preset.test.mjs` — **4 passed, 0 failed** after the save-boundary and sealed-reload change. Saves cannot leave the data directory. Adult memory reloads only with the Vault key. Loading or saving does not run a model or apply a LoRA.
-- `node --test tests/telegram-message.test.mjs tests/node-roster.test.mjs` — **3 passed, 0 failed**. Telegram text is filtered locally. The node roster lists names and projects only, with no address, token, or remote connection.
+- `node --test tests/node-roster.test.mjs` — **2 passed, 0 failed**. A local link keeps only the origin. Paths and tokens are dropped. No connection is opened.
 - `npm run typecheck` — passed for Electron and Vue.
 - `npm run build` — passed. Electron, renderer, and yellow/red app and tray icons built. Vite reports a 987.26 kB minified JavaScript chunk, above its 500 kB advisory threshold.
 - `node --test tests/data-paths.test.mjs tests/studio.test.mjs` — **5 passed, 0 failed**.
@@ -35,7 +35,7 @@ publication was performed.
 - Chat image attachments are disabled. Bounded local WebM dictation remains available, and its transcript passes the active text-content policy.
 - `.soul` preset load and save both stay inside the runtime data directory. NSFW presets stay blocked until the current 21+ check. Clean saves replace sexual memory with `[redacted]`. Adult saves store memory as AES-256-GCM `sealedMemory` and reload it only with the Vault key. Neither applies LoRA weights nor changes the avatar.
 - Telegram intake accepts text and a chat id only. It does not connect to Telegram, store a bot token, or bypass the Director hold.
-- The node roster is a local list of names and projects. It does not connect nodes and does not launch Pinokio.
+- The node roster can store one local origin per node. It strips paths and tokens and does not connect or launch Pinokio or t3code.
 
 ## Known limits
 

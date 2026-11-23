@@ -38,7 +38,7 @@ Chat and media jobs do not start when the user sends a message. The router class
 - Validate After Dark prompts before uploading the reference image. Require a clearly stated numeric age of 21+ for every depicted person and keep the local visual check fail-closed.
 - `.soul` presets load and save only inside the runtime data directory. An NSFW preset is rejected until the current 21+ check passes. Clean saves redact sexual memory. Adult saves seal memory with AES-256-GCM and reload it only with the Vault key. Loading or saving does not run a model, apply a LoRA, or expand the avatar.
 - Incoming Telegram text is accepted locally and passes the active text filter. No bot token is stored or sent, and no Telegram network call is made.
-- The node roster lists names and projects only. It stores no address or token and opens no remote connection. Pinokio is not a node link.
+- The node roster lists names, projects, and an optional local origin. A link keeps only the origin, drops any path or token, and opens no connection.
 
 ## Visual system
 

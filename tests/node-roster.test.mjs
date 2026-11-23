@@ -13,3 +13,11 @@ test('a node roster lists projects without storing an address or token', () => {
   assert.equal(JSON.stringify(nodes).includes('192.168'), false);
   assert.equal(JSON.stringify(nodes).includes('token'), false);
 });
+
+test('a local node link keeps only the origin', () => {
+  const [node] = listNodes([
+    { id: 'desk', name: 'Desk', projects: ['trolly-agent'], localOrigin: 'http://127.0.0.1:42000/path?token=secret' },
+  ]);
+  assert.equal(node.localOrigin, 'http://127.0.0.1:42000');
+  assert.throws(() => listNodes([{ id: 'bad', name: 'Bad', projects: [], localOrigin: 'not a url' }]), /Invalid URL/);
+});
