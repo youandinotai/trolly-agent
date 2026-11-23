@@ -103,6 +103,19 @@ export function applyAgencyChoice(route: TaskRoute, response: any, cards: PandaC
   if (/health/i.test(specialist)) throw new Error('Healthcare is not a router option.');
   return { ...route, specialist: specialist || undefined, source: card ? 'panda' : route.source, routerModel: card ? 'panda-router' : route.routerModel };
 }
+/** Local skill pick when the Panda Code server is down. It names a specialist. It does not run one. */
+export function chooseLocalSkill(prompt: string, cards: PandaCard[]): PandaCard | undefined {
+  const pool = cards.filter((card) => card.provider === 'agency');
+  const text = prompt.toLowerCase();
+  const named = pool.find((card) => text.includes(card.model.replace(/-/g, ' ')) || text.includes(card.model));
+  if (named) return named;
+  if (/\b(bug|typescript|refactor|compile|unit test)\b/.test(text)) return pool.find((card) => card.model === 'engineering');
+  if (/\b(draw|design|logo|wardrobe|clothes)\b/.test(text)) return pool.find((card) => card.model === 'design');
+  if (/\b(security|threat|auth)\b/.test(text)) return pool.find((card) => card.model === 'security');
+  if (/\b(research|paper|source)\b/.test(text)) return pool.find((card) => card.model === 'research');
+  return pool.find((card) => card.model === 'product');
+}
+
 export function applyPandaChoice(route: TaskRoute, response: any, cards: PandaCard[]): TaskRoute {
   const choiceId = String(response?.choice?.model_id ?? '');
   const card = cards.find((item) => item.id === choiceId || item.model === choiceId);

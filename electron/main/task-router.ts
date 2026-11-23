@@ -1,4 +1,4 @@
-import { applyAgencyChoice, applyPandaChoice, pandaAgencyRequest, pandaRouteRequest } from '../../src/lib/panda-route.ts';
+import { applyAgencyChoice, applyPandaChoice, chooseLocalSkill, pandaAgencyRequest, pandaRouteRequest } from '../../src/lib/panda-route.ts';
 import { AGENCY_DIVISIONS, fallbackSpecialist } from '../../src/lib/agency-roster.ts';
 import { routeTaskDeterministic, type TaskRoute } from '../../src/lib/task-router.js';
 
@@ -24,6 +24,11 @@ export class JevTaskRouter {
   async classify(prompt: string): Promise<TaskRoute> {
     const fallback = routeTaskDeterministic(prompt);
     if (!String(prompt ?? '').trim()) return fallback;
+    const agency = pandaAgencyRequest(prompt, [...AGENCY_DIVISIONS]);
+    const localSkill = chooseLocalSkill(prompt, agency.pool);
+    const named = applyAgencyChoice(fallback, { choice: { model_id: localSkill?.id } }, agency.pool);
+    named.specialist = named.specialist || fallbackSpecialist(prompt);
+    named.reason = `${named.reason} Local skill cards named ${named.specialist}.`;
     try {
       const models = await this.installedModels();
       const request = pandaRouteRequest(prompt, models);
@@ -35,8 +40,7 @@ export class JevTaskRouter {
         body: JSON.stringify(request),
       });
       if (!response.ok) throw new Error(`Panda returned HTTP ${response.status}`);
-      const routed = applyPandaChoice(fallback, await response.json(), request.pool);
-      const agency = pandaAgencyRequest(prompt, [...AGENCY_DIVISIONS]);
+      const routed = applyPandaChoice(named, await response.json(), request.pool);
       try {
         const skillResponse = await fetch(`${this.pandaUrl}/route`, {
           method: 'POST',
@@ -48,15 +52,10 @@ export class JevTaskRouter {
         const skilled = applyAgencyChoice(routed, await skillResponse.json(), agency.pool);
         return { ...skilled, specialist: skilled.specialist || fallbackSpecialist(prompt) };
       } catch {
-        const picked = applyAgencyChoice(routed, {}, agency.pool);
-        return { ...picked, specialist: picked.specialist || fallbackSpecialist(prompt) };
+        return routed;
       }
     } catch {
-      return {
-        ...fallback,
-        specialist: fallbackSpecialist(prompt),
-        reason: `${fallback.reason} Panda was unavailable, so deterministic routing was used.`,
-      };
+      return named;
     }
   }
 }

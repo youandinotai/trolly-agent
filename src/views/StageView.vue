@@ -335,8 +335,9 @@ async function runPreview() {
       messages.value
         .filter((m): m is Msg & { role: 'user' | 'assistant' } => m.role !== 'tool')
         .map((m) => ({ role: m.role, content: m.text }));
-    const instructions = pending.agent && pending.agent.name === route.specialist
-      ? `${systemPrompt()}\n\n${pending.agent.systemPrompt}`
+    const skill = profiles.value.find((profile) => profile.id === route.specialist) ?? pending.agent;
+    const instructions = skill
+      ? `${systemPrompt()}\n\nYou are the ${skill.name} specialist for this whole task, not an image-only router. ${skill.systemPrompt}`
       : systemPrompt();
     const reply = await window.trolly.provider.chat({
       provider: pending.provider,

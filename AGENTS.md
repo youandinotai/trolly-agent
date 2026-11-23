@@ -39,6 +39,7 @@ Chat and media jobs do not start when the user sends a message. The router class
 - `.soul` presets load and save only inside the runtime data directory. An NSFW preset is rejected until the current 21+ check passes. Clean saves redact sexual memory. Adult saves seal memory with AES-256-GCM and reload it only with the Vault key. Loading or saving does not run a model, apply a LoRA, or expand the avatar.
 - Incoming Telegram text is accepted locally and passes the active text filter. No bot token is stored or sent, and no Telegram network call is made.
 - The node roster lists names, projects, and an optional local origin. A link keeps only the origin, drops any path or token, and opens no connection.
+- Panda is an agent router. It names one agency skill. If Panda Code is down, local skill cards name that skill. Ordinary chat is not forced to engineering. The named agent keeps chat. Gemma is its local Ollama MCP and Comfy is a tool it may use. Neither opens Artistry by itself. Director Run remains the hold.
 
 ## Visual system
 

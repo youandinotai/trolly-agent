@@ -47,7 +47,7 @@ export function defaultAgentProfiles(): AgentProfile[] {
 
 export function fallbackSpecialist(prompt: string): string {
   const text = String(prompt ?? '').toLowerCase();
-  if (/\b(code|bug|typescript|api|test)\b/.test(text)) return 'engineering';
+  if (/\b(bug|typescript|refactor|compile|unit test)\b/.test(text)) return 'engineering';
   if (/\b(draw|design|logo|wardrobe|clothes)\b/.test(text)) return 'design';
   if (/\b(security|threat|auth)\b/.test(text)) return 'security';
   if (/\b(research|paper|source)\b/.test(text)) return 'research';

@@ -14,6 +14,7 @@ Follow `AGENTS.md`. This file exists so Gemini loads the same rules.
 - `.soul` presets load and save only inside the runtime data directory, including saves. NSFW presets stay rejected until the current 21+ check passes. Clean saves redact sexual memory. Adult saves seal it with AES-256-GCM and reload it only with the Vault key. Neither runs a model or applies a LoRA.
 - Incoming Telegram text is filtered locally. No bot token is stored or sent, and no Telegram network call is made.
 - The node roster lists names, projects, and an optional local origin. A link keeps only the origin, drops any path or token, and opens no connection.
+- Panda is an agent router. It names one agency skill. If Panda Code is down, local skill cards name that skill. Ordinary chat is not forced to engineering. The named agent keeps chat. Gemma is its local Ollama MCP and Comfy is a tool it may use. Neither opens Artistry by itself. Director Run remains the hold.
 - Ollama model pull/delete are explicit, with confirmation before delete. Provider keys stay in the provider service.
 - App palette: vivid yellow/red with black/gray neutrals and accessible contrast.
 - Wardrobe defaults to All and a Clean top. Ghost garment IDs are pruned on studio read.
