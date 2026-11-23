@@ -4,47 +4,47 @@
   "howToSwap": "Set a slot's `swap`, then run `remake apply`. Text and attributes: the new words. Images: a path to your file. Videos: a path to an MP4, or to a photo (it becomes a slow-zoom clip). Fonts: a Google Fonts family name (e.g. \"Inter\"). Links: the new URL. Forms: the address that should receive submissions. Colours: any CSS colour. Inline SVG logos: a path to your .svg. Leave `swap` null to keep the original.",
   "summary": {
     "total": 43,
-    "swapped": 0,
-    "yours": 0,
+    "swapped": 43,
+    "yours": 100,
     "groups": {
       "Copy": {
         "slots": 8,
-        "swapped": 0,
+        "swapped": 8,
         "words": 31
       },
       "Headlines": {
         "slots": 1,
-        "swapped": 0,
+        "swapped": 1,
         "words": 1
       },
       "Buttons & menus": {
         "slots": 1,
-        "swapped": 0,
+        "swapped": 1,
         "words": 1
       },
       "Logos": {
         "slots": 1,
-        "swapped": 0,
+        "swapped": 1,
         "words": 0
       },
       "Fonts": {
         "slots": 14,
-        "swapped": 0,
+        "swapped": 14,
         "words": 0
       },
       "Colours": {
         "slots": 10,
-        "swapped": 0,
+        "swapped": 10,
         "words": 0
       },
       "Search & sharing": {
         "slots": 6,
-        "swapped": 0,
+        "swapped": 6,
         "words": 0
       },
       "Icons": {
         "slots": 2,
-        "swapped": 0,
+        "swapped": 2,
         "words": 0
       }
     }
@@ -67,8 +67,9 @@
       "flags": [
         "their words"
       ],
-      "swap": null,
-      "status": "original"
+      "swap": "Choose a provider in Trolly settings, then start a local-first conversation.",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:55:41.543Z"
     },
     {
       "id": "t-dbde4a56",
@@ -85,8 +86,9 @@
         }
       ],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "Connect a provider to begin",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:55:41.546Z"
     },
     {
       "id": "t-6973971b",
@@ -103,8 +105,9 @@
         }
       ],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "Open provider settings",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:55:41.548Z"
     },
     {
       "id": "t-ca5e631d",
@@ -121,8 +124,9 @@
         }
       ],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "New task",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:55:41.551Z"
     },
     {
       "id": "t-744be623",
@@ -139,8 +143,9 @@
         }
       ],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "Provider settings",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:55:41.554Z"
     },
     {
       "id": "t-ae0ed984",
@@ -162,8 +167,9 @@
         }
       ],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "Message Trolly",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:55:41.558Z"
     },
     {
       "id": "t-53af8357",
@@ -180,8 +186,9 @@
         }
       ],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "Loading your workspace",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:55:41.561Z"
     },
     {
       "id": "t-e9921375",
@@ -198,8 +205,9 @@
         }
       ],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "Trolly",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:55:41.563Z"
     },
     {
       "id": "t-1892a89a",
@@ -219,8 +227,9 @@
         }
       ],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "Trolly Project Online",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:55:41.598Z"
     },
     {
       "id": "t-8036af59",
@@ -236,8 +245,9 @@
         }
       ],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "Try again",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:55:41.605Z"
     },
     {
       "id": "i-b7846202",
@@ -257,8 +267,9 @@
       "flags": [
         "their trademark"
       ],
-      "swap": null,
-      "status": "original"
+      "swap": "site/assets/trolly-mark.svg",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:56.077Z"
     },
     {
       "id": "i-17b34ad5",
@@ -278,8 +289,9 @@
       "flags": [
         "their photo"
       ],
-      "swap": null,
-      "status": "original"
+      "swap": "site/assets/trolly-provider.svg",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:57.193Z"
     },
     {
       "id": "i-c2537b49",
@@ -299,8 +311,9 @@
       "flags": [
         "their photo"
       ],
-      "swap": null,
-      "status": "original"
+      "swap": "site/assets/trolly-agents.svg",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:57.525Z"
     },
     {
       "id": "i-b8544556",
@@ -320,8 +333,9 @@
       "flags": [
         "their photo"
       ],
-      "swap": null,
-      "status": "original"
+      "swap": "site/assets/trolly-tools.svg",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:57.918Z"
     },
     {
       "id": "i-575b714e",
@@ -341,8 +355,9 @@
       "flags": [
         "their photo"
       ],
-      "swap": null,
-      "status": "original"
+      "swap": "site/trolly-social.svg",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:58.078Z"
     },
     {
       "id": "ff-40a3c1a3",
@@ -365,8 +380,9 @@
       "flags": [
         "paid font"
       ],
-      "swap": null,
-      "status": "original"
+      "swap": "Noto Sans",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:55:44.086Z"
     },
     {
       "id": "ff-f9da73cf",
@@ -409,8 +425,9 @@
       "flags": [
         "paid font"
       ],
-      "swap": null,
-      "status": "original"
+      "swap": "Noto Sans",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:55:46.527Z"
     },
     {
       "id": "ff-d1cc1fef",
@@ -428,8 +445,9 @@
       "flags": [
         "paid font"
       ],
-      "swap": null,
-      "status": "original"
+      "swap": "Noto Sans SC",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:17.689Z"
     },
     {
       "id": "ff-ef6c4c29",
@@ -446,8 +464,9 @@
       "license": "free (open font license)",
       "where": [],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "Noto Sans",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:20.166Z"
     },
     {
       "id": "ff-b5124cce",
@@ -465,8 +484,9 @@
       "flags": [
         "paid font"
       ],
-      "swap": null,
-      "status": "original"
+      "swap": "Noto Sans SC",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:20.446Z"
     },
     {
       "id": "ff-155c48f5",
@@ -498,8 +518,9 @@
       "flags": [
         "paid font"
       ],
-      "swap": null,
-      "status": "original"
+      "swap": "Noto Sans Mono",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:22.581Z"
     },
     {
       "id": "ff-043af3ec",
@@ -524,8 +545,9 @@
       "flags": [
         "paid font"
       ],
-      "swap": null,
-      "status": "original"
+      "swap": "Noto Sans",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:22.686Z"
     },
     {
       "id": "ff-1cfd2ebe",
@@ -545,8 +567,9 @@
       "flags": [
         "paid font"
       ],
-      "swap": null,
-      "status": "original"
+      "swap": "Noto Sans",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:22.745Z"
     },
     {
       "id": "ff-b3fa6055",
@@ -569,8 +592,9 @@
       "flags": [
         "paid font"
       ],
-      "swap": null,
-      "status": "original"
+      "swap": "Noto Sans",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:22.813Z"
     },
     {
       "id": "ff-5990b1b1",
@@ -587,8 +611,9 @@
       "license": "free (open font license)",
       "where": [],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "Noto Sans",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:25.045Z"
     },
     {
       "id": "ff-9c0caae5",
@@ -605,8 +630,9 @@
       "license": "free (open font license)",
       "where": [],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "Noto Sans",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:25.098Z"
     },
     {
       "id": "ff-452a6f8c",
@@ -626,8 +652,9 @@
       "license": "free (open font license)",
       "where": [],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "Noto Sans",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.565Z"
     },
     {
       "id": "ff-b6239d2d",
@@ -652,8 +679,9 @@
       "flags": [
         "paid font"
       ],
-      "swap": null,
-      "status": "original"
+      "swap": "Noto Sans",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.630Z"
     },
     {
       "id": "ff-35be1f79",
@@ -672,8 +700,9 @@
       "flags": [
         "paid font"
       ],
-      "swap": null,
-      "status": "original"
+      "swap": "Noto Sans",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.686Z"
     },
     {
       "id": "c-7e6529f6",
@@ -683,8 +712,9 @@
       "uses": 44,
       "where": [],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "#0b0b0b",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.688Z"
     },
     {
       "id": "c-167b94e2",
@@ -694,8 +724,9 @@
       "uses": 12,
       "where": [],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "#000000",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.690Z"
     },
     {
       "id": "c-613f011a",
@@ -705,8 +736,9 @@
       "uses": 8,
       "where": [],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "#151515",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.691Z"
     },
     {
       "id": "c-e6c6c395",
@@ -716,8 +748,9 @@
       "uses": 7,
       "where": [],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "#090909",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.693Z"
     },
     {
       "id": "c-6dcb6302",
@@ -727,8 +760,9 @@
       "uses": 7,
       "where": [],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "#232323",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.695Z"
     },
     {
       "id": "c-03e67a1f",
@@ -738,8 +772,9 @@
       "uses": 5,
       "where": [],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "#ededed",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.696Z"
     },
     {
       "id": "c-c378e886",
@@ -749,8 +784,9 @@
       "uses": 4,
       "where": [],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "#ffd500",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.698Z"
     },
     {
       "id": "c-e3e4cd82",
@@ -760,8 +796,9 @@
       "uses": 4,
       "where": [],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "#262626",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.699Z"
     },
     {
       "id": "c-eb4bdb0f",
@@ -771,8 +808,9 @@
       "uses": 4,
       "where": [],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "#f5f5f5",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.700Z"
     },
     {
       "id": "c-2027bfbd",
@@ -782,8 +820,9 @@
       "uses": 4,
       "where": [],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "#ff3333",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.701Z"
     },
     {
       "id": "a-513799c8",
@@ -798,8 +837,9 @@
         }
       ],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "A local-first workspace for choosing an agent, provider, and tools before work runs.",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.716Z"
     },
     {
       "id": "a-111fbc3d",
@@ -814,8 +854,9 @@
         }
       ],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "A local-first workspace for choosing an agent, provider, and tools before work runs.",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.728Z"
     },
     {
       "id": "a-b85faecc",
@@ -830,8 +871,9 @@
         }
       ],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "Choose providers, agents, and tools for local-first AI work.",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.744Z"
     },
     {
       "id": "a-4a44da3d",
@@ -846,8 +888,9 @@
         }
       ],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "Trolly Project Online",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.752Z"
     },
     {
       "id": "a-be25564c",
@@ -862,8 +905,9 @@
         }
       ],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "Trolly Project Online",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.760Z"
     },
     {
       "id": "a-f8a3a830",
@@ -878,8 +922,9 @@
         }
       ],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "Trolly Project Online",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:27.765Z"
     },
     {
       "id": "i-b980e72f",
@@ -897,8 +942,9 @@
       "source": "live",
       "where": [],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "site/assets/trolly-mark.svg",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:58.185Z"
     },
     {
       "id": "i-0fa420c6",
@@ -916,8 +962,9 @@
       "source": "live",
       "where": [],
       "flags": [],
-      "swap": null,
-      "status": "original"
+      "swap": "site/assets/trolly-mark.svg",
+      "status": "applied",
+      "appliedAt": "2026-11-21T06:56:58.188Z"
     }
   ]
 }

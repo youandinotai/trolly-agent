@@ -101,27 +101,30 @@ test('adult content cannot be enabled before the age check', () => {
   assert.equal(store.readPreferences().adultContent, false);
 });
 
-test('a birth year under 18 is rejected and the gate stays shut', () => {
+test('a person under 21 is rejected and the gate stays shut', () => {
   const store = new MindStore(tmpDir());
-  const tooYoung = new Date().getFullYear() - 12;
-  assert.throws(() => store.verifyAge(tooYoung), /adults only/i);
+  const today = new Date(2026, 10, 21);
+  assert.throws(() => store.verifyAge('2005-11-22', today), /at least 21/i);
   assert.equal(store.readPreferences().ageVerified, false);
   assert.throws(() => store.setAdultContent(true), /age check/i);
 });
 
-test('a nonsense birth year is rejected', () => {
+test('invalid and future birth dates are rejected', () => {
   const store = new MindStore(tmpDir());
-  assert.throws(() => store.verifyAge(0), /valid year/i);
-  assert.throws(() => store.verifyAge(NaN), /valid year/i);
-  assert.throws(() => store.verifyAge(99999), /valid year/i);
+  const today = new Date(2026, 10, 21);
+  for (const birthDate of ['1900-02-29', '2027-01-01', '2005-13-01', 'not-a-date']) {
+    assert.throws(() => store.verifyAge(birthDate, today), /valid date/i);
+  }
 });
 
-test('a legal adult can pass the check and then enable adult content', () => {
+test('a 21-year-old can pass the check without persisting their birth date', () => {
   const dir = tmpDir();
   const store = new MindStore(dir);
-  const prefs = store.verifyAge(new Date().getFullYear() - 30);
+  const prefs = store.verifyAge('2005-11-21', new Date(2026, 10, 21));
   assert.equal(prefs.ageVerified, true);
+  assert.equal(prefs.ageVerifiedFor, 21);
   assert.ok(prefs.verifiedAt, 'records when the check happened');
+  assert.equal(fs.readFileSync(path.join(dir, 'mind.json'), 'utf8').includes('2005-11-21'), false);
 
   const after = store.setAdultContent(true);
   assert.equal(after.adultContent, true);
@@ -130,9 +133,20 @@ test('a legal adult can pass the check and then enable adult content', () => {
   assert.equal(new MindStore(dir).readPreferences().adultContent, true);
 });
 
+test('legacy 18+ confirmations are invalidated', () => {
+  const dir = tmpDir();
+  fs.writeFileSync(path.join(dir, 'mind.json'), JSON.stringify({
+    preferences: { adultContent: true, ageVerified: true, birthYear: 1990, verifiedAt: '2024-01-01T00:00:00.000Z' },
+  }));
+  const store = new MindStore(dir);
+  assert.equal(store.readPreferences().ageVerified, false);
+  assert.equal(store.readPreferences().adultContent, false);
+  assert.throws(() => store.setAdultContent(true), /21\+ age check/i);
+});
+
 test('clearing the age check also switches adult content off', () => {
   const store = new MindStore(tmpDir());
-  store.verifyAge(new Date().getFullYear() - 30);
+  store.verifyAge('1990-01-01');
   store.setAdultContent(true);
 
   const prefs = store.resetVerification();

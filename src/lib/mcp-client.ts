@@ -22,6 +22,7 @@ export interface McpToolDef {
 
 export interface McpCallResult {
   content?: { type: string; text: string }[];
+  structuredContent?: unknown;
   isError?: boolean;
 }
 

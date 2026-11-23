@@ -238,6 +238,7 @@ async function generate() {
       <div class="field">
         <label>Positive prompt</label>
         <textarea v-model="positive" />
+        <p class="hint">Text checks block common sexual wording, but generated images and video are not automatically classified. Review local renders before use or sharing.</p>
       </div>
       <div class="field">
         <label>Negative prompt</label>
@@ -318,8 +319,8 @@ async function generate() {
 
 <style scoped>
 .route-notice { padding: 8px 10px; border-left: 2px solid var(--accent); background: var(--bg-panel); color: var(--text-dim); font: 11px var(--mono); }
-.after-dark-tab:not(:disabled) { color: #fda4af; border-color: #6b3547; }
-.after-dark-tab.primary { background: #e11d48; border-color: #e11d48; color: white; }
+.after-dark-tab:not(:disabled) { color: #ff9a83; border-color: #7d3028; }
+.after-dark-tab.primary { background: var(--danger); border-color: var(--danger); color: #1b0e0b; }
 .lib-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));

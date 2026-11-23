@@ -13,22 +13,19 @@ export class StudioStore {
   private readonly dataDir: string;
   private readonly assetsDir: string;
 
-  constructor(dataDir: string, options: { seedDefaults?: boolean } = {}) {
+  constructor(dataDir: string, options: { seedDefaults?: boolean; sourceRoot?: string } = {}) {
     // Validate lexically first so a rejected path never creates a directory.
     const lexical = path.resolve(dataDir);
-    if (!/^d:/i.test(lexical)) throw new Error('Studio data must be on the D: drive.');
-    const sourceRoot = fs.realpathSync(path.resolve('D:/Trolly/app'));
+    const sourceRoot = fs.realpathSync(path.resolve(options.sourceRoot ?? process.cwd()));
     const outsideSource = (candidate: string) => {
       const relative = path.relative(sourceRoot, candidate);
       return !relative || (!relative.startsWith('..') && !path.isAbsolute(relative));
     };
     if (outsideSource(lexical)) throw new Error('Studio data must be outside the application source tree.');
     fs.mkdirSync(lexical, { recursive: true });
-    // Canonical check: a junction cannot silently redirect the store to C:.
+    // Canonical check: a junction cannot silently redirect the store into the source tree.
     const resolved = fs.realpathSync(lexical);
-    if (!/^d:/i.test(resolved) || outsideSource(resolved)) {
-      throw new Error('Studio data must resolve to a real D: location outside the application source tree.');
-    }
+    if (outsideSource(resolved)) throw new Error('Studio data must resolve outside the application source tree.');
     this.dataDir = resolved;
     this.assetsDir = path.join(resolved, 'assets');
     fs.mkdirSync(this.assetsDir, { recursive: true });
@@ -165,8 +162,8 @@ export class StudioStore {
     if (doc.actors.length) return;
 
     let modelPath = '';
-    const source = 'D:/sow/app-w64/Soul-of-Waifu-v2.5.1/assets/emotions/vrm/AvatarSample_K.vrm';
-    if (fs.existsSync(source)) {
+    const source = process.env.TROLLY_STUDIO_SAMPLE_MODEL;
+    if (source && fs.existsSync(source)) {
       fs.mkdirSync(this.assetsDir, { recursive: true });
       modelPath = path.join(this.assetsDir, 'trolly-base.vrm');
       if (!fs.existsSync(modelPath)) fs.copyFileSync(source, modelPath);

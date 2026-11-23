@@ -1,40 +1,53 @@
-# Status — what is built, what is real
+# Status — local development and verification
 
-**Date:** 2026-11-15. Personal dev/test lane on `D:\Trolly`. Nothing here is a
-shipped product and nothing is claimed past what ran.
+This records results observed in the current worktree. No deployment or
+publication was performed.
 
-## Verified green
-- Full suite: **83 tests / 83 pass / 0 fail** (`npm test`).
-- Safety gate + merge guard: `tests/safety-gate.test.mjs` (subjects are always
-  explicit legal adults; the scan refuses a minor, coercion, or harm).
-- Startup script: `D:\Trolly\start-lane.ps1` — starts Panda, OmniRoute, the
-  browser companion, the Electron app, and the Hermes A2A gateway; starts only
-  what is down; never touches the OmniRoute password.
-- `docs/ARCHITECTURE.md` — the Mermaid pyramid/flow of route → judge → gate →
-  single-branch merge.
-- `scripts/merge-gate.mjs` — only the merge judge may merge; it re-runs the
-  real test suite before allowing `feature/initial-build`.
-- `scripts/gen-legal-adult-image.mjs` + `poll-comfy.mjs` + `watch-image.mjs`.
-- `mcp-servers.example.yaml` — chrome-devtools MCP for all Trolly agents.
+## Verified
 
-## Real, in progress (not yet done)
-- ComfyUI is up on `192.168.0.8:8188` and **has successfully submitted and
-  begun sampling** a legal-adult still image with the locked negative. This box
-  is AMD CPU-only for Comfy, so one 24-step image is ~50 min. **No finished
-  render to show yet** — the queue is 1 running + 3 pending.
-- Video (~5 s) needs the LTX text-to-video workflow; not yet run.
+- `node --test tests/soul-preset.test.mjs` — **4 passed, 0 failed** after the save-boundary and sealed-reload change. Saves cannot leave the data directory. Adult memory reloads only with the Vault key. Loading or saving does not run a model or apply a LoRA.
+- `node --test tests/node-roster.test.mjs` — **2 passed, 0 failed**. A local link keeps only the origin. Paths and tokens are dropped. No connection is opened.
+- `node --test tests/panda-route.test.mjs` — **6 passed, 0 failed**. Ordinary chat names product. A TypeScript bug names engineering. A down Panda server still names a skill and does not run it.
+- `node --test tests/comfy-mcp.test.mjs tests/panda-route.test.mjs` — **10 passed, 0 failed**. A picture job stays in chat on `artokun/gemma4-comfyui-mcp:e2b`. Ordinary chat is not moved onto that model. The Comfy template is `npx --yes comfyui-mcp`. Only a connected matching server is offered as tools.
+- `npm run typecheck` — passed for Electron and Vue after dropping `.ts` suffixes on renderer imports in `soul-preset.ts` and `telegram-message.ts`. Those suffixes typecheck under Electron's `rewriteRelativeImportExtensions` but fail `vue-tsc`.
+- `npm run build` — passed. Electron, renderer, and yellow/red app and tray icons built. Vite reports a 987.26 kB minified JavaScript chunk, above its 500 kB advisory threshold.
+- `node --test tests/data-paths.test.mjs tests/studio.test.mjs` — **5 passed, 0 failed**.
+- `git diff --check` — passed.
+- `npm run verify:leak` — passed; **0 source-brand tokens** found in the shipped surface.
+- A TCP check confirmed `127.0.0.1:2222` is listening; the preview process was not stopped or modified.
+- Browser visual verification was not completed: browser approval for the local preview was denied. No browser page was opened.
+- `remake report` (from `airi-remake/`) — **exit 2** because the overall gate is incomplete. Capture passed (1 page, 886 files); desktop and phone matches were 100.00%, motion match was 99.69%; the swap checklist passed at **43/43 (100%)**. “Live and private” is NOT YET because deployment was intentionally not requested.
+- `remake images` (from `airi-remake/`) — **exit 0**; 0 original images remain to replace.
+- The Impeccable detector reports only an advisory on the transparency checkerboard in `src/styles.css`; it is retained because it communicates the transparent viewport.
+- `npm ci` completed. Its install summary reported 8 dependency advisories (3 moderate, 5 high); they were not investigated or changed in this task.
 
-## Honest blockers
-- No safe, local, non-abliterated vision model is installed to act as judge 2.
-  The only vision-capable model is `abliterant/qwen3.5-rana` (de-aligned), which
-  is not a trustworthy safety judge. Recommend pulling a stock Qwen-VL before
-  the vision judge runs.
-- No merge has happened and no branch was created/pushed from this work. Single
-  branch `feature/initial-build` is untouched by this session, per policy.
+## Implemented
 
-## Already done earlier this lane
-- Announce/panda-to-agency routing (healthcare is not a card).
-- Harness dropdown (Local / Hermes local / Hermes via OmniRoute / OpenCode via OmniRoute / custom).
-- News cover (open AI news; Esc returns; does not swap SFW).
-- Director hold: Stage shows the chosen specialist, model, and steps before any chat or media call. Stop spends nothing. Agent rules live in `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`.
-- Wardrobe closet defaults to All. Studio read drops garment IDs that no longer exist.
+- Provider selection at startup for Ollama, OmniRoute, OpenCode-through-OmniRoute, Hermes local proxy, and custom OpenAI-compatible endpoints. Provider/model choices flow through the main-process adapter; endpoint and model choices persist locally.
+- Agent profiles load from `agent-profiles.json`, can be selected in Stage, and show visible run state. The Director Run/Stop hold remains the only path into task execution; profiles do not auto-run.
+- MCP templates support filesystem, custom agent tools, browser, and Playwright stdio servers. Fresh setup has no commands or auto-connections; filesystem access requires an explicit root.
+- Local Ollama model inventory, pull, and confirmed delete actions.
+- Local task workspace with status updates and resume-to-Stage behavior; resume does not submit or run the task.
+- Runtime data defaults under Electron's `userData` location, with `TROLLY_*` directory overrides; Vault and Studio reject source-tree paths.
+- Yellow/red with black/gray app palette and generated icons.
+- 21+ verification now uses the full birth date without persisting it. Adult mode, MCP connect/tool calls, and Vault access have main-process gates; clearing verification locks the Vault and disconnects MCP servers.
+- Vault media bytes and filenames are AES-256-GCM encrypted, with an explicit legacy migration confirmation and 12-character minimum for new passwords.
+- Clean-mode text checks are limited heuristics. Standard media prompts reject adult, under-21, and gore terms; image/video outputs and MCP side effects are not automatically classified.
+- MCP output is filtered in both modes; Adult sexual text requires explicit 21+ ages and non-text output is withheld. The tool may already have caused a server-side effect before output filtering.
+- Chat image attachments are disabled. Bounded local WebM dictation remains available, and its transcript passes the active text-content policy.
+- `.soul` preset load and save both stay inside the runtime data directory. NSFW presets stay blocked until the current 21+ check. Clean saves replace sexual memory with `[redacted]`. Adult saves store memory as AES-256-GCM `sealedMemory` and reload it only with the Vault key. Neither applies LoRA weights nor changes the avatar.
+- Telegram intake accepts text and a chat id only. It does not connect to Telegram, store a bot token, or bypass the Director hold.
+- The node roster can store one local origin per node. It strips paths and tokens and does not connect or launch Pinokio or t3code.
+- Panda names one agency skill before any model call. If Panda Code is down, local skill cards still name that skill. Chat stays with that agent. Image, video, and edit jobs stay in that chat and select only `artokun/gemma4-comfyui-mcp:e2b`. Comfy is the disconnected `npx --yes comfyui-mcp` template. Director Run still holds the call. After Connect, one Ollama tool round may call that server. Panda Code itself was not cloned or started. A live Gemma MCP call was not made. `node --test tests/comfy-mcp.test.mjs` — **4 passed, 0 failed**. The tool menu includes only a connected `npx --yes comfyui-mcp` server.
+- `ollama list` showed `artokun/gemma4-comfyui-mcp:e2b` already installed (3.4 GB). `ollama pull artokun/gemma4-comfyui-mcp:e2b` failed with a registry TLS handshake timeout and did not replace the local copy.
+- `gh repo edit youandinotai/trolly-agent --visibility public --accept-visibility-change-consequences` — repo is **public**: https://github.com/youandinotai/trolly-agent
+- Duplicate non-templates were archived, not copied: `gh repo archive youandinotai/never-ever-touches-trollz1004 --yes` (trolly snapshot), `gh repo archive youandinotai/never-touches-trollz1004 --yes` (grindroid remake copy). `youandinotai/remake-airi` was already archived; its remake lives in this repo as `airi-remake/`.
+- `gh repo archive youandinotai/Hermes --yes` and `gh repo archive youandinotai/youandinotai --yes` — Hermes and the date app stay archived, not merged.
+- `gh repo list youandinotai --limit 100 --json name,url,visibility,isPrivate,isTemplate,isArchived,description` — active public product is `trolly-agent`. Left as templates: private `grindroid-ai` and archived private `youandinotai`. No Trollz1004 repo was fetched.
+
+## Known limits
+
+- Non-Ollama providers must expose OpenAI-compatible `/models` and `/chat/completions` endpoints; credentials must be configured in that provider service. OpenCode uses OmniRoute by default rather than its native HTTP API.
+- Image attachments are disabled until local age/content classification is available; standard media checks are prompt-level only.
+- MCP transport is stdio only. New server connections require explicit action; existing config entries marked `enabled` may reconnect at startup.
+- One selected agent profile is applied per task; this does not fan out or execute every profile.

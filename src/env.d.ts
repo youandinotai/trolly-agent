@@ -1,5 +1,7 @@
 /** The typed surface the preload script exposes to the renderer. */
 import type { NewActor, NewGarment, NewScene, StudioDoc } from './lib/studio-types.js';
+import type { AgentProfile } from './lib/agency-roster.js';
+import type { HarnessId } from './lib/harness.js';
 
 export interface McpTool {
   name: string;
@@ -27,6 +29,28 @@ export interface OllamaModel {
   family?: string;
 }
 
+export type WorkspaceTaskStatus = 'open' | 'in-progress' | 'done';
+
+export interface WorkspaceTask {
+  id: string;
+  title: string;
+  description: string;
+  status: WorkspaceTaskStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VaultStatus {
+  hasPassword: boolean;
+  unlocked: boolean;
+  encryptionVersion: 0 | 1 | null;
+}
+
+export interface VaultFile {
+  id: string;
+  name: string;
+}
+
 export interface Persona {
   id: string;
   name: string;
@@ -52,8 +76,8 @@ export interface Recipe {
 export interface Preferences {
   adultContent: boolean;
   ageVerified: boolean;
+  ageVerifiedFor?: number;
   verifiedAt?: string;
-  birthYear?: number;
 }
 
 export interface MindDoc {
@@ -75,6 +99,8 @@ export interface SessionModeState {
 export interface TrollyBridge {
   ollama: {
     models(): Promise<OllamaModel[]>;
+    pull(name: string): Promise<void>;
+    delete(name: string): Promise<void>;
     chat(payload: {
       model: string;
       messages: {
@@ -83,9 +109,34 @@ export interface TrollyBridge {
         /** Base64-encoded image attachments for the local vision model. */
         images?: string[];
       }[];
+      purpose?: 'audio-transcription';
       temperature?: number;
       maxTokens?: number;
     }): Promise<string>;
+  };
+  provider: {
+    models(input: { provider: HarnessId; endpoint?: string }): Promise<OllamaModel[]>;
+    chat(input: {
+      provider: HarnessId;
+      endpoint?: string;
+      model: string;
+      messages: {
+        role: 'system' | 'user' | 'assistant';
+        content: string;
+        images?: string[];
+      }[];
+      temperature?: number;
+      maxTokens?: number;
+    }): Promise<string>;
+  };
+  agents: {
+    list(): Promise<{ profiles: AgentProfile[]; error: string }>;
+  };
+  workspace: {
+    list(): Promise<WorkspaceTask[]>;
+    create(input: { title: string; description?: string }): Promise<WorkspaceTask>;
+    setStatus(id: string, status: WorkspaceTaskStatus): Promise<WorkspaceTask>;
+    delete(id: string): Promise<void>;
   };
   router: {
     classify(prompt: string): Promise<{
@@ -113,7 +164,7 @@ export interface TrollyBridge {
     saveRecipe(payload: { id?: string; title: string; prompt: string }): Promise<Recipe>;
     deleteRecipe(id: string): Promise<void>;
     readPrefs(): Promise<Preferences>;
-    verifyAge(birthYear: number): Promise<Preferences>;
+    verifyAge(birthDate: string): Promise<Preferences>;
     setAdultContent(enabled: boolean): Promise<Preferences>;
     resetVerification(): Promise<Preferences>;
   };
@@ -171,10 +222,13 @@ export interface TrollyBridge {
   };
   mcp: {
     list(): Promise<McpServerState[]>;
+    error(): Promise<string>;
     connect(id: string): Promise<McpServerState[]>;
     disconnect(id: string): Promise<McpServerState[]>;
     tools(id: string): Promise<McpTool[]>;
     call(id: string, name: string, args?: Record<string, unknown>): Promise<{ content?: { type: string; text: string }[] }>;
+    add(input: { name: string; command: string; args?: string[] }): Promise<McpServerState[]>;
+    remove(id: string): Promise<McpServerState[]>;
     onChanged(cb: (servers: McpServerState[]) => void): () => void;
   };
   studio: {
@@ -200,16 +254,16 @@ export interface TrollyBridge {
     toggle(): Promise<{ covered: boolean }>;
   };
   vault: {
-    status(): Promise<{ hasPassword: boolean; unlocked: boolean }>;
-    lock(): Promise<{ hasPassword: boolean; unlocked: boolean }>;
-    setPassword(password: string): Promise<{ hasPassword: boolean; unlocked: boolean }>;
-    unlock(password: string): Promise<{ hasPassword: boolean; unlocked: boolean }>;
-    changePassword(current: string, next: string): Promise<{ hasPassword: boolean; unlocked: boolean }>;
-    reset(password: string): Promise<{ hasPassword: boolean; unlocked: boolean }>;
-    list(): Promise<{ name: string }[]>;
-    add(payload: { name: string; dataBase64: string }): Promise<{ name: string }>;
-    read(name: string): Promise<{ name: string; dataBase64: string } | null>;
-    remove(name: string): Promise<void>;
+    status(): Promise<VaultStatus>;
+    lock(): Promise<VaultStatus>;
+    setPassword(password: string): Promise<VaultStatus>;
+    unlock(password: string, confirmMigration?: boolean): Promise<VaultStatus>;
+    changePassword(current: string, next: string, confirmMigration?: boolean): Promise<VaultStatus>;
+    reset(password: string): Promise<VaultStatus>;
+    list(): Promise<VaultFile[]>;
+    add(payload: { name: string; dataBase64: string }): Promise<VaultFile>;
+    read(id: string): Promise<{ id: string; name: string; dataBase64: string } | null>;
+    remove(id: string): Promise<void>;
   };
   paths(): Promise<{ dataDir: string; appRoot: string }>;
 }

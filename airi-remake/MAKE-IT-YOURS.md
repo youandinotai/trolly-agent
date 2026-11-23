@@ -1,25 +1,24 @@
-# Make it yours: airi.moeru.ai
+# Make It Yours: Trolly Project Online
 
-Remake of https://airi.moeru.ai/. 0% yours (0 of 43 slots swapped).
-Until this reaches 100%, the site is a copy of someone else's work: keep the passcode on and don't publish it.
+The tracked identity gate is complete: **100% yours (43 of 43 slots swapped)**.
+All four image slots are also replaced; `remake images` reported zero remaining
+original images. The original source URL, capture, and attribution are preserved
+in `remake/remake.json` and `remake/sources/` for provenance only.
 
-| Group | Slots | Swapped | What Claude needs from you |
+The site remains private behind its passcode gate and has not been deployed or
+published. The 100% score covers tracked swaps, not a clean-room or code-license
+audit of the captured application.
+
+| Group | Slots | Swapped | Replacement notes |
 | --- | ---: | ---: | --- |
-| Copy | 8 (31 words) | 0 | Your About page, a LinkedIn bio or a few notes. Claude rewrites each block in your voice, at the same length so the layout holds. |
-| Headlines | 1 (1 words) | 0 | Your headline for each one, about the same length. |
-| Buttons & menus | 1 (1 words) | 0 | Usually nothing: these follow once the copy is done. Say so if your menu needs different pages. |
-| Logos | 1 | 0 | Your logo as an SVG, or a PNG on a transparent background. |
-| Fonts | 14 | 0 | Nothing: Claude picks a free look-alike from Google Fonts, unless you have a font of your own. |
-| Colours | 10 | 0 | Keep them, or give your two or three brand colours. |
-| Search & sharing | 6 | 0 | Your site name and a one-line description. |
-| Icons | 2 | 0 | Usually nothing. Your logo replaces the favicon. |
-
-## Watch out
-
-- 1 × long copy blocks are the original's writing
-- 1 × logos are trademarks of the original owner
-- 4 × photos are copyrighted by the original owner
-- 10 × fonts the original pays a licence for; swap or buy a licence
+| Copy | 8 (31 words) | 8 | Your About page, a LinkedIn bio or a few notes. Claude rewrites each block in your voice, at the same length so the layout holds. |
+| Headlines | 1 (1 words) | 1 | Your headline for each one, about the same length. |
+| Buttons & menus | 1 (1 words) | 1 | Usually nothing: these follow once the copy is done. Say so if your menu needs different pages. |
+| Logos | 1 | 1 | Your logo as an SVG, or a PNG on a transparent background. |
+| Fonts | 14 | 14 | Nothing: Claude picks a free look-alike from Google Fonts, unless you have a font of your own. |
+| Colours | 10 | 10 | Keep them, or give your two or three brand colours. |
+| Search & sharing | 6 | 6 | Your site name and a one-line description. |
+| Icons | 2 | 2 | Usually nothing. Your logo replaces the favicon. |
 
 ## How to swap
 
@@ -46,4 +45,4 @@ The board with thumbnails: `/_remake/swap/` on the deployed site.
 
 ## Headlines
 
-- [ ] AIRI
+- [x] Trolly Project Online

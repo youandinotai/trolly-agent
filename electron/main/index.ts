@@ -13,28 +13,47 @@ import { StudioStore } from './studio.js';
 import { HermesReviewer } from './hermes-review.js';
 import { SpeechClient } from './speech.js';
 import { MindStore } from './mind.js';
-import { resolveAfterDarkOutputDir } from '../../src/lib/after-dark.js';
+import { assertAfterDarkPrompt, resolveAfterDarkOutputDir } from '../../src/lib/after-dark.js';
+import { assertAgeVerified, assertVaultAccess } from '../../src/lib/access-policy.js';
+import { isLocalAudioTranscriptionRequest } from '../../src/lib/audio-transcription.js';
+import {
+  assertAdultContent21Plus,
+  assertCleanPrompt,
+  assertCleanResponse,
+  assertMcpToolOutput,
+  assertStandardMediaPrompt,
+} from '../../src/lib/content-policy.js';
 import { SessionMode, type SessionModeSnapshot } from '../../src/lib/session-mode.js';
 import { MediaVault } from './vault.js';
 import { GLANCE_NEWS_URL } from '../../src/lib/glance-cover.js';
+import { harnessById } from '../../src/lib/harness.js';
+import { AgentRegistry } from './agent-registry.js';
+import { ProviderClient } from './provider.js';
+import { WorkspaceStore } from './workspace.js';
+import { resolveTrollyDataPaths } from './data-paths.js';
+import { COMFY_MCP_MODEL, comfyToolMenu } from '../../src/lib/comfy-mcp.js';
 
 const __dirname_ = path.dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = path.resolve(__dirname_, '..', '..', '..');
 
-/** All mutable state lives on D: — never on the system drive. */
-const DATA_DIR = process.env.TROLLY_DATA_DIR || path.join(APP_ROOT, 'data');
-const vault = new MediaVault(process.env.TROLLY_VAULT_DIR || 'D:/Trolly/data/vault');
+/** App state stays in its local data directory or a user-configured override. */
+const DATA_PATHS = resolveTrollyDataPaths(app.getPath('userData'), process.env);
+const DATA_DIR = DATA_PATHS.dataDir;
+const vault = new MediaVault(DATA_PATHS.vaultDir, APP_ROOT);
 
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let supervisor: McpSupervisor | null = null;
 
 const ollama = new OllamaClient('http://127.0.0.1:11434');
+const provider = new ProviderClient();
+const agents = new AgentRegistry(DATA_DIR);
+const workspace = new WorkspaceStore(DATA_DIR);
 const router = new JevTaskRouter('http://127.0.0.1:11434', process.env.TROLLY_PANDA_URL || 'http://127.0.0.1:48710');
-const comfy = new ComfyClient('http://127.0.0.1:8188');
+const comfy = new ComfyClient('http://127.0.0.1:8188', DATA_DIR);
 const afterDark = new AfterDarkClient(
   'http://127.0.0.1:8188',
-  resolveAfterDarkOutputDir(process.env, APP_ROOT),
+  resolveAfterDarkOutputDir(process.env, DATA_DIR, APP_ROOT),
   new AfterDarkSafetyInspector('http://127.0.0.1:11434', process.env.TROLLY_SAFETY_VISION_MODEL || 'qwen2.5vl:7b'),
 );
 const speech = new SpeechClient(DATA_DIR, (status) => {
@@ -43,7 +62,7 @@ const speech = new SpeechClient(DATA_DIR, (status) => {
 const mind = new MindStore(DATA_DIR);
 const contentMode = new SessionMode();
 contentMode.restore(mind.readPreferences());
-const studio = new StudioStore(process.env.TROLLY_STUDIO_DIR || 'D:/Trolly/data/studio');
+const studio = new StudioStore(DATA_PATHS.studioDir, { sourceRoot: APP_ROOT });
 const hermes = new HermesReviewer(process.env.TROLLY_HERMES_URL || 'http://127.0.0.1:8645');
 
 function publishMode(state: SessionModeSnapshot = contentMode.snapshot()): void {
@@ -65,8 +84,8 @@ function showCleanShield(): void {
   const [width, height] = mainWindow.getContentSize();
   cleanShield.setBounds({ x: 0, y: 0, width, height });
   cleanShield.setAutoResize({ width: true, height: true });
-  cleanShield.setBackgroundColor('#142027');
-  const html = `<!doctype html><html><body style="margin:0;background:#142027;color:#c5f3ec;font:600 16px system-ui;display:flex;align-items:center;justify-content:center;height:100vh;user-select:none"><div style="text-align:center"><div style="font-size:22px;margin-bottom:8px">Clean protection</div><div style="font-weight:400;font-size:13px;color:#8fbab8">Visuals are secured. The workspace returns in a moment.</div></div></body></html>`;
+  cleanShield.setBackgroundColor('#15120f');
+  const html = `<!doctype html><html><body style="margin:0;background:#15120f;color:#ffd21a;font:600 16px system-ui;display:flex;align-items:center;justify-content:center;height:100vh;user-select:none"><div style="text-align:center"><div style="font-size:22px;margin-bottom:8px">Clean protection</div><div style="font-weight:400;font-size:13px;color:#c1b6a6">Visuals are secured. The workspace returns in a moment.</div></div></body></html>`;
   void cleanShield.webContents.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`).catch(() => {});
 }
 
@@ -129,12 +148,12 @@ function setSessionAdult(enabled: boolean): SessionModeSnapshot {
   return cleanNow();
 }
 
-function cleanNow(): SessionModeSnapshot {
+function cleanNow(force = false): SessionModeSnapshot {
   hideGlance();
   vault.lock();
   // Dedupe the renderer keydown and Electron globalShortcut firing together.
   const now = Date.now();
-  if (now - lastCleanAt < 400 && cleanShield) return contentMode.snapshot();
+  if (!force && now - lastCleanAt < 400 && cleanShield) return contentMode.snapshot();
   lastCleanAt = now;
   mainWindow?.webContents.setAudioMuted(true);
   showCleanShield();
@@ -149,9 +168,112 @@ function cleanNow(): SessionModeSnapshot {
   return state;
 }
 
+function requireAgeVerified(action: string): void {
+  assertAgeVerified(mind.readPreferences().ageVerified, action);
+}
+
+function requireVaultAccess(): void {
+  assertVaultAccess(mind.readPreferences().ageVerified, contentMode.snapshot().adult);
+}
+
+async function runChatWithPolicy(messages: any[], send: () => Promise<string>, allowAudio = false): Promise<string> {
+  const adult = contentMode.snapshot().adult;
+  const ticket = adult ? contentMode.beginAdultWork(mind.readPreferences()) : undefined;
+  const lastUser = [...(messages ?? [])].reverse().find((message: any) => message.role === 'user');
+  const userText = String(lastUser?.content ?? '');
+  if (!allowAudio && (messages ?? []).some((message: any) => Array.isArray(message.images) && message.images.length)) {
+    throw new Error('Chat image attachments are not age/content classified. Remove the attachment before sending.');
+  }
+  if (adult) assertAdultContent21Plus(userText);
+  else assertCleanPrompt(userText);
+
+  const reply = await send();
+  if (ticket && contentMode.finishAdultWork(ticket, reply).kind === 'suppressed') {
+    throw new Error('Clean mode suppressed this Adult response before it could be shown.');
+  }
+  if (adult) assertAdultContent21Plus(reply);
+  else assertCleanResponse(reply);
+  return reply;
+}
+
+function screenToolText(value: unknown, adult: boolean): string {
+  const text = typeof value === 'string' ? value : JSON.stringify(value ?? '');
+  if (typeof text !== 'string') throw new Error('MCP output could not be safely inspected.');
+  assertMcpToolOutput(text, adult);
+  return text;
+}
+
+/** One tool round on the trained Comfy model. No call unless that server is connected. */
+async function runComfyMcpChat(input: { model: string; messages: any[]; temperature?: number; maxTokens?: number }): Promise<string> {
+  requireAgeVerified('calling an MCP tool');
+  const adult = contentMode.snapshot().adult;
+  const ticket = adult ? contentMode.beginAdultWork(mind.readPreferences()) : undefined;
+  const lastUser = [...(input.messages ?? [])].reverse().find((message: any) => message.role === 'user');
+  const userText = String(lastUser?.content ?? '');
+  if ((input.messages ?? []).some((message: any) => Array.isArray(message.images) && message.images.length)) {
+    throw new Error('Chat image attachments are not age/content classified. Remove the attachment before sending.');
+  }
+  if (adult) assertAdultContent21Plus(userText);
+  else assertCleanPrompt(userText);
+  assertStandardMediaPrompt(userText);
+
+  const servers = supervisor?.listServers() ?? [];
+  const listed = await Promise.all(servers.map(async (server) => {
+    const tools = await supervisor?.listTools(server.id) ?? [];
+    return tools.map((tool) => ({ serverId: server.id, ...tool }));
+  }));
+  const menu = comfyToolMenu(servers, listed.flat());
+  const first = await ollama.chatTurn({
+    model: COMFY_MCP_MODEL,
+    messages: input.messages,
+    temperature: input.temperature,
+    maxTokens: input.maxTokens,
+    tools: menu.map((tool) => ({
+      type: 'function' as const,
+      function: { name: tool.wire, description: tool.description, parameters: tool.parameters },
+    })),
+  });
+  let reply = first.content.trim() || first.thinking.trim();
+  if (first.toolCalls.length) {
+    const notes: string[] = [];
+    for (const call of first.toolCalls.slice(0, 4)) {
+      const tool = menu.find((item) => item.wire === call.function.name);
+      if (!tool) throw new Error('The model named a tool that is not on the connected Comfy server.');
+      const result = await supervisor?.callTool(tool.serverId, tool.name, call.function.arguments ?? {});
+      const parts = (result?.content ?? []).map((item) => {
+        if (item?.type !== 'text' || typeof item?.text !== 'string') {
+          throw new Error('Trolly cannot classify non-text MCP output. The result was not returned.');
+        }
+        return screenToolText(item.text, adult);
+      });
+      if (result?.structuredContent !== undefined) parts.push(screenToolText(result.structuredContent, adult));
+      notes.push(`${tool.name}: ${parts.join('\n') || (result?.isError ? 'tool error' : 'ok')}`);
+    }
+    const second = await ollama.chatTurn({
+      model: COMFY_MCP_MODEL,
+      messages: [
+        ...input.messages,
+        { role: 'assistant', content: first.content, tool_calls: first.toolCalls },
+        { role: 'tool', content: notes.join('\n') },
+      ],
+      temperature: input.temperature,
+      maxTokens: input.maxTokens,
+    });
+    reply = second.content.trim() || second.thinking.trim() || notes.join('\n');
+  }
+  if (!menu.length && !reply) reply = 'ComfyUI MCP is not connected. Add it and press Connect before a workflow can run.';
+  if (ticket && contentMode.finishAdultWork(ticket, reply).kind === 'suppressed') {
+    throw new Error('Clean mode suppressed this Adult response before it could be shown.');
+  }
+  if (adult) assertAdultContent21Plus(reply);
+  else assertCleanResponse(reply);
+  return reply;
+}
+
+
 function ensureDataDir() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
-  // Redirect Electron's own userData (cache, localStorage) onto D: as well.
+  // Keep Electron's cache and localStorage with the configured app data.
   app.setPath('userData', path.join(DATA_DIR, 'userData'));
   app.setPath('sessionData', path.join(DATA_DIR, 'sessionData'));
   app.setPath('temp', path.join(DATA_DIR, 'temp'));
@@ -167,7 +289,7 @@ function createWindow() {
     minWidth: 1080,
     minHeight: 700,
     show: false,
-    backgroundColor: '#0d0f14',
+    backgroundColor: '#0c0b09',
     title: 'Trolly Agent',
     icon: path.join(__dirname_, 'assets', 'icon.png'),
     autoHideMenuBar: true,
@@ -230,23 +352,70 @@ function createTray() {
 
 function registerIpc() {
   ipcMain.handle('trolly:ollama:models', async () => ollama.listModels());
-  ipcMain.handle('trolly:ollama:chat', async (_e, payload) => ollama.chat(payload));
-  ipcMain.handle('trolly:router:classify', async (_e, prompt: string) => router.classify(prompt));
+  ipcMain.handle('trolly:ollama:chat', async (_e, payload) => {
+    const audioTranscription = isLocalAudioTranscriptionRequest(payload);
+    return runChatWithPolicy(payload?.messages, () => ollama.chat(payload), audioTranscription);
+  });
+  ipcMain.handle('trolly:ollama:pull', async (_e, name: string) => ollama.pullModel(name));
+  ipcMain.handle('trolly:ollama:delete', async (_e, name: string) => ollama.deleteModel(name));
+  ipcMain.handle('trolly:provider:models', async (_e, input) => provider.listModels(input));
+  ipcMain.handle('trolly:provider:chat', async (_e, input) => {
+    if (input?.model === COMFY_MCP_MODEL && harnessById(input.provider).adapter === 'ollama') {
+      return runComfyMcpChat(input);
+    }
+    return runChatWithPolicy(input?.messages, () => provider.chat(input));
+  });
+  ipcMain.handle('trolly:agents:list', async () => ({ profiles: agents.list(), error: agents.error() }));
+  ipcMain.handle('trolly:workspace:list', async () => workspace.list());
+  ipcMain.handle('trolly:workspace:create', async (_e, input) => workspace.create(input));
+  ipcMain.handle('trolly:workspace:status', async (_e, input) => workspace.setStatus(input.id, input.status));
+  ipcMain.handle('trolly:workspace:delete', async (_e, id: string) => workspace.delete(id));
+  ipcMain.handle('trolly:router:classify', async (_e, prompt: string) => {
+    if (contentMode.snapshot().adult) assertAdultContent21Plus(prompt);
+    else assertCleanPrompt(prompt);
+    return router.classify(prompt);
+  });
   ipcMain.handle('trolly:comfy:status', async () => comfy.status());
-  ipcMain.handle('trolly:comfy:generate', async (_e, payload) => comfy.generate(payload));
+  ipcMain.handle('trolly:comfy:generate', async (_e, payload) => {
+    assertStandardMediaPrompt(String(payload?.positive ?? ''));
+    return comfy.generate(payload);
+  });
   ipcMain.handle('trolly:comfy:inventory', async () => comfy.inventory());
   ipcMain.handle('trolly:comfy:outputs', async (_e, limit) => comfy.outputs(limit));
   ipcMain.handle('trolly:comfy:after-dark', async (_e, payload) => {
     const ticket = contentMode.beginAdultWork(mind.readPreferences());
+    assertAfterDarkPrompt(payload?.positive ?? '');
     const rendered = await afterDark.generate(payload);
     return contentMode.finishAdultWork(ticket, rendered);
   });
 
   ipcMain.handle('trolly:mcp:list', async () => supervisor?.listServers() ?? []);
-  ipcMain.handle('trolly:mcp:connect', async (_e, id: string) => supervisor?.connect(id));
+  ipcMain.handle('trolly:mcp:error', async () => supervisor?.error() ?? '');
+  ipcMain.handle('trolly:mcp:connect', async (_e, id: string) => {
+    requireAgeVerified('connecting an MCP server');
+    return supervisor?.connect(id);
+  });
   ipcMain.handle('trolly:mcp:disconnect', async (_e, id: string) => supervisor?.disconnect(id));
   ipcMain.handle('trolly:mcp:tools', async (_e, id: string) => supervisor?.listTools(id) ?? []);
-  ipcMain.handle('trolly:mcp:call', async (_e, payload) => supervisor?.callTool(payload.id, payload.name, payload.args));
+  ipcMain.handle('trolly:mcp:call', async (_e, payload) => {
+    requireAgeVerified('calling an MCP tool');
+    const result = await supervisor?.callTool(payload.id, payload.name, payload.args);
+    const adult = contentMode.snapshot().adult;
+    for (const item of result?.content ?? []) {
+      if (item?.type !== 'text' || typeof item?.text !== 'string') {
+        throw new Error('Trolly cannot classify non-text MCP output. The result was not returned.');
+      }
+      assertMcpToolOutput(item.text, adult);
+    }
+    if (result?.structuredContent !== undefined) {
+      const structuredText = JSON.stringify(result.structuredContent);
+      if (typeof structuredText !== 'string') throw new Error('MCP output could not be safely inspected.');
+      assertMcpToolOutput(structuredText, adult);
+    }
+    return result;
+  });
+  ipcMain.handle('trolly:mcp:add', async (_e, input) => supervisor?.addServer(input));
+  ipcMain.handle('trolly:mcp:remove', async (_e, id: string) => supervisor?.removeServer(id));
   ipcMain.handle('trolly:speech:voices', async () => speech.voices());
   ipcMain.handle('trolly:speech:speak', async (_e, payload) => speech.speak(payload?.text, payload));
   ipcMain.handle('trolly:mind:read', async () => mind.read());
@@ -257,15 +426,17 @@ function registerIpc() {
   ipcMain.handle('trolly:mind:recipe:save', async (_e, payload) => mind.saveRecipe(payload));
   ipcMain.handle('trolly:mind:recipe:delete', async (_e, id: string) => mind.deleteRecipe(id));
   ipcMain.handle('trolly:mind:prefs:read', async () => mind.readPreferences());
-  ipcMain.handle('trolly:mind:prefs:verify', async (_e, birthYear: number) => mind.verifyAge(birthYear));
+  ipcMain.handle('trolly:mind:prefs:verify', async (_e, birthDate: string) => mind.verifyAge(birthDate));
   ipcMain.handle('trolly:mind:prefs:adult', async (_e, enabled: boolean) => {
     setSessionAdult(enabled);
     return mind.readPreferences();
   });
   ipcMain.handle('trolly:mind:prefs:reset', async () => {
-    const prefs = mind.resetVerification();
-    publishMode(contentMode.clean(prefs));
-    return prefs;
+    mind.resetVerification();
+    vault.lock();
+    await supervisor?.disconnectAll();
+    cleanNow(true);
+    return mind.readPreferences();
   });
   ipcMain.handle('trolly:mode:state', async () => contentMode.snapshot());
   ipcMain.handle('trolly:mode:adult', async (_e, enabled: boolean) => setSessionAdult(enabled));
@@ -282,17 +453,38 @@ function registerIpc() {
   ipcMain.handle('trolly:paths', async () => ({ dataDir: DATA_DIR, appRoot: APP_ROOT }));
   ipcMain.handle('trolly:vault:status', async () => vault.status());
   ipcMain.handle('trolly:vault:lock', async () => vault.lock());
-  ipcMain.handle('trolly:vault:set', async (_e, password: string) => vault.setPassword(password));
-  ipcMain.handle('trolly:vault:unlock', async (_e, password: string) => vault.unlock(password));
-  ipcMain.handle('trolly:vault:change', async (_e, current: string, next: string) => vault.changePassword(current, next));
-  ipcMain.handle('trolly:vault:reset', async (_e, password: string) => vault.reset(password));
-  ipcMain.handle('trolly:vault:list', async () => (contentMode.snapshot().adult ? vault.list() : []));
+  ipcMain.handle('trolly:vault:set', async (_e, password: string) => {
+    requireVaultAccess();
+    return vault.setPassword(password);
+  });
+  ipcMain.handle('trolly:vault:unlock', async (_e, password: string, confirmMigration: boolean) => {
+    requireVaultAccess();
+    return vault.unlock(password, confirmMigration);
+  });
+  ipcMain.handle('trolly:vault:change', async (_e, current: string, next: string, confirmMigration: boolean) => {
+    requireVaultAccess();
+    return vault.changePassword(current, next, confirmMigration);
+  });
+  ipcMain.handle('trolly:vault:reset', async (_e, password: string) => {
+    requireVaultAccess();
+    return vault.reset(password);
+  });
+  ipcMain.handle('trolly:vault:list', async () => {
+    requireVaultAccess();
+    return vault.list();
+  });
   ipcMain.handle('trolly:vault:add', async (_e, payload: { name: string; dataBase64: string }) => {
-    if (!contentMode.snapshot().adult) throw new Error('Vault images stay hidden while SFW is on.');
+    requireVaultAccess();
     return vault.add(payload.name, payload.dataBase64);
   });
-  ipcMain.handle('trolly:vault:read', async (_e, name: string) => (contentMode.snapshot().adult ? vault.read(name) : null));
-  ipcMain.handle('trolly:vault:remove', async (_e, name: string) => vault.remove(name));
+  ipcMain.handle('trolly:vault:read', async (_e, name: string) => {
+    requireVaultAccess();
+    return vault.read(name);
+  });
+  ipcMain.handle('trolly:vault:remove', async (_e, name: string) => {
+    requireVaultAccess();
+    return vault.remove(name);
+  });
   ipcMain.handle('trolly:studio:read', async () => studio.read());
   ipcMain.handle('trolly:studio:garment:save', async (_e, payload) => studio.saveGarment(payload));
   ipcMain.handle('trolly:studio:actor:save', async (_e, payload) => studio.saveActor(payload));
@@ -305,6 +497,7 @@ function registerIpc() {
 
 app.whenReady().then(async () => {
   ensureDataDir();
+  agents.load();
   registerIpc();
 
   supervisor = new McpSupervisor(path.join(DATA_DIR, 'mcp-servers.json'));
@@ -316,8 +509,10 @@ app.whenReady().then(async () => {
   // Bring up the tool servers the user enabled, so the character has hands
   // from the moment the window opens.
   for (const cfg of supervisor.listServers()) {
-    if (cfg.enabled && cfg.command) {
-      supervisor.connect(cfg.id).catch(() => {});
+    if (mind.readPreferences().ageVerified && cfg.enabled && cfg.command) {
+      supervisor.connect(cfg.id).catch((error) => {
+        console.warn(`Configured MCP server ${cfg.name} failed to connect:`, error);
+      });
     }
   }
 

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">Trolly provider routes</title>
+  <desc id="desc">A local model route beside two selectable provider endpoints.</desc>
+  <rect width="720" height="420" rx="28" fill="#090909"/>
+  <path d="M0 94h720" stroke="#262626" stroke-width="2"/>
+  <rect x="28" y="26" width="34" height="34" rx="10" fill="#ffd500"/>
+  <path d="M37 35h16v5h-6v15h-5V40h-5z" fill="#090909"/>
+  <text x="78" y="50" fill="#f5f5f5" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700">PROVIDER ROUTES</text>
+  <rect x="36" y="138" width="190" height="176" rx="18" fill="#151515" stroke="#ffd500" stroke-width="3"/>
+  <circle cx="70" cy="176" r="10" fill="#ffd500"/>
+  <text x="94" y="182" fill="#f5f5f5" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="700">OLLAMA</text>
+  <text x="58" y="224" fill="#ededed" font-family="Segoe UI,Arial,sans-serif" font-size="15">Local models</text>
+  <text x="58" y="251" fill="#9b9b9b" font-family="Segoe UI,Arial,sans-serif" font-size="13">On this device</text>
+  <path d="M226 225h72m0 0 23-25m-23 25 23 25" fill="none" stroke="#ffd500" stroke-linecap="round" stroke-width="4"/>
+  <rect x="344" y="126" width="158" height="76" rx="16" fill="#232323"/>
+  <circle cx="372" cy="164" r="8" fill="#ff3333"/>
+  <text x="392" y="170" fill="#f5f5f5" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="700">OMNIROUTE</text>
+  <rect x="344" y="244" width="158" height="76" rx="16" fill="#232323"/>
+  <circle cx="372" cy="282" r="8" fill="#ffd500"/>
+  <text x="392" y="288" fill="#f5f5f5" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="700">HERMES</text>
+  <path d="M502 164h55m-55 118h55m0-118 25 59-25 59" fill="none" stroke="#ff3333" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+  <rect x="584" y="180" width="100" height="86" rx="16" fill="#151515" stroke="#ff3333" stroke-width="2"/>
+  <text x="634" y="218" text-anchor="middle" fill="#f5f5f5" font-family="Segoe UI,Arial,sans-serif" font-size="13" font-weight="700">DIRECTOR</text>
+  <text x="634" y="241" text-anchor="middle" fill="#bcbcbc" font-family="Segoe UI,Arial,sans-serif" font-size="12">Run to start</text>
+</svg>

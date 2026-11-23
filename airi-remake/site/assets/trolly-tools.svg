@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">Trolly tool connections</title>
+  <desc id="desc">Explicitly connected filesystem, browser, and Playwright tool servers.</desc>
+  <rect width="720" height="420" rx="28" fill="#090909"/>
+  <path d="M0 94h720" stroke="#262626" stroke-width="2"/>
+  <text x="34" y="58" fill="#f5f5f5" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700">TOOLS · EXPLICIT CONNECTIONS</text>
+  <rect x="38" y="130" width="196" height="230" rx="18" fill="#151515" stroke="#333" stroke-width="2"/>
+  <path d="M64 174h56l12 12h72v40H64z" fill="#ffd500"/>
+  <text x="64" y="260" fill="#f5f5f5" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="700">FILESYSTEM</text>
+  <text x="64" y="286" fill="#aaa" font-family="Segoe UI,Arial,sans-serif" font-size="13">configured roots only</text>
+  <rect x="262" y="130" width="196" height="230" rx="18" fill="#151515" stroke="#333" stroke-width="2"/>
+  <circle cx="360" cy="194" r="38" fill="none" stroke="#ff3333" stroke-width="8"/>
+  <path d="M387 221 414 248" stroke="#ff3333" stroke-linecap="round" stroke-width="9"/>
+  <text x="288" y="286" fill="#f5f5f5" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="700">BROWSER</text>
+  <text x="288" y="312" fill="#aaa" font-family="Segoe UI,Arial,sans-serif" font-size="13">user-approved pages</text>
+  <rect x="486" y="130" width="196" height="230" rx="18" fill="#151515" stroke="#333" stroke-width="2"/>
+  <rect x="526" y="162" width="116" height="72" rx="8" fill="#232323" stroke="#ffd500" stroke-width="3"/>
+  <path d="M544 190h29m10 0h18m-57 18h63" stroke="#f5f5f5" stroke-linecap="round" stroke-width="4"/>
+  <text x="512" y="286" fill="#f5f5f5" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="700">PLAYWRIGHT</text>
+  <text x="512" y="312" fill="#aaa" font-family="Segoe UI,Arial,sans-serif" font-size="13">tests on request</text>
+</svg>

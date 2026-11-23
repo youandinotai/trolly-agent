@@ -1,18 +1,29 @@
-import test from 'node:test';
+import test, { afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 import { StudioStore } from '../electron/main/studio.ts';
 
+const temporaryPaths = [];
+
+afterEach(() => {
+  for (const dir of temporaryPaths.splice(0)) fs.rmSync(dir, { recursive: true, force: true });
+});
+
 function tmpDir() {
-  fs.mkdirSync('D:/Trolly/data/test-tmp', { recursive: true });
-  return fs.mkdtempSync('D:/Trolly/data/test-tmp/studio-');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'trolly-studio-'));
+  temporaryPaths.push(dir);
+  return dir;
 }
 
-test('studio refuses output outside the D: adult lane', () => {
-  assert.throws(() => new StudioStore('C:/forbidden', { seedDefaults: false }), /D:/i);
-  assert.throws(() => new StudioStore('D:/Trolly/app/data/studio', { seedDefaults: false }), /outside/i);
+test('studio refuses data inside the application source tree', () => {
+  const sourceRoot = process.cwd();
+  assert.throws(
+    () => new StudioStore(path.join(sourceRoot, 'data', 'studio'), { seedDefaults: false, sourceRoot }),
+    /outside/i,
+  );
 });
 
 test('actors, garments, and scenes round-trip through the admin store', () => {
@@ -23,7 +34,7 @@ test('actors, garments, and scenes round-trip through the admin store', () => {
   const garment = store.saveGarment({ name: 'Scarlet bikini', category: 'bikini', color: '#e11d48', scale: 1 });
   const scene = store.saveScene({ name: 'Neon stage', background: '#0d0714', accent: '#67e8f9', lightIntensity: 1.2 });
   const actor = store.saveActor({
-    name: 'Trolly', role: 'actress', modelPath: 'D:/models/trolly.vrm',
+    name: 'Trolly', role: 'actress', modelPath: path.join(dir, 'trolly.vrm'),
     hair: { color: '#f3f5f7', length: 1.2, volume: 1 }, smile: 0.5,
     garmentIds: [garment.id], sceneId: scene.id,
   });
@@ -44,7 +55,7 @@ test('uploaded artwork and VRM files stay inside the studio asset folder', () =>
   const store = new StudioStore(dir, { seedDefaults: false });
   const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
   const uploaded = store.uploadAsset({ name: 'bikini.png', dataBase64: png.toString('base64'), kind: 'image' });
-  assert.match(uploaded.path, /^D:/i);
+  assert.equal(path.dirname(uploaded.path), path.join(path.resolve(dir), 'assets'));
   assert.ok(uploaded.path.startsWith(path.resolve(dir)));
   assert.equal(fs.readFileSync(uploaded.path).length, png.length);
   const read = store.readAsset(uploaded.path);

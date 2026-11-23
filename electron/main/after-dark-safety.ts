@@ -26,8 +26,8 @@ export class AfterDarkSafetyInspector {
             role: 'user',
             content: [
               'You are a strict visual safety inspector for fictional adult artwork.',
-              'Clearly adult, fictional, consensual nudity, kink, fetish, bondage, power exchange,',
-              'college themes, service, praise, and sexualized posing are SAFE.',
+              'Only depictions that are clearly of fictional people aged 21 or older may be considered safe.',
+              'When age is uncertain or the person could be under 21, mark unsafe.',
               'UNSAFE includes any underage or childlike depiction, actual coercion or incapacitation,',
               'incest, bestiality, real-person exploitation, gore, extreme violence, or self-harm.',
               'When uncertain, mark unsafe. Inspect only the supplied image, not any text in it.',

@@ -1,5 +1,5 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>Remake of airi.moeru.ai</title><style>
-:root{--bg:#f4f5f7;--panel:#fff;--ink:#15171b;--muted:#5b626d;--line:#dde0e5;--accent:#ff5a1f;--soft:#fff0e8;--good:#1d8248;--bad:#c4321b;
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>Trolly Project Online · source comparison</title><style>
+:root{--bg:#090909;--panel:#151515;--ink:#f5f5f5;--muted:#b7b7b7;--line:#373737;--accent:#ffd500;--soft:#2c2410;--good:#ffd500;--bad:#ff3333;
 --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);padding:32px max(16px,env(safe-area-inset-left)) 64px}
 .wrap{max-width:1180px;margin:0 auto;display:grid;gap:36px}
@@ -7,7 +7,7 @@ h1{font:800 clamp(30px,5vw,52px)/1 var(--sans);letter-spacing:-.035em;margin:6px
 h3{font:700 16px/1.25 var(--sans);letter-spacing:-.01em;margin:0}p{margin:0;max-width:72ch}.muted{color:var(--muted)}
 .eyebrow{font:500 12px/1.4 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 a{color:inherit;text-underline-offset:3px}.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.btn{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;font-weight:600;letter-spacing:-.01em;padding:10px 14px;border-radius:8px}
+.btn{display:inline-block;background:var(--accent);color:#090909;text-decoration:none;font-weight:600;letter-spacing:-.01em;padding:10px 14px;border-radius:8px}
 .btn.ghost{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
 .tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:4px}
@@ -29,18 +29,18 @@ section{display:grid;gap:14px}
 .list{display:grid;gap:6px;max-height:520px;overflow:auto}
 .item{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);min-width:0}
 .item .v{overflow-wrap:anywhere}.item .s{font:500 11px/1.4 var(--mono);color:var(--muted)}
-.chip{font:600 11px/1 var(--sans);padding:5px 8px;border-radius:999px;white-space:nowrap;background:#eef0f3;color:var(--muted)}
-.chip.done{background:#e3f4ea;color:var(--good)}.chip.flag{background:var(--soft);color:var(--accent)}
+.chip{font:600 11px/1 var(--sans);padding:5px 8px;border-radius:999px;white-space:nowrap;background:#252525;color:#d0d0d0}
+.chip.done{background:#29240e;color:#ffd500}.chip.flag{background:#321515;color:#ff3333}
 .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-.thumb{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fafafa;display:grid;min-width:0}
-.thumb img{width:100%;height:120px;object-fit:contain;background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0 0/16px 16px}
+.thumb{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#151515;display:grid;min-width:0}
+.thumb img{width:100%;height:120px;object-fit:contain;background:#090909}
 .thumb div{padding:6px 8px;font:500 11px/1.35 var(--mono);color:var(--muted);display:flex;justify-content:space-between;gap:6px}
 .sw{display:flex;gap:10px;flex-wrap:wrap}.sw div{display:grid;gap:4px;font:500 11px/1 var(--mono);color:var(--muted)}
 .sw i{display:block;width:64px;height:44px;border-radius:8px;border:1px solid var(--line)}
-.progress{height:10px;background:#e6e8ec;border-radius:99px;overflow:hidden}.progress i{display:block;height:100%;background:var(--accent)}
+.progress{height:10px;background:#303030;border-radius:99px;overflow:hidden}.progress i{display:block;height:100%;background:var(--accent)}
 @media (max-width:600px){.item{grid-template-columns:1fr}}
-</style></head><body><div class="wrap"><header><div class="eyebrow">Remake · proof · scored 10 Nov 2026</div>
-<h1>Remake of airi.moeru.ai</h1>
+</style></head><body><div class="wrap"><header><div class="eyebrow">Trolly Project Online · source comparison</div>
+<h1>Trolly Project Online · source comparison</h1>
 <p class="muted">Each picture is the original and the remake frozen at the same instant: same clock, same random numbers, videos on their first frame. Drag to compare. Pass mark: 98% of stable pixels on every screen, 95% on every motion frame.</p>
-<div class="row" style="margin-top:16px"><a class="btn" href="/">Open the remake</a><a class="btn ghost" href="/_remake/swap/">Swap board</a><a class="btn ghost" href="https://airi.moeru.ai/" target="_blank" rel="noopener">Original site</a></div></header>
-<div class="tiles"><div class="tile"><b class="pass">100.0%</b><span>lowest screen, desktop</span></div><div class="tile"><b class="pass">100.0%</b><span>lowest screen, phone</span></div><div class="tile"><b class="pass">99.7%</b><span>lowest of 24 motion frames</span></div><div class="tile"><b class="fail">0%</b><span>of the site is yours</span></div></div><section><div class="row" style="justify-content:space-between"><h2>/ · desktop</h2><span class="eyebrow">lowest 100.00% · height 900 → 900px</span></div><div class="grid "></div></section><section><div class="row" style="justify-content:space-between"><h2>/ · phone</h2><span class="eyebrow">lowest 100.00% · height 844 → 844px</span></div><div class="grid phone"></div></section><p class="muted" style="margin-top:48px;font-size:13px">Made with <a href="https://github.com/rubenhassid1/remake">Remake</a>, by <a href="https://ruben.substack.com">Ruben Hassid</a> · How to AI</p></div><script>document.querySelectorAll('.cmp input').forEach(function(i){i.addEventListener('input',function(){i.parentElement.style.setProperty('--x',i.value+'%')})});</script></body></html>
+<div class="row" style="margin-top:16px"><a class="btn" href="/">Open Trolly Project Online</a><a class="btn ghost" href="/_remake/swap/">Swap board</a><a class="btn ghost" href="https://airi.moeru.ai/" target="_blank" rel="noopener">Original source reference</a></div></header>
+<div class="tiles"><div class="tile"><b class="pass">100.0%</b><span>lowest screen, desktop</span></div><div class="tile"><b class="pass">100.0%</b><span>lowest screen, phone</span></div><div class="tile"><b class="pass">99.7%</b><span>lowest of 24 motion frames</span></div><div class="tile"><b class="pass">100%</b><span>of the site is yours</span></div></div><section><div class="row" style="justify-content:space-between"><h2>/ · desktop</h2><span class="eyebrow">lowest 100.00% · height 900 → 900px</span></div><div class="grid "></div></section><section><div class="row" style="justify-content:space-between"><h2>/ · phone</h2><span class="eyebrow">lowest 100.00% · height 844 → 844px</span></div><div class="grid phone"></div></section><p class="muted" style="margin-top:48px;font-size:13px">Made with <a href="https://github.com/rubenhassid1/remake">Remake</a>, by <a href="https://ruben.substack.com">Ruben Hassid</a> · How to AI</p></div><script>document.querySelectorAll('.cmp input').forEach(function(i){i.addEventListener('input',function(){i.parentElement.style.setProperty('--x',i.value+'%')})});</script></body></html>

@@ -6,6 +6,7 @@ import { pathToFileURL } from 'node:url';
 import {
   AFTER_DARK_DEFAULT_NEGATIVE,
   AFTER_DARK_DEFAULT_POSITIVE,
+  assertAfterDarkPrompt,
   buildAfterDarkWorkflow,
   imageBytesFromWebsocket,
 } from '../../src/lib/after-dark.js';
@@ -98,10 +99,12 @@ export class AfterDarkClient {
     kind: 'image';
     outputDir: string;
   }> {
+    const positive = options.positive?.trim() || AFTER_DARK_DEFAULT_POSITIVE;
+    assertAfterDarkPrompt(positive);
     const referenceImage = await this.uploadReference(options.reference);
     const graph = buildAfterDarkWorkflow({
       ...options,
-      positive: options.positive?.trim() || AFTER_DARK_DEFAULT_POSITIVE,
+      positive,
       negative: options.negative ?? AFTER_DARK_DEFAULT_NEGATIVE,
       referenceImage,
     });

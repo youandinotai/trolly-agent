@@ -22,14 +22,17 @@ test('After Dark requires both age verification and the adult preference', () =>
 
 test('After Dark hard boundaries reject minors, coercion, and gore', () => {
   assert.throws(() => assertAfterDarkPrompt('underage girl'), /adults only/i);
-  assert.throws(() => assertAfterDarkPrompt('non-consensual encounter'), /consensual/i);
-  assert.throws(() => assertAfterDarkPrompt('bloody gore'), /gore|violence/i);
+  assert.throws(() => assertAfterDarkPrompt('21-year-old adult, non-consensual encounter'), /consensual/i);
+  assert.throws(() => assertAfterDarkPrompt('21-year-old adult, bloody gore'), /gore|violence/i);
   assert.doesNotThrow(() => assertAfterDarkPrompt(AFTER_DARK_DEFAULT_POSITIVE));
 });
 
-test('After Dark permits clearly legal college adults and consensual fetish dynamics', () => {
+test('After Dark accepts 21+ adults and rejects younger or ambiguous ages', () => {
   assert.doesNotThrow(() => assertAfterDarkPrompt('22-year-old adult college woman, consensual bondage and power exchange'));
-  assert.doesNotThrow(() => assertAfterDarkPrompt('19-year-old adult teen, consensual service and praise'));
+  assert.doesNotThrow(() => assertAfterDarkPrompt('21-year-old adult woman'));
+  assert.throws(() => assertAfterDarkPrompt('20-year-old adult woman'), /21 or older/i);
+  assert.throws(() => assertAfterDarkPrompt('adult woman'), /21 or older/i);
+  assert.throws(() => assertAfterDarkPrompt('21-year-old adult teen'), /21 or older/i);
 });
 
 test('After Dark builds local Pony img2img and never saves through ComfyUI output', () => {
@@ -66,26 +69,25 @@ test('After Dark builds local Pony img2img and never saves through ComfyUI outpu
 });
 
 test('After Dark requires a reference and valid denoise', () => {
-  assert.throws(() => buildAfterDarkWorkflow({ positive: 'adult', referenceImage: '' }), /reference/i);
+  assert.throws(() => buildAfterDarkWorkflow({ positive: '25-year-old adult', referenceImage: '' }), /reference/i);
   assert.throws(
-    () => buildAfterDarkWorkflow({ positive: 'adult', referenceImage: 'x.png', denoise: 0 }),
+    () => buildAfterDarkWorkflow({ positive: '25-year-old adult', referenceImage: 'x.png', denoise: 0 }),
     /denoise/i,
   );
   assert.throws(
-    () => buildAfterDarkWorkflow({ positive: 'adult', referenceImage: 'x.png', denoise: 1.1 }),
+    () => buildAfterDarkWorkflow({ positive: '25-year-old adult', referenceImage: 'x.png', denoise: 1.1 }),
     /denoise/i,
   );
 });
 
-test('After Dark output defaults to the adult D: lane and rejects C: or repo output', () => {
-  const appRoot = path.resolve('D:/Trolly/app');
-  const dir = resolveAfterDarkOutputDir({}, appRoot);
-  assert.match(dir, /^D:\\/i);
-  assert.match(dir, /Trolly/i);
+test('After Dark output defaults to app data and rejects output inside the source tree', () => {
+  const appRoot = path.resolve('trolly-app');
+  const dataDir = path.resolve('trolly-user-data');
+  const dir = resolveAfterDarkOutputDir({}, dataDir, appRoot);
+  assert.equal(dir, path.join(dataDir, 'after-dark'));
   assert.notEqual(path.resolve(dir), appRoot);
-  assert.throws(() => resolveAfterDarkOutputDir({ TROLLY_AFTER_DARK_DIR: 'C:/forbidden' }, appRoot), /D:/i);
   assert.throws(
-    () => resolveAfterDarkOutputDir({ TROLLY_AFTER_DARK_DIR: 'D:/Trolly/app/data/adult' }, appRoot),
+    () => resolveAfterDarkOutputDir({ TROLLY_AFTER_DARK_DIR: path.join(appRoot, 'data', 'adult') }, dataDir, appRoot),
     /outside/i,
   );
 });

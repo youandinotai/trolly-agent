@@ -2,7 +2,7 @@ import { reactive } from 'vue';
 
 import type { SessionModeState } from '../env';
 
-/** Shared agent modes. Visual safety never disables chat, tools, or navigation. */
+/** Shared mode state. Backend IPC independently enforces the sensitive-operation gates. */
 export const appMode = reactive({
   adult: false,
   ageVerified: false,
@@ -62,8 +62,15 @@ export async function setAdultMode(on: boolean): Promise<boolean> {
 export const ADULT_BLOCK = [
   'The user has adult content enabled in their preferences.',
   'You may engage with legal adult content when asked directly.',
-  'These limits do not change: legal adults only, never minors,',
+  'These limits do not change: depicted people must be 21 or older, never minors,',
   'consensual adults only, no gore or extreme violence.',
+].join(' ');
+
+/** A prompt reminder; hard enforcement is a limited text filter in Electron main. */
+export const CLEAN_BLOCK = [
+  'Clean mode is active.',
+  'Do not provide sexual or nude content.',
+  'If asked for that content, explain that the user can revise the request.',
 ].join(' ');
 
 /** The instruction block that turns on the always-on brainstorming frame. */
@@ -81,5 +88,6 @@ export function systemPrompt(): string {
   const parts = [base];
   if (appMode.brainstorming) parts.push(BRAINSTORM_BLOCK);
   if (appMode.adult) parts.push(ADULT_BLOCK);
+  else parts.push(CLEAN_BLOCK);
   return parts.join(' ');
 }

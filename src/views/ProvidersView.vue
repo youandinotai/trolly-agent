@@ -17,6 +17,10 @@ const models = ref<OllamaModel[]>([]);
 const error = ref('');
 const probeResult = ref('');
 const probing = ref(false);
+const pullName = ref('');
+const pullBusy = ref(false);
+const deleting = ref('');
+const operationStatus = ref('');
 
 const category = ref<Category>('Chat');
 const pricing = ref<'All' | 'Free'>('All');
@@ -76,6 +80,36 @@ async function runProbe() {
   }
 }
 
+async function pullModel() {
+  operationStatus.value = '';
+  pullBusy.value = true;
+  try {
+    await window.trolly.ollama.pull(pullName.value);
+    operationStatus.value = `Installed ${pullName.value.trim()}.`;
+    pullName.value = '';
+    await load();
+  } catch (err: any) {
+    operationStatus.value = `Pull failed: ${err?.message ?? err}`;
+  } finally {
+    pullBusy.value = false;
+  }
+}
+
+async function deleteModel(model: OllamaModel) {
+  if (!window.confirm(`Permanently delete ${model.name} from this Ollama installation?`)) return;
+  operationStatus.value = '';
+  deleting.value = model.name;
+  try {
+    await window.trolly.ollama.delete(model.name);
+    operationStatus.value = `Deleted ${model.name}.`;
+    await load();
+  } catch (err: any) {
+    operationStatus.value = `Delete failed: ${err?.message ?? err}`;
+  } finally {
+    deleting.value = '';
+  }
+}
+
 onMounted(load);
 </script>
 
@@ -84,11 +118,17 @@ onMounted(load);
     <div class="panel">
       <h2>Providers</h2>
       <p class="hint">
-        Every model your local daemon serves. Pick by job, not by vendor — one Ollama instance
-        covers all five categories. Daemon on <code>127.0.0.1:11434</code>, model store on
-        <code>D:\ollama\models</code>.
+        The active provider and model are selected in the top bar and Stage. This inventory manages models installed in your local Ollama daemon at
+        <code>127.0.0.1:11434</code>; provider credentials remain in their configured service.
       </p>
 
+      <form class="row model-pull" @submit.prevent="pullModel">
+        <input v-model="pullName" class="input" aria-label="Ollama model name" placeholder="Model name, e.g. llama3.2:latest" />
+        <button class="btn primary" :disabled="pullBusy || !pullName.trim()">{{ pullBusy ? 'Pulling…' : 'Pull model' }}</button>
+        <button class="btn" type="button" :disabled="pullBusy" @click="load">Refresh</button>
+      </form>
+
+      <div v-if="operationStatus" class="provider-operation" role="status">{{ operationStatus }}</div>
       <div class="row" style="margin: 14px 0; flex-wrap: wrap; gap: 10px">
         <div class="tabs">
           <button
@@ -144,6 +184,9 @@ onMounted(load);
           </div>
         </div>
         <span class="badge">{{ m.size === 0 ? 'cloud' : 'local' }}</span>
+        <button v-if="m.size > 0" class="btn sm" :disabled="!!deleting" :aria-label="`Delete ${m.name}`" @click="deleteModel(m)">
+          {{ deleting === m.name ? 'Deleting…' : 'Delete' }}
+        </button>
       </div>
 
       <div v-if="!filtered.length && !error" class="empty">
@@ -181,7 +224,7 @@ onMounted(load);
 }
 .tab.active {
   background: var(--accent);
-  color: #06121a;
+  color: #17110a;
   font-weight: 600;
 }
 .input {
@@ -192,4 +235,7 @@ onMounted(load);
   color: var(--text);
   font-size: 12px;
 }
+.model-pull { flex-wrap: wrap; }
+.model-pull .input { min-width: 240px; flex: 1; }
+.provider-operation { padding: 8px 0; color: var(--text-dim); font-size: 12px; }
 </style>
