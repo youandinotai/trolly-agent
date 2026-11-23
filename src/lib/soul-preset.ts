@@ -1,3 +1,6 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 export interface SoulPreset {
   id: string;
   name: string;
@@ -19,4 +22,14 @@ export function parseSoulPreset(raw: SoulPreset, options: { ageVerified?: boolea
     memoryContext: [...raw.memoryContext],
     isNSFW: raw.isNSFW,
   };
+}
+
+export function loadSoulPresetFile(dataDir: string, fileName: string, options: { ageVerified?: boolean } = {}): SoulPreset {
+  const root = path.resolve(dataDir);
+  const filePath = path.resolve(root, fileName);
+  const relative = path.relative(root, filePath);
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new Error('A .soul preset must stay inside the data directory.');
+  }
+  return parseSoulPreset(JSON.parse(fs.readFileSync(filePath, 'utf8')) as SoulPreset, options);
 }
