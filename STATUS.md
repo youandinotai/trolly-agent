@@ -5,7 +5,7 @@ publication was performed.
 
 ## Verified
 
-- `node --test tests/soul-preset.test.mjs` — **3 passed, 0 failed**. `.soul` files load only from inside the data directory. NSFW data is rejected until 21+ verification. Loading does not run a model or apply a LoRA.
+- `node --test tests/soul-preset.test.mjs` — **4 passed, 0 failed**. `.soul` files load only from inside the data directory. Clean saves redact sexual memory. Adult saves seal memory with AES-256-GCM. Loading or saving does not run a model or apply a LoRA.
 - `npm run typecheck` — passed for Electron and Vue.
 - `npm run build` — passed. Electron, renderer, and yellow/red app and tray icons built. Vite reports a 987.26 kB minified JavaScript chunk, above its 500 kB advisory threshold.
 - `node --test tests/data-paths.test.mjs tests/studio.test.mjs` — **5 passed, 0 failed**.
@@ -32,7 +32,7 @@ publication was performed.
 - Clean-mode text checks are limited heuristics. Standard media prompts reject adult, under-21, and gore terms; image/video outputs and MCP side effects are not automatically classified.
 - MCP output is filtered in both modes; Adult sexual text requires explicit 21+ ages and non-text output is withheld. The tool may already have caused a server-side effect before output filtering.
 - Chat image attachments are disabled. Bounded local WebM dictation remains available, and its transcript passes the active text-content policy.
-- `.soul` preset loading reads one JSON file from inside the runtime data directory and blocks NSFW presets until the current 21+ check. It does not save presets, apply LoRA weights, or change the avatar.
+- `.soul` preset load and save stay inside the runtime data directory. NSFW presets stay blocked until the current 21+ check. Clean saves replace sexual memory with `[redacted]`. Adult saves store memory as AES-256-GCM `sealedMemory`. Neither applies LoRA weights nor changes the avatar.
 
 ## Known limits
 
