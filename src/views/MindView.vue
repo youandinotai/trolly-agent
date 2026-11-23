@@ -33,9 +33,16 @@ const editingRecipe = ref<string | null>(null);
 
 /* Preferences: adult content is a preference gated behind an age check. */
 const prefs = ref<Preferences>({ adultContent: false, ageVerified: false });
-const birthYear = ref('');
-const confirmLegalAdult = ref(false);
+const birthDate = ref('');
+const confirmAge21 = ref(false);
 const prefsError = ref('');
+const ageCutoff = new Date();
+ageCutoff.setFullYear(ageCutoff.getFullYear() - 21);
+const maxBirthDate = [
+  ageCutoff.getFullYear(),
+  String(ageCutoff.getMonth() + 1).padStart(2, '0'),
+  String(ageCutoff.getDate()).padStart(2, '0'),
+].join('-');
 
 async function loadPrefs() {
   prefs.value = await window.trolly.mind.readPrefs();
@@ -44,8 +51,8 @@ async function loadPrefs() {
 async function verifyAge() {
   prefsError.value = '';
   try {
-    prefs.value = await window.trolly.mind.verifyAge(Number(birthYear.value));
-    note('Age check recorded');
+    prefs.value = await window.trolly.mind.verifyAge(birthDate.value);
+    note('21+ age check recorded');
   } catch (err: any) {
     prefsError.value = String(err?.message ?? err);
   }
@@ -66,9 +73,9 @@ async function toggleAdultContent(on: boolean) {
 async function resetVerification() {
   prefsError.value = '';
   prefs.value = await window.trolly.mind.resetVerification();
-  birthYear.value = '';
-  confirmLegalAdult.value = false;
-  note('Age check cleared');
+  birthDate.value = '';
+  confirmAge21.value = false;
+  note('21+ age check cleared');
 }
 
 async function load() {
@@ -282,10 +289,11 @@ onMounted(load);
       <div class="boundaries">
         <h3>Always enforced</h3>
         <ul>
-          <li>Legal adults only — nothing involving minors, ever.</li>
+          <li>Adult mode, MCP connections, and Vault access require a 21+ check.</li>
+          <li>After Dark requires every depicted person to be clearly 21 or older.</li>
           <li>Consensual adults only.</li>
           <li>No gore or extreme violence.</li>
-          <li>Everything stays on this machine.</li>
+          <li>Configured providers and MCP servers receive data you send them.</li>
         </ul>
         <p class="hint">
           These are fixed limits, not settings. They cannot be switched off here.
@@ -294,42 +302,49 @@ onMounted(load);
 
       <h3>Adult content</h3>
       <p class="hint">
-        Lets the agent answer adult requests directly instead of deflecting. Requires an age
-        check first.
+        Lets the agent answer adult requests directly instead of deflecting. A date-of-birth
+        check screens for 21+ eligibility; it is self-reported, not identity verification, and
+        the date itself is not stored.
       </p>
 
       <div v-if="!prefs.ageVerified" class="age-gate">
-        <p class="age-title">Age check</p>
+        <p class="age-title">21+ age check</p>
         <p class="hint">
-          This application is for adults only. Enter your year of birth and confirm you are a
-          legal adult to continue.
+          Enter your date of birth and confirm you are at least 21. Trolly checks the date in
+          memory and does not save it. This is a self-reported age check, not identity verification.
         </p>
-        <div class="row" style="gap: 8px; margin-top: 10px">
+        <div class="field age-birth-field">
+          <label for="age-birth-date">Date of birth</label>
           <input
-            v-model="birthYear"
+            id="age-birth-date"
+            v-model="birthDate"
             class="input"
-            style="max-width: 130px"
-            inputmode="numeric"
-            placeholder="YYYY"
+            type="date"
+            :max="maxBirthDate"
+            required
+            aria-describedby="age-birth-date-hint"
           />
+          <span id="age-birth-date-hint" class="hint">Required for the 21+ check; not retained.</span>
+        </div>
+        <div class="row" style="gap: 8px; margin-top: 10px">
           <label class="check">
-            <input v-model="confirmLegalAdult" type="checkbox" />
-            I confirm I am a legal adult.
+            <input v-model="confirmAge21" type="checkbox" />
+            I confirm I am at least 21.
           </label>
         </div>
         <button
           class="btn primary"
           style="margin-top: 12px"
-          :disabled="!confirmLegalAdult || !birthYear"
+          :disabled="!confirmAge21 || !birthDate"
           @click="verifyAge"
         >
-          Complete age check
+          Verify 21+ age
         </button>
       </div>
 
       <template v-else>
         <div class="row" style="gap: 10px">
-          <span class="badge">Age verified</span>
+          <span class="badge">21+ verified</span>
           <span v-if="prefs.verifiedAt" class="hint">
             {{ new Date(prefs.verifiedAt).toLocaleString() }}
           </span>
@@ -343,7 +358,7 @@ onMounted(load);
           >
             {{ prefs.adultContent ? 'Adult content: ON' : 'Adult content: OFF' }}
           </button>
-          <button class="btn" @click="resetVerification">Clear age check</button>
+          <button class="btn" @click="resetVerification">Clear 21+ check</button>
         </div>
       </template>
 
@@ -408,6 +423,13 @@ onMounted(load);
   margin: 0 0 6px;
   font-size: 14px;
   font-weight: 600;
+}
+.age-birth-field {
+  max-width: 320px;
+  margin: 12px 0 0;
+}
+.age-birth-field .input {
+  width: 100%;
 }
 .check {
   display: flex;

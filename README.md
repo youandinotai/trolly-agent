@@ -16,9 +16,9 @@ fonts, or brand tokens are reused.
 |---|---|
 | **Stage** | Select a provider, model, and loaded agent profile. Every request waits in the Director preview; Stop makes no call. |
 | **Workspace** | Save tasks and notes locally, update their status, and resume them into Stage without auto-running. |
-| **Tools (MCP)** | Configure stdio filesystem, agent, browser, or Playwright servers; connect new servers manually, inspect tools, and call them explicitly. |
+| **Tools (MCP)** | Configure stdio filesystem, agent, browser, or Playwright servers. Connecting and calling tools requires the 21+ check and an explicit action. |
 | **Providers** | Use local Ollama, OmniRoute-compatible endpoints, OpenCode through OmniRoute, or a Hermes proxy. Pull and delete local Ollama models. |
-| **Artistry** | Generate video or images on your local ComfyUI backend. Nothing is uploaded. |
+| **Artistry** | Generate video or images on local ComfyUI. Clean checks common sexual wording but does not classify every generated image/video. |
 | **Mind** | Consciousness (the persona), long-term memories, prompt recipes, and content preferences. |
 
 Runtime data remains on this device unless a provider endpoint or MCP server is
@@ -82,7 +82,10 @@ Playwright servers. The filesystem template requires an explicit allowed folder.
 New servers stay disconnected until the user chooses **Connect**; an existing
 server explicitly marked `enabled` in local configuration may reconnect at
 startup. MCP transport is currently stdio only. Configuration is saved in
-`data/mcp-servers.json`.
+`data/mcp-servers.json`. Connecting or calling a tool requires the 21+ check.
+The filesystem template passes the chosen folder to its server but does not
+sandbox the server process or its OS account.
+There is no separate plugin runtime; integrations are configured MCP servers.
 
 Agent profiles load from `data/agent-profiles.json` and are selectable in Stage.
 Loading profiles does not execute them. The selected profile is applied only
@@ -100,23 +103,42 @@ after the user approves the Director plan with **Run**.
 | **Consciousness** | The persona prepended to every conversation. Edit it and the next message uses it. |
 | **Memories** | Long-term facts that persist between sessions, with tags. |
 | **Recipes** | Reusable prompts you can drop into the chat. |
-| **Preferences** | Content preferences, gated behind an age check. |
+| **Preferences** | Adult mode and other sensitive operations require a 21+ age check. |
 
 ### Content preferences and the age check
 
-`Preferences → Adult content` unlocks direct adult responses, but the switch
-refuses to open until the age check is complete: a year of birth plus an
-explicit "I am a legal adult" confirmation. A birth year under 18 is rejected
-outright, and clearing the check switches adult content back off.
+`Preferences → Adult content` unlocks direct adult responses only after a full
+date-of-birth check screens for 21+ eligibility. It is self-reported, not identity
+verification; Trolly checks the date in memory and does not store it. Older
+year-only checks are invalidated. Adult text
+must clearly state 21+ ages; After Dark validates every prompt before uploading
+its reference and requires the local vision check to pass.
 
 These limits are fixed and cannot be toggled off:
 
-- legal adults only — never minors
+- 21+ verification for Adult mode, MCP connection/tool calls, and Vault access
+- never depict minors
 - consensual adults only
 - no gore or extreme violence
 
-The preference only changes how *directly* the agent answers. It never widens
-those limits.
+Adult mode enables direct responses and the separate After Dark surface; it
+never widens those content limits. Clean mode blocks
+common sexual wording in chat and text/tool outputs. Standard image/video
+prompts also reject adult, under-21, and gore terms; these are text checks, not
+an image/video classifier. Standard ComfyUI output and MCP side effects still
+require user review. MCP text is filtered in both modes; non-text results are
+withheld, and Adult sexual text requires 21+ ages. Filtering occurs after a
+tool call and cannot undo server side effects. Chat image attachments are
+blocked until a local age/content classifier is available.
+
+### Vault storage
+
+The Vault requires both 21+ verification and Adult mode. New media bytes and
+the filename index are encrypted locally with AES-256-GCM; passwords are
+required to be at least 12 characters. Existing plaintext Vault files are not
+silently changed: unlock or password change requires an explicit migration
+confirmation. Locking clears the decryption key from memory. The Vault data
+directory remains outside the application source tree.
 
 ### Instant Clean visual protection
 
@@ -127,9 +149,9 @@ They are presentation states, not separate applications.
   preference never restores adult visuals by itself.
 - The avatar's private outfit is hidden and replaced by a modest dress and shoes.
   An opaque cover remains if that safe presentation cannot be prepared.
-- Unreviewed images, videos, scene artwork, attachments, and After Dark references
-  are not mounted in Clean. Generation and agent tasks can continue behind the
-  cover.
+- Existing media previews are hidden in Clean. Text checks cover common sexual
+  wording, but generated image/video output is not automatically classified.
+  Generation and agent tasks can continue behind the cover.
 - Clean stops current avatar speech and invalidates pending adult visual results.
   Electron main returns only `{ kind: "suppressed" }` for an adult render that
   finishes after Clean—no pixels, URL, or file path cross back into the view.
@@ -146,11 +168,13 @@ Both run locally, with no cloud service:
 
 - **Speech (TTS)** uses the Windows SAPI voice set through `System.Speech`.
   Audio is written to `data/speech/*.wav` and played back in-app.
-- **Vision** sends an attached image to a local multimodal model on Ollama
-  (for example `qwen2.5vl`). Images are base64 on the wire and never leave
-  the machine.
-- **Dictation** records a clip and transcribes it with a local Whisper model
-  if one is present in Ollama.
+- **Vision attachments** are currently blocked in Stage because Trolly has no
+  age/content classifier for user-supplied images. The provider adapter itself
+  sends images only to the selected Ollama service; removing the block requires
+  a separately reviewed local classifier.
+- **Dictation** records a bounded WebM clip and transcribes it with a local
+  Whisper model if one is present in Ollama. The transcript passes the active
+  text-content policy before it is returned.
 
 ## Architecture
 
@@ -188,7 +212,8 @@ runtime-resolved `userData` location. Set `TROLLY_DATA_DIR` to override that
 root. `TROLLY_VAULT_DIR` and `TROLLY_STUDIO_DIR` can override the vault and
 studio folders; both must remain outside the application source tree.
 `TROLLY_STUDIO_SAMPLE_MODEL` optionally points to a local model copied into the
-studio assets on first setup.
+studio assets on first setup. `TROLLY_AFTER_DARK_DIR` optionally overrides the
+After Dark output folder; source-tree output is rejected.
 
 ```
 data\
@@ -197,6 +222,7 @@ data\
   tasks.json           workspace tasks and notes
   mind.json            persona, memories, recipes, preferences
   artistry\            generated media
+  vault\               encrypted Vault files and filename index (unless overridden)
   speech\              synthesized WAV files
   userData\            Electron state
 ```
@@ -212,9 +238,8 @@ are excluded by design.
 
 **2. No surprise endpoints.** Trolly uses local services by default. External
 network requests occur only when a user-configured provider or MCP server makes
-them; provider credentials are not stored in Trolly. OpenAI-compatible providers
-must expose `/models` and `/chat/completions`. Image attachments currently work
-with the Ollama provider only.
+them; provider credentials are not stored in Trolly. OpenAI-compatible providers must expose `/models` and `/chat/completions`.
+Chat image attachments are currently blocked pending local safety classification.
 
 ---
 

@@ -7,7 +7,8 @@ Read this before editing `youandinotai/trolly-agent`. The same rules are in `CLA
 - This repo is the only GitHub repo for this node. Push only as `youandinotai`.
 - Never fetch, clone, or push a Trollz1004 repo from this lane.
 - Healthcare is not a router option. Do not add it to agency cards or specialist lists.
-- Legal adults only. No minors. No blood, gore, or extreme violence. Those terms stay in the negative prompt and in the After Dark hard gate.
+- Adult mode, After Dark, MCP connections/tool calls, and Vault access require the current 21+ age check. Never depict minors; no blood, gore, or extreme violence. Those terms stay in the negative prompt and in the After Dark hard gate.
+- Clean blocks common sexual wording in text inputs and screens obvious matching text outputs. Standard image/video prompts also reject adult, under-21, and gore terms. These are text checks, not image/video classifiers; do not claim that every generated result or tool side effect is safe.
 
 ## Director hold
 
@@ -19,7 +20,7 @@ Chat and media jobs do not start when the user sends a message. The router class
 
 - Provider and model choices are available on the initial Stage screen. Ollama is local; other options use an OpenAI-compatible endpoint configured in its provider service. Never store provider keys in Trolly.
 - OpenCode is exposed through OmniRoute by default; the Hermes choice targets the local Hermes proxy. These require the corresponding service and compatible endpoint to be running.
-- Images are currently sent only through Ollama. Do not silently drop unsupported attachments.
+- The provider adapter can send images only through Ollama, but Stage blocks chat image attachments until they can be age/content classified. Local dictation is limited to a bounded WebM transcription request and its text result is filtered. Explain limitations; do not silently drop attachments.
 - The agent profile registry loads at startup and profiles are selectable. Loading is not execution; no agent runs until the user approves the Director plan.
 - Runtime data defaults under Electron's `userData` location; `TROLLY_DATA_DIR` may override the root. Vault and Studio directories must remain outside the source tree. Do not hardcode machine-specific local paths. Resume fills Stage; it never submits or runs a task.
 - Ollama pull and delete actions are explicit. Confirm before deleting a model.
@@ -27,8 +28,14 @@ Chat and media jobs do not start when the user sends a message. The router class
 ## MCP
 
 - Fresh installs start with no MCP server commands. Templates are offered for filesystem, custom agent tools, browser, and Playwright.
-- New MCP templates are disconnected and stdio-only. Existing config entries marked `enabled` may reconnect at startup; never auto-connect an unreviewed server or add machine-specific executable paths.
-- Filesystem MCP requires the user to choose its allowed root. Tool calls require an explicit user action.
+- New MCP templates are disconnected and stdio-only. Existing `enabled` entries may reconnect at startup only after 21+ verification; never auto-connect an unreviewed server or add machine-specific executable paths.
+- Connecting or calling an MCP tool requires 21+ verification and an explicit user action. MCP output is text-filtered in both modes; Adult sexual text needs explicit 21+ ages, and non-text output is blocked. Tool side effects can occur before output filtering. A filesystem template passes the selected root to the server; it does not sandbox arbitrary commands.
+
+## Safety and Vault
+
+- Check a full, self-reported date of birth against 21+ in memory; never persist the date or imply identity verification. Older year-only verification is invalid.
+- Vault IPC requires 21+ verification and Adult mode. Media bytes and file names are AES-256-GCM encrypted at rest; legacy plaintext Vault files require an explicit migration confirmation. Locking clears the in-memory key.
+- Validate After Dark prompts before uploading the reference image. Require a clearly stated numeric age of 21+ for every depicted person and keep the local visual check fail-closed.
 
 ## Visual system
 

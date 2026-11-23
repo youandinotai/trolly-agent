@@ -43,7 +43,7 @@ const AFTER_DARK_DEFAULTS = {
 
 /** The renderer cannot unlock this on its own; the Electron main process calls it too. */
 export function assertAfterDarkAllowed(prefs: AfterDarkPreferences, currentSessionAdult = false): void {
-  if (!prefs?.ageVerified) throw new Error('Complete the age check in Mind before using After Dark.');
+  if (!prefs?.ageVerified) throw new Error('Complete the 21+ age check in Mind before using After Dark.');
   if (!prefs.adultContent) throw new Error('Enable adult content in Mind before using After Dark.');
   if (!currentSessionAdult) throw new Error('Adult content is not unlocked in the current session.');
 }
@@ -55,9 +55,9 @@ export function assertAfterDarkPrompt(prompt: string): void {
   if (/\b(underage|minor|child|loli|shota|preteen|jailbait|young[-\s]?looking|schoolgirl|schoolboy|high\s+school|infant|toddler|baby)\b/i.test(value)) {
     throw new Error('After Dark is for clearly depicted legal adults only.');
   }
-  const legalAdultTeen = /\b(?:18|19)[-\s]+year[-\s]?old\b/i.test(value) || /\badult\s+teen\b/i.test(value);
-  if (/\bteen\b/i.test(value) && !legalAdultTeen) {
-    throw new Error('State that the person is a legal adult (18 or 19) instead of using an ambiguous age description.');
+  const ages = [...value.matchAll(/\b(\d{1,3})[-\s]+years?[-\s]+old\b/gi)].map((match) => Number(match[1]));
+  if (/\bteen\b/i.test(value) || !ages.length || ages.some((age) => age < 21)) {
+    throw new Error('State a clear age of 21 or older for every depicted person.');
   }
   if (/\b(non[-\s]?consensual|rape|raped|coercion|coerced|unwilling|unconscious|drugged|incapacitated|blackmail|trafficking)\b/i.test(value)) {
     throw new Error('After Dark allows consensual adults only.');
@@ -112,13 +112,13 @@ export function buildAfterDarkWorkflow(options: AfterDarkWorkflowOptions): Comfy
   };
 }
 
-/** Adult renders live outside every source tree, in the dedicated D: adult lane. */
+/** Adult renders live in the app's local data area or a user-selected external folder. */
 export function resolveAfterDarkOutputDir(
   env: Record<string, string | undefined>,
+  dataDir: string,
   appRoot: string,
 ): string {
-  const dir = path.resolve(env.TROLLY_AFTER_DARK_DIR || 'D:/Trolly/data/after-dark');
-  if (!/^d:/i.test(dir)) throw new Error('After Dark output must be on the D: drive.');
+  const dir = path.resolve(env.TROLLY_AFTER_DARK_DIR || path.join(dataDir, 'after-dark'));
   const relative = path.relative(path.resolve(appRoot), dir);
   if (!relative || (!relative.startsWith('..') && !path.isAbsolute(relative))) {
     throw new Error('After Dark output must be outside the application source tree.');

@@ -5,12 +5,14 @@ publication was performed.
 
 ## Verified
 
-- `npm run build` — passed. Electron, renderer, and yellow/red app and tray icons built. Vite reports a 982.67 kB minified JavaScript chunk, above its 500 kB advisory threshold.
+- `npm test` — **108 passed, 0 failed**, including the 21+ access, content-policy, MCP, After Dark, and encrypted Vault tests.
 - `npm run typecheck` — passed for Electron and Vue.
-- `npm test` — **95 passed, 0 failed**.
+- `npm run build` — passed. Electron, renderer, and yellow/red app and tray icons built. Vite reports a 987.26 kB minified JavaScript chunk, above its 500 kB advisory threshold.
 - `node --test tests/data-paths.test.mjs tests/studio.test.mjs` — **5 passed, 0 failed**.
 - `git diff --check` — passed.
 - `npm run verify:leak` — passed; **0 source-brand tokens** found in the shipped surface.
+- A TCP check confirmed `127.0.0.1:2222` is listening; the preview process was not stopped or modified.
+- Browser visual verification was not completed: browser approval for the local preview was denied. No browser page was opened.
 - `remake report` (from `airi-remake/`) — **exit 2** because the overall gate is incomplete. Capture passed (1 page, 886 files); desktop and phone matches were 100.00%, motion match was 99.69%; the swap checklist passed at **43/43 (100%)**. “Live and private” is NOT YET because deployment was intentionally not requested.
 - `remake images` (from `airi-remake/`) — **exit 0**; 0 original images remain to replace.
 - The Impeccable detector reports only an advisory on the transparency checkerboard in `src/styles.css`; it is retained because it communicates the transparent viewport.
@@ -25,10 +27,15 @@ publication was performed.
 - Local task workspace with status updates and resume-to-Stage behavior; resume does not submit or run the task.
 - Runtime data defaults under Electron's `userData` location, with `TROLLY_*` directory overrides; Vault and Studio reject source-tree paths.
 - Yellow/red with black/gray app palette and generated icons.
+- 21+ verification now uses the full birth date without persisting it. Adult mode, MCP connect/tool calls, and Vault access have main-process gates; clearing verification locks the Vault and disconnects MCP servers.
+- Vault media bytes and filenames are AES-256-GCM encrypted, with an explicit legacy migration confirmation and 12-character minimum for new passwords.
+- Clean-mode text checks are limited heuristics. Standard media prompts reject adult, under-21, and gore terms; image/video outputs and MCP side effects are not automatically classified.
+- MCP output is filtered in both modes; Adult sexual text requires explicit 21+ ages and non-text output is withheld. The tool may already have caused a server-side effect before output filtering.
+- Chat image attachments are disabled. Bounded local WebM dictation remains available, and its transcript passes the active text-content policy.
 
 ## Known limits
 
 - Non-Ollama providers must expose OpenAI-compatible `/models` and `/chat/completions` endpoints; credentials must be configured in that provider service. OpenCode uses OmniRoute by default rather than its native HTTP API.
-- Image attachments are currently supported only through Ollama.
+- Image attachments are disabled until local age/content classification is available; standard media checks are prompt-level only.
 - MCP transport is stdio only. New server connections require explicit action; existing config entries marked `enabled` may reconnect at startup.
 - One selected agent profile is applied per task; this does not fan out or execute every profile.

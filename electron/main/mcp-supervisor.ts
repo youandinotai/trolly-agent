@@ -48,6 +48,7 @@ function isServerConfig(value: unknown): value is McpServerConfig {
 export class McpSupervisor extends EventEmitter {
   private configs: McpServerConfig[] = [];
   private clients = new Map<string, McpStdioClient>();
+  private pendingClients = new Map<string, McpStdioClient>();
   private states = new Map<string, McpServerState>();
   private filePath: string;
   private loadError = '';
@@ -131,6 +132,7 @@ export class McpSupervisor extends EventEmitter {
   async connect(id: string) {
     const cfg = this.configs.find((c) => c.id === id);
     if (!cfg) throw new Error(`unknown MCP server: ${id}`);
+    if (this.clients.has(id) || this.pendingClients.has(id)) return this.listServers();
     if (cfg.transport !== 'stdio') {
       throw new Error(`transport ${cfg.transport} is not implemented yet`);
     }
@@ -145,9 +147,15 @@ export class McpSupervisor extends EventEmitter {
       args: cfg.args ?? [],
       env: cfg.env,
     });
+    this.pendingClients.set(id, client);
     try {
       const info = await client.connect();
       const tools = await client.listTools();
+      if (this.pendingClients.get(id) !== client) {
+        await client.close().catch(() => {});
+        return this.listServers();
+      }
+      this.pendingClients.delete(id);
       this.clients.set(id, client);
       this._setState(id, {
         status: 'connected',
@@ -156,6 +164,8 @@ export class McpSupervisor extends EventEmitter {
         error: undefined,
       });
     } catch (err: any) {
+      if (this.pendingClients.get(id) !== client) return this.listServers();
+      this.pendingClients.delete(id);
       await client.close().catch(() => {});
       this._setState(id, { status: 'error', error: String(err?.message ?? err) });
     }
@@ -164,6 +174,11 @@ export class McpSupervisor extends EventEmitter {
   }
 
   async disconnect(id: string) {
+    const pending = this.pendingClients.get(id);
+    if (pending) {
+      this.pendingClients.delete(id);
+      await pending.close().catch(() => {});
+    }
     const client = this.clients.get(id);
     if (client) {
       await client.close().catch(() => {});
@@ -191,10 +206,11 @@ export class McpSupervisor extends EventEmitter {
   }
 
   async shutdown() {
-    for (const client of this.clients.values()) {
-      await client.close().catch(() => {});
-    }
-    this.clients.clear();
+    await this.disconnectAll();
+  }
+
+  async disconnectAll() {
+    await Promise.all(this.configs.map((config) => this.disconnect(config.id)));
   }
 
   private _setState(id: string, patch: Partial<McpServerState>) {

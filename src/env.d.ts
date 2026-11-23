@@ -40,6 +40,17 @@ export interface WorkspaceTask {
   updatedAt: string;
 }
 
+export interface VaultStatus {
+  hasPassword: boolean;
+  unlocked: boolean;
+  encryptionVersion: 0 | 1 | null;
+}
+
+export interface VaultFile {
+  id: string;
+  name: string;
+}
+
 export interface Persona {
   id: string;
   name: string;
@@ -65,8 +76,8 @@ export interface Recipe {
 export interface Preferences {
   adultContent: boolean;
   ageVerified: boolean;
+  ageVerifiedFor?: number;
   verifiedAt?: string;
-  birthYear?: number;
 }
 
 export interface MindDoc {
@@ -98,6 +109,7 @@ export interface TrollyBridge {
         /** Base64-encoded image attachments for the local vision model. */
         images?: string[];
       }[];
+      purpose?: 'audio-transcription';
       temperature?: number;
       maxTokens?: number;
     }): Promise<string>;
@@ -152,7 +164,7 @@ export interface TrollyBridge {
     saveRecipe(payload: { id?: string; title: string; prompt: string }): Promise<Recipe>;
     deleteRecipe(id: string): Promise<void>;
     readPrefs(): Promise<Preferences>;
-    verifyAge(birthYear: number): Promise<Preferences>;
+    verifyAge(birthDate: string): Promise<Preferences>;
     setAdultContent(enabled: boolean): Promise<Preferences>;
     resetVerification(): Promise<Preferences>;
   };
@@ -242,16 +254,16 @@ export interface TrollyBridge {
     toggle(): Promise<{ covered: boolean }>;
   };
   vault: {
-    status(): Promise<{ hasPassword: boolean; unlocked: boolean }>;
-    lock(): Promise<{ hasPassword: boolean; unlocked: boolean }>;
-    setPassword(password: string): Promise<{ hasPassword: boolean; unlocked: boolean }>;
-    unlock(password: string): Promise<{ hasPassword: boolean; unlocked: boolean }>;
-    changePassword(current: string, next: string): Promise<{ hasPassword: boolean; unlocked: boolean }>;
-    reset(password: string): Promise<{ hasPassword: boolean; unlocked: boolean }>;
-    list(): Promise<{ name: string }[]>;
-    add(payload: { name: string; dataBase64: string }): Promise<{ name: string }>;
-    read(name: string): Promise<{ name: string; dataBase64: string } | null>;
-    remove(name: string): Promise<void>;
+    status(): Promise<VaultStatus>;
+    lock(): Promise<VaultStatus>;
+    setPassword(password: string): Promise<VaultStatus>;
+    unlock(password: string, confirmMigration?: boolean): Promise<VaultStatus>;
+    changePassword(current: string, next: string, confirmMigration?: boolean): Promise<VaultStatus>;
+    reset(password: string): Promise<VaultStatus>;
+    list(): Promise<VaultFile[]>;
+    add(payload: { name: string; dataBase64: string }): Promise<VaultFile>;
+    read(id: string): Promise<{ id: string; name: string; dataBase64: string } | null>;
+    remove(id: string): Promise<void>;
   };
   paths(): Promise<{ dataDir: string; appRoot: string }>;
 }

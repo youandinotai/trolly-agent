@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 
 import type { McpServerState, McpTool } from '../env';
+import { appMode } from '../lib/mode';
 
 const servers = ref<McpServerState[]>([]);
 const tools = ref<Record<string, McpTool[]>>({});
@@ -126,8 +127,16 @@ onMounted(refresh);
     <div class="panel">
       <h2>Tool servers</h2>
       <p class="hint">
-        Configure filesystem, agent, browser, or Playwright servers here. Nothing starts or installs until you choose Connect.
-        Filesystem access is limited to the folder you provide. Server definitions stay in the app's local data folder.
+        Configure filesystem, agent, browser, or Playwright servers here. New servers stay disconnected until you choose Connect.
+        A 21+ age check is required to connect or run tools. Servers run with your account's OS permissions; Trolly does not sandbox their commands.
+      </p>
+      <p class="clean-status" role="status">
+        <strong>Filesystem boundary</strong>
+        <span>The filesystem template passes the folder you choose to the server; it does not restrict other access that server or its OS account may have.</span>
+      </p>
+      <p class="clean-status" role="status">
+        <strong>Tool results</strong>
+        <span>Trolly filters returned text in both modes and withholds non-text results. Filtering happens after the tool runs and cannot undo its side effects.</span>
       </p>
 
       <form class="mcp-form" @submit.prevent="addServer">
@@ -160,7 +169,7 @@ onMounted(refresh);
           <span>Arguments (one per line)</span>
           <textarea v-model="argsText" rows="3" placeholder="--yes&#10;package-name" />
         </label>
-        <p class="hint">Only stdio servers are supported. This form only saves configuration; new servers stay disconnected until you choose Connect. Do not put secrets in arguments.</p>
+        <p class="hint">Only stdio servers are supported. This form saves configuration without connecting. Do not put secrets in arguments.</p>
         <button class="btn primary" :disabled="newServerBusy || !!configurationError">{{ newServerBusy ? 'Saving…' : 'Add server' }}</button>
       </form>
 
@@ -183,7 +192,7 @@ onMounted(refresh);
         <button
           v-if="s.status !== 'connected'"
           class="btn sm"
-          :disabled="busy === s.id || !s.command || !!configurationError"
+          :disabled="busy === s.id || !s.command || !!configurationError || !appMode.ageVerified"
           @click="connect(s)"
         >
           {{ busy === s.id ? '…' : 'Connect' }}

@@ -229,8 +229,8 @@ onMounted(async () => {
         <span>{{ harness === 'local' ? HARNESSES.find((item) => item.id === harness)?.detail : (providerEndpoint || 'Enter a valid local or configured provider endpoint. Credentials stay in the provider service.') }}</span>
       </section>
       <section v-if="!appMode.adult" class="clean-status" role="status">
-        <strong>SFW</strong>
-        <span>Top switch covers every picture, pet, and clip · Ctrl+Alt+C</span>
+        <strong>Clean</strong>
+        <span>Hides existing previews and blocks common sexual wording in chat and standard generation. ComfyUI media is not automatically classified; inspect local renders before use.</span>
       </section>
       <StageView v-show="view === 'stage'" :provider="harness" :provider-endpoint="providerEndpoint" @navigate="view = $event" />
       <WorkspaceView v-show="view === 'workspace'" @resume="resumeWorkspaceTask" />

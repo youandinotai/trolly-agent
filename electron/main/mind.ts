@@ -1,12 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { MINIMUM_AGE, isAtLeastMinimumAge, isValidBirthDate } from '../../src/lib/age-policy.ts';
 
 /**
  * The agent's "mind": a persona (its consciousness), long-term memories it
  * keeps about the user, and reusable prompt recipes.
  *
- * Everything is a small JSON document on the app's D: data dir — no database,
+ * Everything is a small JSON document in the app's local data directory — no database,
  * no cloud, readable by hand.
  */
 export interface Persona {
@@ -35,19 +36,19 @@ export interface Recipe {
  * User preferences.
  *
  * `adultContent` unlocks the app's adult-content persona, but it is only
- * honoured once `ageVerified` is set. Adult mode is a content PREFERENCE, not
+ * honoured once the current 21+ age policy is verified. Adult mode is a content PREFERENCE, not
  * a licence to change the hard boundaries: legal age and consent always apply
  * and are never user-toggleable.
  */
 export interface Preferences {
   /** User wants the agent to allow legal adult content in replies. */
   adultContent: boolean;
-  /** User has explicitly confirmed they are a legal adult (18+ / local age of majority). */
+  /** User completed the current 21+ age policy. */
   ageVerified: boolean;
+  /** Age-policy version accepted by the user. */
+  ageVerifiedFor?: number;
   /** ISO timestamp of when the age confirmation was made. */
   verifiedAt?: string;
-  /** Year of birth the user entered as part of the age check. */
-  birthYear?: number;
 }
 
 export interface Mind {
@@ -93,12 +94,15 @@ export class MindStore {
         personas: Array.isArray(parsed.personas) ? parsed.personas : [],
         memories: Array.isArray(parsed.memories) ? parsed.memories : [],
         recipes: Array.isArray(parsed.recipes) ? parsed.recipes : [],
-        preferences: {
-          adultContent: prefs.adultContent === true,
-          ageVerified: prefs.ageVerified === true,
-          verifiedAt: typeof prefs.verifiedAt === 'string' ? prefs.verifiedAt : undefined,
-          birthYear: typeof prefs.birthYear === 'number' ? prefs.birthYear : undefined,
-        },
+        preferences: (() => {
+          const ageVerified = prefs.ageVerified === true && prefs.ageVerifiedFor === MINIMUM_AGE;
+          return {
+            adultContent: ageVerified && prefs.adultContent === true,
+            ageVerified,
+            ageVerifiedFor: ageVerified ? MINIMUM_AGE : undefined,
+            verifiedAt: ageVerified && typeof prefs.verifiedAt === 'string' ? prefs.verifiedAt : undefined,
+          };
+        })(),
       };
     } catch {
       // A corrupt file must not brick the app; start clean rather than crash.
@@ -190,24 +194,22 @@ export class MindStore {
   }
 
   /**
-   * Record the age confirmation. `birthYear` must put the user at or above
-   * 18; a younger year is rejected outright and the gate stays shut.
+   * Check a date of birth without persisting it. Older year-only checks are
+   * invalidated by the age-policy version in read().
    */
-  verifyAge(birthYear: number): Preferences {
-    const year = Number(birthYear);
-    if (!Number.isInteger(year) || year < 1900 || year > new Date().getFullYear()) {
-      throw new Error('Enter a valid year of birth.');
+  verifyAge(birthDate: string, today = new Date()): Preferences {
+    if (!isValidBirthDate(birthDate, today)) {
+      throw new Error('Enter a valid date of birth.');
     }
-    const age = new Date().getFullYear() - year;
-    if (age < 18) {
-      throw new Error('This app is for adults only. The age check was not recorded.');
+    if (!isAtLeastMinimumAge(birthDate, today)) {
+      throw new Error('You must be at least 21 to enable Adult mode. The age check was not recorded.');
     }
     const doc = this.read();
     doc.preferences = {
       ...doc.preferences,
       ageVerified: true,
+      ageVerifiedFor: MINIMUM_AGE,
       verifiedAt: new Date().toISOString(),
-      birthYear: year,
     };
     this.write(doc);
     return doc.preferences;
@@ -217,7 +219,7 @@ export class MindStore {
   setAdultContent(enabled: boolean): Preferences {
     const doc = this.read();
     if (enabled && !doc.preferences.ageVerified) {
-      throw new Error('Complete the age check before enabling adult content.');
+      throw new Error('Complete the 21+ age check before enabling Adult mode.');
     }
     doc.preferences = { ...doc.preferences, adultContent: enabled === true };
     this.write(doc);

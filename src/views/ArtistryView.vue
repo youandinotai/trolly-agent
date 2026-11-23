@@ -238,6 +238,7 @@ async function generate() {
       <div class="field">
         <label>Positive prompt</label>
         <textarea v-model="positive" />
+        <p class="hint">Text checks block common sexual wording, but generated images and video are not automatically classified. Review local renders before use or sharing.</p>
       </div>
       <div class="field">
         <label>Negative prompt</label>

@@ -2,7 +2,6 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 
 import AvatarStage from '../components/AvatarStage.vue';
-import SafeMedia from '../components/SafeMedia.vue';
 import type { OllamaModel } from '../env';
 import type { AgentProfile } from '../lib/agency-roster';
 import type { HarnessId } from '../lib/harness';
@@ -24,7 +23,6 @@ interface RoutePreview {
   route: TaskRoute;
   steps: string[];
   text: string;
-  images?: string[];
   provider: HarnessId;
   endpoint: string;
   agent?: AgentProfile;
@@ -53,9 +51,6 @@ const speechStatus = ref('Natural voices · first use downloads once');
 const speaking = ref(false);
 const avatarStage = ref<InstanceType<typeof AvatarStage> | null>(null);
 
-/* Vision: attach an image to the next message. */
-const attachment = ref<{ name: string; dataUrl: string; base64: string } | null>(null);
-const fileInput = ref<HTMLInputElement | null>(null);
 const audioInput = ref<HTMLInputElement | null>(null);
 const recording = ref(false);
 const mediaRecorder = ref<MediaRecorder | null>(null);
@@ -194,25 +189,6 @@ async function speakText(text: string) {
   }
 }
 
-/** Attach an image for the vision model. */
-function pickImage() {
-  fileInput.value?.click();
-}
-
-function onImagePicked(event: Event) {
-  const input = event.target as HTMLInputElement;
-  const file = input.files?.[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    const dataUrl = String(reader.result ?? '');
-    const base64 = dataUrl.split(',')[1] ?? '';
-    attachment.value = { name: file.name, dataUrl, base64 };
-  };
-  reader.readAsDataURL(file);
-  input.value = '';
-}
-
 /** Record a voice note; transcription runs through the local speech stack. */
 async function toggleRecording() {
   if (recording.value) {
@@ -231,9 +207,15 @@ async function toggleRecording() {
       stream.getTracks().forEach((t) => t.stop());
       const blob = new Blob(recordedChunks.value, { type: 'audio/webm' });
       if (!blob.size) return;
-      const text = await transcribe(blob);
-      if (text) {
-        draft.value = draft.value ? `${draft.value} ${text}` : text;
+      try {
+        const text = await transcribe(blob);
+        if (text) draft.value = draft.value ? `${draft.value} ${text}` : text;
+      } catch (err: any) {
+        messages.value.push({
+          role: 'tool',
+          name: 'speech',
+          text: `transcription failed: ${err?.message ?? err}`,
+        });
       }
     };
     rec.start();
@@ -250,6 +232,10 @@ async function toggleRecording() {
 
 /** Transcribe a recorded clip with the local transcription model. */
 async function transcribe(blob: Blob): Promise<string> {
+  if (blob.size > 20 * 1024 * 1024) {
+    messages.value.push({ role: 'tool', name: 'speech', text: 'recording is too large; keep dictation under 20 MiB' });
+    return '';
+  }
   const models = await window.trolly.ollama.models();
   const stt = models.find((m) => /whisper|transcribe|stt/i.test(m.name));
   if (!stt) {
@@ -261,9 +247,15 @@ async function transcribe(blob: Blob): Promise<string> {
     return '';
   }
   const buf = await blob.arrayBuffer();
-  const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+  const bytes = new Uint8Array(buf);
+  let binary = '';
+  for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+  }
+  const b64 = btoa(binary);
   const reply = await window.trolly.ollama.chat({
     model: stt.name,
+    purpose: 'audio-transcription',
     messages: [
       {
         role: 'user',
@@ -280,8 +272,6 @@ async function send() {
   const text = draft.value.trim();
   if (!text || busy.value || preview.value) return;
   draft.value = '';
-  const attached = attachment.value;
-  attachment.value = null;
   messages.value.push({ role: 'user', name: 'You', text });
   try {
     const route = await window.trolly.router.classify(text);
@@ -296,7 +286,6 @@ async function send() {
       route: plannedRoute,
       steps: planRouteSteps(plannedRoute, selectedModel.value),
       text,
-      images: attached ? [attached.base64] : undefined,
       provider: props.provider,
       endpoint: props.providerEndpoint,
       agent: selectedProfile,
@@ -342,12 +331,10 @@ async function runPreview() {
       return;
     }
 
-    const history: { role: 'user' | 'assistant'; content: string; images?: string[] }[] =
+    const history: { role: 'user' | 'assistant'; content: string }[] =
       messages.value
         .filter((m): m is Msg & { role: 'user' | 'assistant' } => m.role !== 'tool')
         .map((m) => ({ role: m.role, content: m.text }));
-    const last = history[history.length - 1];
-    if (pending.images && last) last.images = pending.images;
     const instructions = pending.agent && pending.agent.name === route.specialist
       ? `${systemPrompt()}\n\n${pending.agent.systemPrompt}`
       : systemPrompt();
@@ -362,10 +349,13 @@ async function runPreview() {
     messages.value.push({ role: 'assistant', name: 'Trolly', text: reply || '(no reply)' });
     if (voiceEnabled.value) void speakLatest();
   } catch (err: any) {
+    const detail = String(err?.message ?? err);
     messages.value.push({
       role: 'assistant',
       name: 'Trolly',
-      text: `I could not reach the model: ${err?.message ?? err}`,
+      text: detail.includes('Clean mode') || detail.includes('21') || detail.includes('age/content classified')
+        ? detail
+        : `I could not reach the model: ${detail}`,
     });
   } finally {
     busy.value = false;
@@ -492,12 +482,6 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <div v-if="attachment" class="attach-chip">
-          <SafeMedia class="attach-preview" :src="attachment.dataUrl" kind="image" alt="Attached image" />
-          <span>{{ attachment.name }}</span>
-          <button class="btn sm" @click="attachment = null">Remove</button>
-        </div>
-
         <div class="chat-input">
           <select
             v-model="selectedModel"
@@ -512,7 +496,7 @@ onUnmounted(() => {
           </select>
           <div v-if="agentError" class="provider-error" role="status">{{ agentError }}</div>
           <div v-if="modelError" class="provider-error" role="status">{{ modelError }}</div>
-          <button class="btn sm" :disabled="provider !== 'local'" title="Image attachments are currently supported only with Ollama" @click="pickImage">
+          <button class="btn sm" disabled title="Image attachments are disabled until local age/content classification is available" aria-describedby="stage-image-note">
             Attach
           </button>
           <button
@@ -539,6 +523,7 @@ onUnmounted(() => {
             {{ busy ? '…' : 'Send' }}
           </button>
         </div>
+        <p id="stage-image-note" class="hint">Image attachments are disabled until Trolly can classify them locally.</p>
 
         <div v-if="voices.length" class="row voice-bar">
           <label class="hint">Voice</label>
@@ -551,7 +536,6 @@ onUnmounted(() => {
           <span class="hint voice-status">{{ speechStatus }}</span>
         </div>
 
-        <input ref="fileInput" type="file" accept="image/*" hidden @change="onImagePicked" />
       </section>
     </div>
   </div>
@@ -562,8 +546,4 @@ onUnmounted(() => {
 .voice-select { flex: 1; min-width: 180px; background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--text); padding: 5px 8px; font-size: 12px; }
 .voice-preview { padding: 5px 10px; border: 1px solid var(--accent-dim); border-radius: 6px; color: var(--accent); font-size: 12px; }
 .voice-status { flex-basis: 100%; }
-.attach-preview { width: 44px; min-height: 44px; flex: none; }
-.attach-preview :deep(.safe-media-cover) { padding: 3px; }
-.attach-preview :deep(.safe-media-cover strong) { font-size: 8px; }
-.attach-preview :deep(.safe-media-cover span), .attach-preview :deep(.safe-media-cover small) { display: none; }
 </style>

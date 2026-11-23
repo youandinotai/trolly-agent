@@ -6,7 +6,7 @@
   --line-soft: #2a231d;
   --text: #f4eee4;
   --text-dim: #c1b6a6;
-  --text-faint: #8d8172;
+  --text-faint: #a39583;
   --accent: #ffd21a;
   --accent-dim: #f2b900;
   --accent-glow: rgba(255, 210, 26, 0.15);
@@ -560,13 +560,18 @@ input, textarea, select {
 .vault { position: fixed; inset: 48px 24px 24px; z-index: 50; display: grid; grid-template-columns: 180px 1fr; background: var(--bg); color: var(--text); border: 1px solid var(--line); }
 .vault nav { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: var(--bg-panel); }
 .vault nav button, .vault-add { text-align: left; color: inherit; }
-.vault-stage { position: relative; padding: 18px; }
+.vault nav button:disabled { opacity: .5; cursor: not-allowed; }
+.vault-stage { min-width: 0; overflow: auto; padding: 18px; }
 .vault-stage header { font-size: 22px; margin-bottom: 16px; }
-.vault-stage form, .vault-stage ul { display: flex; flex-direction: column; gap: 8px; max-width: 320px; }
-.vault-stage input { padding: 8px; }
-.vault-add { position: absolute; left: 50%; bottom: 48px; transform: translateX(-50%); padding: 10px 18px; background: var(--bg-panel); }
-.vault-add input { display: none; }
+.vault-stage form, .vault-stage ul { display: flex; flex-direction: column; gap: 8px; max-width: 420px; }
+.vault-stage input { max-width: 100%; padding: 8px; }
+.vault-stage form > label:not(.vault-check) { color: var(--text-dim); }
+.vault-add { display: inline-flex; flex-direction: column; gap: 8px; margin-top: 14px; padding: 10px 14px; background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.vault-add input { display: block; }
+.vault-check { display: flex; align-items: flex-start; gap: 8px; color: var(--text-dim); line-height: 1.5; }
+.vault-check input { flex: none; margin-top: 3px; }
 .vault-note { color: var(--text-dim); }
+.vault-error { color: var(--danger); }
 
 .float-pet {
   position: fixed;
@@ -803,7 +808,11 @@ button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-
 }
 
 @media (max-width: 1220px) {
-  .stage { grid-template-columns: minmax(390px, 1fr) minmax(360px, 440px); gap: 12px; }
+  .topbar { flex-wrap: wrap; gap: 8px; padding: 10px 14px; }
+  .topbar .spacer { display: none; }
+  .chip { padding: 4px 8px; font-size: 10px; }
+  .stage { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 12px; }
+  .stage-canvas { padding: 18px; }
   .expression-dock button { padding: 7px 7px; font-size: 10px; }
   .console-local { display: none; }
   .motion-grid { grid-template-columns: 1fr 1fr; }

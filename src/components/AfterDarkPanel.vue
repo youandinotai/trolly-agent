@@ -100,13 +100,13 @@ onMounted(chooseDefaultModel);
     <div class="after-dark-head">
       <div>
         <h2>Trolly — After Dark</h2>
-        <p class="hint">Local Pony XL image-to-image with a mandatory safety negative and a local vision check before display or save.</p>
+        <p class="hint">Local Pony XL image-to-image for clearly described 21+ adults, with a mandatory safety negative and local vision check before display or save.</p>
       </div>
-      <span class="after-dark-badge">LOCAL · AGE GATED</span>
+      <span class="after-dark-badge">LOCAL · 21+ ONLY</span>
     </div>
 
     <div v-if="!appMode.ageVerified || !appMode.adult" class="gate-message" role="status">
-      Complete the age check in <strong>Mind → Preferences</strong>, then switch the top bar to <strong>Adult</strong>. The main process independently enforces this lock.
+      Complete the <strong>21+ check</strong> in <strong>Mind → Preferences</strong>, then switch the top bar to <strong>Adult</strong>. The main process independently enforces this lock.
     </div>
 
     <template v-else>
@@ -139,6 +139,7 @@ onMounted(chooseDefaultModel);
           <div class="field">
             <label for="adult-positive">Adult prompt</label>
             <textarea id="adult-positive" v-model="positive" rows="7" />
+            <p class="hint">Include a numeric age of 21 or older for every depicted person. Ambiguous ages are blocked before the reference is uploaded.</p>
           </div>
           <div class="field">
             <label for="adult-negative">Negative prompt</label>
@@ -158,7 +159,7 @@ onMounted(chooseDefaultModel);
             </div>
           </div>
 
-          <p class="boundaries-line">Legal adults · consensual content · no gore or extreme violence</p>
+          <p class="boundaries-line">21+ adults · consensual content · no gore or extreme violence</p>
           <button class="btn primary after-dark-generate" :disabled="!canGenerate" @click="generate">
             {{ busy ? 'Rendering + checking locally…' : 'Generate After Dark' }}
           </button>
