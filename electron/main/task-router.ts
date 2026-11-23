@@ -1,3 +1,4 @@
+import { assignComfyMcp } from '../../src/lib/comfy-mcp.ts';
 import { applyAgencyChoice, applyPandaChoice, chooseLocalSkill, pandaAgencyRequest, pandaRouteRequest } from '../../src/lib/panda-route.ts';
 import { AGENCY_DIVISIONS, fallbackSpecialist } from '../../src/lib/agency-roster.ts';
 import { routeTaskDeterministic, type TaskRoute } from '../../src/lib/task-router.js';
@@ -50,12 +51,12 @@ export class JevTaskRouter {
         });
         if (!skillResponse.ok) throw new Error(`Panda skill route returned HTTP ${skillResponse.status}`);
         const skilled = applyAgencyChoice(routed, await skillResponse.json(), agency.pool);
-        return { ...skilled, specialist: skilled.specialist || fallbackSpecialist(prompt) };
+        return assignComfyMcp({ ...skilled, specialist: skilled.specialist || fallbackSpecialist(prompt) });
       } catch {
-        return routed;
+        return assignComfyMcp(routed);
       }
     } catch {
-      return named;
+      return assignComfyMcp(named);
     }
   }
 }

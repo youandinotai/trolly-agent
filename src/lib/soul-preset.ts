@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { containsAdultText } from './content-policy.ts';
-import { decryptVaultBytes, encryptVaultBytes } from './vault-lock.ts';
+import { containsAdultText } from './content-policy';
+import { decryptVaultBytes, encryptVaultBytes } from './vault-lock';
 
 export interface SoulPreset {
   id: string;

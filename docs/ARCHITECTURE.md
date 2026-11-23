@@ -11,8 +11,10 @@ graph TD
   C -->|chat| P[Selected provider adapter]
   P --> O[Ollama local]
   P --> G[Configured OpenAI-compatible endpoint]
-  C -->|media| A[Existing media route and Artistry flow]
-  A --> S[21+ Adult gate and Clean text checks]
+  C -->|image video edit| M["Chat on artokun/gemma4-comfyui-mcp:e2b"]
+  M --> MC
+  P --> S[21+ Adult gate and Clean text checks]
+  M --> S
   subgraph Local["Local application data"]
     AG[Agent profile registry — loaded, not executed]
     W[Workspace tasks — resume fills Stage]
@@ -34,7 +36,9 @@ No profile runs at startup. Task titles, notes, and statuses are stored locally 
 `tasks.json`; resuming a task only populates the Stage composer.
 
 Fresh MCP configuration is empty. The UI offers filesystem, custom agent, browser,
-and Playwright stdio templates. New servers are not auto-connected; previously
+Playwright, and ComfyUI MCP (`npx --yes comfyui-mcp`) stdio templates. Image, video,
+and edit jobs stay in Stage chat and select only `artokun/gemma4-comfyui-mcp:e2b`.
+The Comfy template does not connect by itself. After Connect and Director Run, chat on that model may make one Ollama tool round against the connected server. Tool text is filtered after the call. Non-text results are withheld. New servers are not auto-connected; previously
 enabled config entries may reconnect at startup only after 21+ verification.
 Connecting and calling tools require the same verification and explicit user
 action. The filesystem template passes an explicit folder to its server; Trolly

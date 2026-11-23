@@ -26,10 +26,12 @@ import {
 import { SessionMode, type SessionModeSnapshot } from '../../src/lib/session-mode.js';
 import { MediaVault } from './vault.js';
 import { GLANCE_NEWS_URL } from '../../src/lib/glance-cover.js';
+import { harnessById } from '../../src/lib/harness.js';
 import { AgentRegistry } from './agent-registry.js';
 import { ProviderClient } from './provider.js';
 import { WorkspaceStore } from './workspace.js';
 import { resolveTrollyDataPaths } from './data-paths.js';
+import { COMFY_MCP_MODEL, comfyToolMenu } from '../../src/lib/comfy-mcp.js';
 
 const __dirname_ = path.dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = path.resolve(__dirname_, '..', '..', '..');
@@ -194,6 +196,80 @@ async function runChatWithPolicy(messages: any[], send: () => Promise<string>, a
   return reply;
 }
 
+function screenToolText(value: unknown, adult: boolean): string {
+  const text = typeof value === 'string' ? value : JSON.stringify(value ?? '');
+  if (typeof text !== 'string') throw new Error('MCP output could not be safely inspected.');
+  assertMcpToolOutput(text, adult);
+  return text;
+}
+
+/** One tool round on the trained Comfy model. No call unless that server is connected. */
+async function runComfyMcpChat(input: { model: string; messages: any[]; temperature?: number; maxTokens?: number }): Promise<string> {
+  requireAgeVerified('calling an MCP tool');
+  const adult = contentMode.snapshot().adult;
+  const ticket = adult ? contentMode.beginAdultWork(mind.readPreferences()) : undefined;
+  const lastUser = [...(input.messages ?? [])].reverse().find((message: any) => message.role === 'user');
+  const userText = String(lastUser?.content ?? '');
+  if ((input.messages ?? []).some((message: any) => Array.isArray(message.images) && message.images.length)) {
+    throw new Error('Chat image attachments are not age/content classified. Remove the attachment before sending.');
+  }
+  if (adult) assertAdultContent21Plus(userText);
+  else assertCleanPrompt(userText);
+  assertStandardMediaPrompt(userText);
+
+  const servers = supervisor?.listServers() ?? [];
+  const listed = await Promise.all(servers.map(async (server) => {
+    const tools = await supervisor?.listTools(server.id) ?? [];
+    return tools.map((tool) => ({ serverId: server.id, ...tool }));
+  }));
+  const menu = comfyToolMenu(servers, listed.flat());
+  const first = await ollama.chatTurn({
+    model: COMFY_MCP_MODEL,
+    messages: input.messages,
+    temperature: input.temperature,
+    maxTokens: input.maxTokens,
+    tools: menu.map((tool) => ({
+      type: 'function' as const,
+      function: { name: tool.wire, description: tool.description, parameters: tool.parameters },
+    })),
+  });
+  let reply = first.content.trim() || first.thinking.trim();
+  if (first.toolCalls.length) {
+    const notes: string[] = [];
+    for (const call of first.toolCalls.slice(0, 4)) {
+      const tool = menu.find((item) => item.wire === call.function.name);
+      if (!tool) throw new Error('The model named a tool that is not on the connected Comfy server.');
+      const result = await supervisor?.callTool(tool.serverId, tool.name, call.function.arguments ?? {});
+      const parts = (result?.content ?? []).map((item) => {
+        if (item?.type !== 'text' || typeof item?.text !== 'string') {
+          throw new Error('Trolly cannot classify non-text MCP output. The result was not returned.');
+        }
+        return screenToolText(item.text, adult);
+      });
+      if (result?.structuredContent !== undefined) parts.push(screenToolText(result.structuredContent, adult));
+      notes.push(`${tool.name}: ${parts.join('\n') || (result?.isError ? 'tool error' : 'ok')}`);
+    }
+    const second = await ollama.chatTurn({
+      model: COMFY_MCP_MODEL,
+      messages: [
+        ...input.messages,
+        { role: 'assistant', content: first.content, tool_calls: first.toolCalls },
+        { role: 'tool', content: notes.join('\n') },
+      ],
+      temperature: input.temperature,
+      maxTokens: input.maxTokens,
+    });
+    reply = second.content.trim() || second.thinking.trim() || notes.join('\n');
+  }
+  if (!menu.length && !reply) reply = 'ComfyUI MCP is not connected. Add it and press Connect before a workflow can run.';
+  if (ticket && contentMode.finishAdultWork(ticket, reply).kind === 'suppressed') {
+    throw new Error('Clean mode suppressed this Adult response before it could be shown.');
+  }
+  if (adult) assertAdultContent21Plus(reply);
+  else assertCleanResponse(reply);
+  return reply;
+}
+
 
 function ensureDataDir() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -283,8 +359,12 @@ function registerIpc() {
   ipcMain.handle('trolly:ollama:pull', async (_e, name: string) => ollama.pullModel(name));
   ipcMain.handle('trolly:ollama:delete', async (_e, name: string) => ollama.deleteModel(name));
   ipcMain.handle('trolly:provider:models', async (_e, input) => provider.listModels(input));
-  ipcMain.handle('trolly:provider:chat', async (_e, input) =>
-    runChatWithPolicy(input?.messages, () => provider.chat(input)));
+  ipcMain.handle('trolly:provider:chat', async (_e, input) => {
+    if (input?.model === COMFY_MCP_MODEL && harnessById(input.provider).adapter === 'ollama') {
+      return runComfyMcpChat(input);
+    }
+    return runChatWithPolicy(input?.messages, () => provider.chat(input));
+  });
   ipcMain.handle('trolly:agents:list', async () => ({ profiles: agents.list(), error: agents.error() }));
   ipcMain.handle('trolly:workspace:list', async () => workspace.list());
   ipcMain.handle('trolly:workspace:create', async (_e, input) => workspace.create(input));

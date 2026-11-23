@@ -4,6 +4,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import AvatarStage from '../components/AvatarStage.vue';
 import type { OllamaModel } from '../env';
 import type { AgentProfile } from '../lib/agency-roster';
+import { COMFY_MCP_MODEL } from '../lib/comfy-mcp';
 import type { HarnessId } from '../lib/harness';
 import { HARNESSES } from '../lib/harness';
 import { appMode, loadMode, systemPrompt } from '../lib/mode';
@@ -275,12 +276,14 @@ async function send() {
   messages.value.push({ role: 'user', name: 'You', text });
   try {
     const route = await window.trolly.router.classify(text);
-    const model = route.task === 'chat' ? selectedModel.value : route.model;
+    const model = route.model === COMFY_MCP_MODEL
+      ? route.model
+      : route.task === 'chat' ? selectedModel.value : route.model;
     const selectedProfile = profiles.value.find((profile) => profile.id === selectedAgentId.value);
     const plannedRoute = {
       ...route,
       model,
-      specialist: selectedProfile?.name ?? route.specialist,
+      specialist: selectedProfile?.id ?? route.specialist,
     };
     preview.value = {
       route: plannedRoute,
@@ -320,14 +323,8 @@ async function runPreview() {
       messages.value.push({
         role: 'tool',
         name: routerName,
-        text: route.task === 'avatar'
-          ? `Avatar → Stage VRM · ${route.model}. Skill ${route.specialist || 'product'}.`
-          : `${route.task} → ${route.backend} · ${route.model}. Skill ${route.specialist || 'product'}. Opening Artistry.`,
+        text: `Avatar → Stage VRM · ${route.model}. Skill ${route.specialist || 'product'}.`,
       });
-      if (route.task !== 'avatar') {
-        window.dispatchEvent(new CustomEvent('trolly:task-route', { detail: route }));
-        emit('navigate', 'artistry');
-      }
       return;
     }
 
@@ -336,9 +333,12 @@ async function runPreview() {
         .filter((m): m is Msg & { role: 'user' | 'assistant' } => m.role !== 'tool')
         .map((m) => ({ role: m.role, content: m.text }));
     const skill = profiles.value.find((profile) => profile.id === route.specialist) ?? pending.agent;
+    const comfy = route.model === COMFY_MCP_MODEL
+      ? ` You are ${COMFY_MCP_MODEL}. Drive Comfy only through the connected comfyui-mcp tools. Do not claim a workflow ran unless a tool result says so.`
+      : '';
     const instructions = skill
-      ? `${systemPrompt()}\n\nYou are the ${skill.name} specialist for this whole task, not an image-only router. ${skill.systemPrompt}`
-      : systemPrompt();
+      ? `${systemPrompt()}\n\nYou are the ${skill.name} specialist for this whole task, not an image-only router. ${skill.systemPrompt}${comfy}`
+      : `${systemPrompt()}${comfy}`;
     const reply = await window.trolly.provider.chat({
       provider: pending.provider,
       endpoint: pending.endpoint,

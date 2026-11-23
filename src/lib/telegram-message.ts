@@ -1,4 +1,4 @@
-import { assertAdultContent21Plus, assertCleanPrompt } from './content-policy.ts';
+import { assertAdultContent21Plus, assertCleanPrompt } from './content-policy';
 
 export interface TelegramText {
   text: string;

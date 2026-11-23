@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 
 import type { McpServerState, McpTool } from '../env';
+import { COMFY_MCP_MODEL, COMFY_MCP_SERVER } from '../lib/comfy-mcp';
 import { appMode } from '../lib/mode';
 
 const servers = ref<McpServerState[]>([]);
@@ -10,7 +11,7 @@ const busy = ref<string | null>(null);
 const log = ref<string[]>([]);
 const error = ref('');
 const configurationError = ref('');
-const template = ref<'filesystem' | 'agent' | 'browser' | 'playwright'>('filesystem');
+const template = ref<'filesystem' | 'agent' | 'browser' | 'playwright' | 'comfy'>('filesystem');
 const serverName = ref('Filesystem');
 const command = ref('npx');
 const argsText = ref('--yes\n@modelcontextprotocol/server-filesystem');
@@ -23,6 +24,7 @@ function applyTemplate() {
     agent: { name: 'Agent tools', command: '', args: '' },
     browser: { name: 'Browser', command: 'npx', args: '--yes\n@modelcontextprotocol/server-puppeteer' },
     playwright: { name: 'Playwright', command: 'npx', args: '--yes\n@playwright/mcp@latest' },
+    comfy: { name: COMFY_MCP_SERVER.name, command: COMFY_MCP_SERVER.command, args: COMFY_MCP_SERVER.args.join('\n') },
   };
   const preset = presets[template.value];
   serverName.value = preset.name;
@@ -127,7 +129,7 @@ onMounted(refresh);
     <div class="panel">
       <h2>Tool servers</h2>
       <p class="hint">
-        Configure filesystem, agent, browser, or Playwright servers here. New servers stay disconnected until you choose Connect.
+        Configure filesystem, agent, browser, Playwright, or ComfyUI MCP here. ComfyUI MCP is the tool surface for {{ COMFY_MCP_MODEL }} only. New servers stay disconnected until you choose Connect.
         A 21+ age check is required to connect or run tools. Servers run with your account's OS permissions; Trolly does not sandbox their commands.
       </p>
       <p class="clean-status" role="status">
@@ -148,6 +150,7 @@ onMounted(refresh);
               <option value="agent">Agent tools (custom)</option>
               <option value="browser">Browser</option>
               <option value="playwright">Playwright</option>
+              <option value="comfy">ComfyUI MCP</option>
             </select>
           </label>
           <label class="field">

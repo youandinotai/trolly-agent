@@ -27,7 +27,7 @@ Chat and media jobs do not start when the user sends a message. The router class
 
 ## MCP
 
-- Fresh installs start with no MCP server commands. Templates are offered for filesystem, custom agent tools, browser, and Playwright.
+- Fresh installs start with no MCP server commands. Templates are offered for filesystem, custom agent tools, browser, Playwright, and ComfyUI MCP (`npx --yes comfyui-mcp`, no machine path).
 - New MCP templates are disconnected and stdio-only. Existing `enabled` entries may reconnect at startup only after 21+ verification; never auto-connect an unreviewed server or add machine-specific executable paths.
 - Connecting or calling an MCP tool requires 21+ verification and an explicit user action. MCP output is text-filtered in both modes; Adult sexual text needs explicit 21+ ages, and non-text output is blocked. Tool side effects can occur before output filtering. A filesystem template passes the selected root to the server; it does not sandbox arbitrary commands.
 
@@ -39,7 +39,7 @@ Chat and media jobs do not start when the user sends a message. The router class
 - `.soul` presets load and save only inside the runtime data directory. An NSFW preset is rejected until the current 21+ check passes. Clean saves redact sexual memory. Adult saves seal memory with AES-256-GCM and reload it only with the Vault key. Loading or saving does not run a model, apply a LoRA, or expand the avatar.
 - Incoming Telegram text is accepted locally and passes the active text filter. No bot token is stored or sent, and no Telegram network call is made.
 - The node roster lists names, projects, and an optional local origin. A link keeps only the origin, drops any path or token, and opens no connection.
-- Panda is an agent router. It names one agency skill. If Panda Code is down, local skill cards name that skill. Ordinary chat is not forced to engineering. The named agent keeps chat. Gemma is its local Ollama MCP and Comfy is a tool it may use. Neither opens Artistry by itself. Director Run remains the hold.
+- Panda is an agent router. It names one agency skill. If Panda Code is down, local skill cards name that skill. Ordinary chat is not forced to engineering. The named agent keeps chat. Image, video, and edit jobs stay in that chat and use only `artokun/gemma4-comfyui-mcp:e2b` (https://ollama.com/artokun/gemma4-comfyui-mcp). Comfy is the disconnected `comfyui-mcp` stdio template, not an Artistry jump. Director Run remains the hold. The template does not connect by itself. After Connect and Director Run, one Ollama tool round may call that connected server. Tool text is filtered. Non-text results are withheld.
 
 ## Visual system
 

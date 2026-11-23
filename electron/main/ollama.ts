@@ -13,10 +13,30 @@ export interface OllamaModel {
 }
 
 export interface ChatMessage {
-  role: 'system' | 'user' | 'assistant';
+  role: 'system' | 'user' | 'assistant' | 'tool';
   content: string;
   /** Base64-encoded image attachments (Ollama multimodal `images` array). */
   images?: string[];
+  tool_calls?: OllamaToolCall[];
+}
+
+export interface OllamaTool {
+  type: 'function';
+  function: {
+    name: string;
+    description?: string;
+    parameters?: Record<string, unknown>;
+  };
+}
+
+export interface OllamaToolCall {
+  function: { name: string; arguments?: Record<string, unknown> };
+}
+
+export interface OllamaChatTurn {
+  content: string;
+  thinking: string;
+  toolCalls: OllamaToolCall[];
 }
 
 export class OllamaClient {
@@ -75,27 +95,45 @@ export class OllamaClient {
     }
   }
 
-  async chat({
+  async chat(input: {
+    model: string;
+    messages: ChatMessage[];
+    temperature?: number;
+    maxTokens?: number;
+    tools?: OllamaTool[];
+  }): Promise<string> {
+    const turn = await this.chatTurn(input);
+    if (turn.content.trim()) return turn.content;
+    if (turn.thinking.trim()) return turn.thinking.trim();
+    return '';
+  }
+
+  async chatTurn({
     model,
     messages,
     temperature = 0.8,
     maxTokens = 4096,
+    tools,
   }: {
     model: string;
     messages: ChatMessage[];
     temperature?: number;
     maxTokens?: number;
-  }): Promise<string> {
+    tools?: OllamaTool[];
+  }): Promise<OllamaChatTurn> {
     const res = await fetch(this.url('/api/chat'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model,
-        // Ollama carries image attachments on the message, not in a separate field.
-        messages: messages.map((m) =>
-          m.images?.length ? { ...m, images: m.images } : { role: m.role, content: m.content },
-        ),
+        messages: messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+          ...(m.images?.length ? { images: m.images } : {}),
+          ...(m.tool_calls?.length ? { tool_calls: m.tool_calls } : {}),
+        })),
         stream: false,
+        ...(tools?.length ? { tools } : {}),
         options: { temperature, num_predict: maxTokens },
       }),
     });
@@ -104,14 +142,21 @@ export class OllamaClient {
       throw new Error(`Ollama chat failed: ${res.status} ${body.slice(0, 200)}`);
     }
     const data = await res.json();
-    const content = data?.message?.content ?? '';
-    // Reasoning models (Qwen3-style) emit a `thinking` field and can spend the
-    // whole token budget on it, leaving `content` empty. Surface the thinking
-    // as the reply when there is no content, so the user still gets an answer.
-    const thinking = data?.message?.thinking ?? '';
-    if (content.trim()) return content;
-    if (thinking.trim()) return thinking.trim();
-    return '';
+    const calls = Array.isArray(data?.message?.tool_calls) ? data.message.tool_calls : [];
+    return {
+      content: String(data?.message?.content ?? ''),
+      thinking: String(data?.message?.thinking ?? ''),
+      toolCalls: calls
+        .filter((call: any) => typeof call?.function?.name === 'string')
+        .map((call: any) => ({
+          function: {
+            name: call.function.name,
+            arguments: call.function.arguments && typeof call.function.arguments === 'object'
+              ? call.function.arguments
+              : {},
+          },
+        })),
+    };
   }
 
   async status() {
